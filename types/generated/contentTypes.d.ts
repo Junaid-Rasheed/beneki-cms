@@ -373,12 +373,13 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiDemoDemo extends Struct.CollectionTypeSchema {
-  collectionName: 'demos';
+export interface ApiBenekiSampleBenekiSample
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'beneki_samples';
   info: {
-    displayName: 'demo';
-    pluralName: 'demos';
-    singularName: 'demo';
+    displayName: 'beneki-sample';
+    pluralName: 'beneki-samples';
+    singularName: 'beneki-sample';
   };
   options: {
     draftAndPublish: true;
@@ -387,11 +388,13 @@ export interface ApiDemoDemo extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    img: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::demo.demo'> &
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::beneki-sample.beneki-sample'
+    > &
       Schema.Attribute.Private;
-    number: Schema.Attribute.Integer;
     publishedAt: Schema.Attribute.DateTime;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
@@ -909,7 +912,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
-      'api::demo.demo': ApiDemoDemo;
+      'api::beneki-sample.beneki-sample': ApiBenekiSampleBenekiSample;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
