@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "home_page_partner_sections",
+  "info": {
+    "singularName": "home-page-partner-section",
+    "pluralName": "home-page-partner-sections",
+    "displayName": "HomePagePartnerSection"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "logo": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    }
+  }
+}

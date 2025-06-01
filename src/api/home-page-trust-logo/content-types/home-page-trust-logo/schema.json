@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "home_page_trust_logos",
+  "info": {
+    "singularName": "home-page-trust-logo",
+    "pluralName": "home-page-trust-logos",
+    "displayName": "HomePageTrustLogo"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "alt": {
+      "type": "string"
+    },
+    "image": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    }
+  }
+}

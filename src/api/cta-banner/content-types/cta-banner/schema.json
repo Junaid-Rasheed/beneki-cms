@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cta_banners",
+  "info": {
+    "singularName": "cta-banner",
+    "pluralName": "cta-banners",
+    "displayName": "CTABanner",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
