@@ -464,6 +464,35 @@ export interface ApiHomePagePartnerSectionHomePagePartnerSection
   };
 }
 
+export interface ApiHomePageProductHomePageProduct
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'home_page_products';
+  info: {
+    displayName: 'HomePageProduct';
+    pluralName: 'home-page-products';
+    singularName: 'home-page-product';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::home-page-product.home-page-product'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiHomePageTrustLogoHomePageTrustLogo
   extends Struct.CollectionTypeSchema {
   collectionName: 'home_page_trust_logos';
@@ -1006,6 +1035,7 @@ declare module '@strapi/strapi' {
       'api::beneki-sample.beneki-sample': ApiBenekiSampleBenekiSample;
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
+      'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

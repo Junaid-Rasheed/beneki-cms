@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "collectionName": "home_page_products",
+  "info": {
+    "singularName": "home-page-product",
+    "pluralName": "home-page-products",
+    "displayName": "HomePageProduct"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}
