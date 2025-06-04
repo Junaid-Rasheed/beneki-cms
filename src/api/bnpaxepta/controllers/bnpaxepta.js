@@ -1,13 +1,12 @@
 const crypto = require('crypto');
 
-function generateShaSign(params, hmacKey) {
+function generateShaSign(params, shaInKey) {
   const sortedKeys = Object.keys(params).sort();
   const signatureString = sortedKeys
-    .map((key) => `${key}=${params[key]}`)
+    .map((key) => `${key}=${params[key]}${shaInKey}`)
     .join('');
-  return crypto.createHmac('sha256', hmacKey).update(signatureString).digest('hex').toUpperCase();
+  return crypto.createHash('sha256').update(signatureString).digest('hex').toUpperCase();
 }
-
 module.exports = {
   async createHppSession(ctx) {
     const { orderId, amount } = ctx.request.body;
@@ -29,3 +28,4 @@ module.exports = {
     ctx.send({ ...parameters, SHASIGN });
   }
 };
+
