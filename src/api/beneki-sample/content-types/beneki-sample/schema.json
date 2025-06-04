@@ -4,21 +4,23 @@
   "info": {
     "singularName": "beneki-sample",
     "pluralName": "beneki-samples",
-    "displayName": "beneki-sample"
+    "displayName": "beneki-sample33",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
   },
   "attributes": {
     "img": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
       "allowedTypes": [
         "images",
         "files",
         "videos",
         "audios"
-      ],
-      "type": "media",
-      "multiple": false
+      ]
     },
     "title": {
       "type": "string"

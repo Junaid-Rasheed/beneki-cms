@@ -377,7 +377,8 @@ export interface ApiBenekiSampleBenekiSample
   extends Struct.CollectionTypeSchema {
   collectionName: 'beneki_samples';
   info: {
-    displayName: 'beneki-sample';
+    description: '';
+    displayName: 'beneki-sample33';
     pluralName: 'beneki-samples';
     singularName: 'beneki-sample';
   };
