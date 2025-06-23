@@ -3,8 +3,8 @@ module.exports = {
   routes: [
     {
       method: 'POST',
-      path: '/bnpaxepta/hpp-session',
-      handler: 'bnpaxepta.createHppSession',
+      path: '/bnpaxepta/processpayment',
+      handler: 'bnpaxepta.processpayment',
       config: {
         auth: false,
         type: 'content-api', // 🔧 Required by users-permissions
