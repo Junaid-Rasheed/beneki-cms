@@ -1,4 +1,4 @@
-// src/api/payment/routes/payment.js
+// src/api/bnpaxepta/routes/bnpaxepta.js
 module.exports = {
   routes: [
     {
