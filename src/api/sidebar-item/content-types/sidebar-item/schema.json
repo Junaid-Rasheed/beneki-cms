@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sidebar_items",
+  "info": {
+    "singularName": "sidebar-item",
+    "pluralName": "sidebar-items",
+    "displayName": "SidebarItem"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "uid"
+    },
+    "url": {
+      "type": "string"
+    },
+    "order": {
+      "type": "integer"
+    },
+    "icon": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "isActive": {
+      "type": "boolean"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::sidebar-item.sidebar-item",
+      "inversedBy": "children"
+    },
+    "children": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::sidebar-item.sidebar-item",
+      "mappedBy": "parent"
+    }
+  }
+}
