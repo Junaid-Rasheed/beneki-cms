@@ -378,7 +378,7 @@ export interface ApiBenekiSampleBenekiSample
   collectionName: 'beneki_samples';
   info: {
     description: '';
-    displayName: 'beneki-sample33';
+    displayName: 'beneki-sample';
     pluralName: 'beneki-samples';
     singularName: 'beneki-sample';
   };
