@@ -19,7 +19,7 @@ module.exports = [
         name: 'strapi::cors',
         config: {
           enabled: true,
-          origin: [process.env.FRONTEND_URL_LOCAL], // Replace with your frontend URL
+          origin: [process.env.FRONTEND_URL], // Replace with your frontend URL
           methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
           headers: '*',
           credentials: true,
