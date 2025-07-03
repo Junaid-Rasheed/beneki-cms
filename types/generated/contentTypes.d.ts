@@ -527,7 +527,8 @@ export interface ApiHomePageTrustLogoHomePageTrustLogo
 export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
   collectionName: 'sidebar_items';
   info: {
-    displayName: 'SidebarItem';
+    description: '';
+    displayName: 'SidebarProduct';
     pluralName: 'sidebar-items';
     singularName: 'sidebar-item';
   };
@@ -555,8 +556,15 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
       'manyToOne',
       'api::sidebar-item.sidebar-item'
     >;
+    PD_Description: Schema.Attribute.Blocks;
+    PD_Gallery: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
+    PD_PriceRange: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    slug: Schema.Attribute.UID;
+    quantity: Schema.Attribute.Integer;
+    slug: Schema.Attribute.UID<'title'>;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

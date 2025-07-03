@@ -4,7 +4,8 @@
   "info": {
     "singularName": "sidebar-item",
     "pluralName": "sidebar-items",
-    "displayName": "SidebarItem"
+    "displayName": "SidebarProduct",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -14,7 +15,8 @@
       "type": "string"
     },
     "slug": {
-      "type": "uid"
+      "type": "uid",
+      "targetField": "title"
     },
     "url": {
       "type": "string"
@@ -23,14 +25,15 @@
       "type": "integer"
     },
     "icon": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
       "allowedTypes": [
         "images",
         "files",
         "videos",
         "audios"
-      ],
-      "type": "media",
-      "multiple": false
+      ]
     },
     "isActive": {
       "type": "boolean"
@@ -46,6 +49,25 @@
       "relation": "oneToMany",
       "target": "api::sidebar-item.sidebar-item",
       "mappedBy": "parent"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "PD_Description": {
+      "type": "blocks"
+    },
+    "PD_PriceRange": {
+      "type": "string"
+    },
+    "PD_Gallery": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": true
     }
   }
 }
