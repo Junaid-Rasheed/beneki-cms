@@ -22,8 +22,8 @@ module.exports = ({ env }) => ({
         apiKey: env('SENDGRID_API_KEY'),
       },
       settings: {
-        defaultFrom: 'Admin@beneki.com',
-        defaultReplyTo: 'support@yourdomain.com',
+        defaultFrom: 'dailyinfouniverse@gmail.com',
+        defaultReplyTo: 'dailyinfouniverse@gmail.com',
       },
     },
   },
