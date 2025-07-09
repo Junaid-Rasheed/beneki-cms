@@ -19,12 +19,13 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'sendgrid',
       providerOptions: {
-        apiKey: env('SENDGRID_API_KEY'),
+        apiKey: process.env.SENDGRID_API_KEY,
       },
       settings: {
         defaultFrom: 'dailyinfouniverse@gmail.com',
         defaultReplyTo: 'dailyinfouniverse@gmail.com',
       },
     },
+    // ddfs
   },
 });
