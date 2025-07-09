@@ -15,14 +15,24 @@ module.exports = [
           },
         },
       },
+      // {
+      //   name: 'strapi::cors',
+      //   config: {
+      //     enabled: true,
+      //     origin: [process.env.FRONTEND_URL], // Replace with your frontend URL
+      //     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      //     headers: '*',
+      //     credentials: true,
+      //   },
+      // },
       {
         name: 'strapi::cors',
         config: {
           enabled: true,
-          origin: [process.env.FRONTEND_URL], // Replace with your frontend URL
+          origin: '*', // Allow all origins
           methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
           headers: '*',
-          credentials: true,
+          credentials: false, // Must be false when using '*'
         },
       },
   'strapi::poweredBy',
