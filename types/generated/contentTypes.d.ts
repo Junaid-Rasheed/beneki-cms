@@ -573,6 +573,48 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiUserAdresseUserAdresse extends Struct.CollectionTypeSchema {
+  collectionName: 'user_adresses';
+  info: {
+    description: '';
+    displayName: 'UserAddress';
+    pluralName: 'user-adresses';
+    singularName: 'user-adresse';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    AddressName: Schema.Attribute.String;
+    City: Schema.Attribute.String;
+    CompanyName: Schema.Attribute.String;
+    Country: Schema.Attribute.Enumeration<['France', 'Netherland']>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    FirstName: Schema.Attribute.String;
+    IsPrimary: Schema.Attribute.Boolean;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::user-adresse.user-adresse'
+    > &
+      Schema.Attribute.Private;
+    Name: Schema.Attribute.String;
+    PostalCode: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    Street: Schema.Attribute.Text;
+    Type: Schema.Attribute.Enumeration<['billing', 'delivery']>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    users_permissions_user: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+  };
+}
+
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -1028,7 +1070,6 @@ export interface PluginUsersPermissionsUser
   };
   options: {
     draftAndPublish: false;
-    timestamps: true;
   };
   attributes: {
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -1037,17 +1078,20 @@ export interface PluginUsersPermissionsUser
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    DisplayName: Schema.Attribute.String;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    FirstName: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
+    Name: Schema.Attribute.String;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
@@ -1063,6 +1107,10 @@ export interface PluginUsersPermissionsUser
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    user_addresses: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::user-adresse.user-adresse'
+    >;
     username: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique &
@@ -1088,6 +1136,7 @@ declare module '@strapi/strapi' {
       'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
+      'api::user-adresse.user-adresse': ApiUserAdresseUserAdresse;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

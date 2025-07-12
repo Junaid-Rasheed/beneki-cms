@@ -1,0 +1,59 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_adresses",
+  "info": {
+    "singularName": "user-adresse",
+    "pluralName": "user-adresses",
+    "displayName": "UserAddress",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "AddressName": {
+      "type": "string"
+    },
+    "FirstName": {
+      "type": "string"
+    },
+    "Name": {
+      "type": "string"
+    },
+    "CompanyName": {
+      "type": "string"
+    },
+    "Country": {
+      "type": "enumeration",
+      "enum": [
+        "France",
+        "Netherland"
+      ]
+    },
+    "Street": {
+      "type": "text"
+    },
+    "PostalCode": {
+      "type": "string"
+    },
+    "City": {
+      "type": "string"
+    },
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "billing",
+        "delivery"
+      ]
+    },
+    "IsPrimary": {
+      "type": "boolean"
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "user_addresses"
+    }
+  }
+}
