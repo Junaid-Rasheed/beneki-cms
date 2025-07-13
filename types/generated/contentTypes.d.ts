@@ -573,38 +573,40 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiUserAdresseUserAdresse extends Struct.CollectionTypeSchema {
-  collectionName: 'user_adresses';
+export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
+  collectionName: 'user_addresses';
   info: {
     description: '';
     displayName: 'UserAddress';
-    pluralName: 'user-adresses';
-    singularName: 'user-adresse';
+    pluralName: 'user-addresses';
+    singularName: 'user-address';
   };
   options: {
     draftAndPublish: true;
   };
   attributes: {
-    AddressName: Schema.Attribute.String;
-    City: Schema.Attribute.String;
-    CompanyName: Schema.Attribute.String;
-    Country: Schema.Attribute.Enumeration<['France', 'Netherland']>;
+    addressName: Schema.Attribute.String;
+    city: Schema.Attribute.String;
+    companyName: Schema.Attribute.String;
+    country: Schema.Attribute.Enumeration<['France', 'Netherland']>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    FirstName: Schema.Attribute.String;
-    IsPrimary: Schema.Attribute.Boolean;
+    email: Schema.Attribute.String;
+    firstName: Schema.Attribute.String;
+    isPrimary: Schema.Attribute.Boolean;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
-      'api::user-adresse.user-adresse'
+      'api::user-address.user-address'
     > &
       Schema.Attribute.Private;
-    Name: Schema.Attribute.String;
-    PostalCode: Schema.Attribute.String;
+    name: Schema.Attribute.String;
+    phone: Schema.Attribute.String;
+    postalCode: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    Street: Schema.Attribute.Text;
-    Type: Schema.Attribute.Enumeration<['billing', 'delivery']>;
+    street: Schema.Attribute.String;
+    type: Schema.Attribute.Enumeration<['billing', 'delivery']>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1078,20 +1080,20 @@ export interface PluginUsersPermissionsUser
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    DisplayName: Schema.Attribute.String;
+    displayName: Schema.Attribute.String;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
-    FirstName: Schema.Attribute.String;
+    firstName: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
-    Name: Schema.Attribute.String;
+    name: Schema.Attribute.String;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
@@ -1109,7 +1111,7 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.Private;
     user_addresses: Schema.Attribute.Relation<
       'oneToMany',
-      'api::user-adresse.user-adresse'
+      'api::user-address.user-address'
     >;
     username: Schema.Attribute.String &
       Schema.Attribute.Required &
@@ -1136,7 +1138,7 @@ declare module '@strapi/strapi' {
       'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
-      'api::user-adresse.user-adresse': ApiUserAdresseUserAdresse;
+      'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

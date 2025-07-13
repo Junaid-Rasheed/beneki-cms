@@ -1,9 +1,9 @@
 {
   "kind": "collectionType",
-  "collectionName": "user_adresses",
+  "collectionName": "user_addresses",
   "info": {
-    "singularName": "user-adresse",
-    "pluralName": "user-adresses",
+    "singularName": "user-address",
+    "pluralName": "user-addresses",
     "displayName": "UserAddress",
     "description": ""
   },
@@ -11,43 +11,49 @@
     "draftAndPublish": true
   },
   "attributes": {
-    "AddressName": {
+    "addressName": {
       "type": "string"
     },
-    "FirstName": {
+    "firstName": {
       "type": "string"
     },
-    "Name": {
+    "name": {
       "type": "string"
     },
-    "CompanyName": {
+    "companyName": {
       "type": "string"
     },
-    "Country": {
+    "country": {
       "type": "enumeration",
       "enum": [
         "France",
         "Netherland"
       ]
     },
-    "Street": {
-      "type": "text"
-    },
-    "PostalCode": {
+    "street": {
       "type": "string"
     },
-    "City": {
+    "postalCode": {
       "type": "string"
     },
-    "Type": {
+    "city": {
+      "type": "string"
+    },
+    "type": {
       "type": "enumeration",
       "enum": [
         "billing",
         "delivery"
       ]
     },
-    "IsPrimary": {
+    "isPrimary": {
       "type": "boolean"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
     },
     "users_permissions_user": {
       "type": "relation",

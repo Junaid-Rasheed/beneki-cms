@@ -65,20 +65,20 @@
       "inversedBy": "users",
       "configurable": false
     },
+    "firstName": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "displayName": {
+      "type": "string"
+    },
     "user_addresses": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::user-adresse.user-adresse",
+      "target": "api::user-address.user-address",
       "mappedBy": "users_permissions_user"
-    },
-    "FirstName": {
-      "type": "string"
-    },
-    "Name": {
-      "type": "string"
-    },
-    "DisplayName": {
-      "type": "string"
     }
   }
 }
