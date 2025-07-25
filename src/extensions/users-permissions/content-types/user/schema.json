@@ -74,11 +74,11 @@
     "displayName": {
       "type": "string"
     },
-    "user_addresses": {
+    "user_address": {
       "type": "relation",
-      "relation": "oneToMany",
+      "relation": "manyToOne",
       "target": "api::user-address.user-address",
-      "mappedBy": "users_permissions_user"
+      "inversedBy": "users_permissions_users"
     }
   }
 }

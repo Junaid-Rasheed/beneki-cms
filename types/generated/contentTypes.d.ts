@@ -563,7 +563,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
     >;
     PD_PriceRange: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    quantity: Schema.Attribute.Integer;
+    quantityy: Schema.Attribute.JSON;
     slug: Schema.Attribute.UID<'title'>;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
@@ -582,7 +582,7 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
     singularName: 'user-address';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     addressName: Schema.Attribute.String;
@@ -610,8 +610,8 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    users_permissions_user: Schema.Attribute.Relation<
-      'manyToOne',
+    users_permissions_users: Schema.Attribute.Relation<
+      'oneToMany',
       'plugin::users-permissions.user'
     >;
   };
@@ -1109,8 +1109,8 @@ export interface PluginUsersPermissionsUser
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    user_addresses: Schema.Attribute.Relation<
-      'oneToMany',
+    user_address: Schema.Attribute.Relation<
+      'manyToOne',
       'api::user-address.user-address'
     >;
     username: Schema.Attribute.String &

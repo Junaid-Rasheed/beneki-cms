@@ -50,9 +50,6 @@
       "target": "api::sidebar-item.sidebar-item",
       "mappedBy": "parent"
     },
-    "quantity": {
-      "type": "integer"
-    },
     "PD_Description": {
       "type": "blocks"
     },
@@ -60,14 +57,18 @@
       "type": "string"
     },
     "PD_Gallery": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
       "allowedTypes": [
         "images",
         "files",
         "videos",
         "audios"
-      ],
-      "type": "media",
-      "multiple": true
+      ]
+    },
+    "quantityy": {
+      "type": "json"
     }
   }
 }
