@@ -524,6 +524,88 @@ export interface ApiHomePageTrustLogoHomePageTrustLogo
   };
 }
 
+export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
+  collectionName: 'order_items';
+  info: {
+    description: '';
+    displayName: 'orderItem';
+    pluralName: 'order-items';
+    singularName: 'order-item';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::order-item.order-item'
+    > &
+      Schema.Attribute.Private;
+    price: Schema.Attribute.Decimal;
+    productQuantity: Schema.Attribute.Integer;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Integer;
+    sidebar_product: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::sidebar-item.sidebar-item'
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
+  collectionName: 'orders';
+  info: {
+    description: '';
+    displayName: 'Order';
+    pluralName: 'orders';
+    singularName: 'order';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.String;
+    order_items: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::order-item.order-item'
+    >;
+    orderNumber: Schema.Attribute.UID;
+    orderStatus: Schema.Attribute.Enumeration<
+      ['Pending', 'Paid', 'Shipped', 'Completed']
+    >;
+    paymentMethod: Schema.Attribute.Enumeration<
+      ['BnpAxepta', 'Paypal', 'WireTransfer']
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    totalAmount: Schema.Attribute.Decimal;
+    transactionId: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    user_address: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::user-address.user-address'
+    >;
+    users_permissions_user: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+  };
+}
+
 export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
   collectionName: 'sidebar_items';
   info: {
@@ -552,6 +634,10 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     order: Schema.Attribute.Integer;
+    order_item: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::order-item.order-item'
+    >;
     parent: Schema.Attribute.Relation<
       'manyToOne',
       'api::sidebar-item.sidebar-item'
@@ -1094,6 +1180,7 @@ export interface PluginUsersPermissionsUser
     > &
       Schema.Attribute.Private;
     name: Schema.Attribute.String;
+    orders: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
@@ -1137,6 +1224,8 @@ declare module '@strapi/strapi' {
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
       'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
+      'api::order-item.order-item': ApiOrderItemOrderItem;
+      'api::order.order': ApiOrderOrder;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
       'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;

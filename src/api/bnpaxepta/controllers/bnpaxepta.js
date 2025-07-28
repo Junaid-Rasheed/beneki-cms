@@ -59,7 +59,7 @@ module.exports = {
       payload.hmac = signature;
 
       const response = await axios.post(
-        'https://paymentpage.axepta.bnpparibas/direct.aspx',
+        'https://test.paymentpage.axepta.bnpparibas/api/v2',
         qs.stringify(payload),
         {
           headers: {
