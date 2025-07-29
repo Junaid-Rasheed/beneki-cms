@@ -69,12 +69,6 @@
     },
     "quantityy": {
       "type": "json"
-    },
-    "order_item": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::order-item.order-item",
-      "mappedBy": "sidebar_product"
     }
   }
 }

@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "order_addresses",
+  "info": {
+    "singularName": "order-address",
+    "pluralName": "order-addresses",
+    "displayName": "OrderAddress",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "firstName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "companyName": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "street": {
+      "type": "string"
+    },
+    "appartment": {
+      "type": "string"
+    },
+    "postalCode": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    }
+  }
+}

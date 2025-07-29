@@ -14,24 +14,24 @@
     "orderNumber": {
       "type": "uid"
     },
-    "users_permissions_user": {
+    "user": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
       "inversedBy": "orders"
     },
-    "totalAmount": {
+    "total": {
       "type": "decimal"
     },
     "paymentMethod": {
       "type": "enumeration",
       "enum": [
-        "BnpAxepta",
-        "Paypal",
-        "WireTransfer"
+        "credit_card",
+        "bank_transfer",
+        "paypal"
       ]
     },
-    "order_items": {
+    "orderItems": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::order-item.order-item"
@@ -39,22 +39,46 @@
     "orderStatus": {
       "type": "enumeration",
       "enum": [
-        "Pending",
-        "Paid",
-        "Shipped",
-        "Completed"
+        "pending",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled"
       ]
-    },
-    "user_address": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::user-address.user-address"
     },
     "notes": {
       "type": "string"
     },
-    "transactionId": {
-      "type": "string"
+    "subTotal": {
+      "type": "decimal"
+    },
+    "shippingCost": {
+      "type": "decimal"
+    },
+    "vat": {
+      "type": "decimal"
+    },
+    "paymentStatus": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "paid",
+        "failed"
+      ]
+    },
+    "deliveryDate": {
+      "type": "datetime"
+    },
+    "billingAddress": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order-address.order-address"
+    },
+    "shippingAddress": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order-address.order-address"
     }
   }
 }

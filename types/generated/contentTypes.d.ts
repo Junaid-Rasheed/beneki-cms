@@ -524,6 +524,45 @@ export interface ApiHomePageTrustLogoHomePageTrustLogo
   };
 }
 
+export interface ApiOrderAddressOrderAddress
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'order_addresses';
+  info: {
+    description: '';
+    displayName: 'OrderAddress';
+    pluralName: 'order-addresses';
+    singularName: 'order-address';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    appartment: Schema.Attribute.String;
+    city: Schema.Attribute.String;
+    companyName: Schema.Attribute.String;
+    country: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.String;
+    firstName: Schema.Attribute.String;
+    lastName: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::order-address.order-address'
+    > &
+      Schema.Attribute.Private;
+    phoneNumber: Schema.Attribute.String;
+    postalCode: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    street: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
   collectionName: 'order_items';
   info: {
@@ -539,20 +578,17 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    lineTotal: Schema.Attribute.Decimal;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::order-item.order-item'
     > &
       Schema.Attribute.Private;
-    price: Schema.Attribute.Decimal;
-    productQuantity: Schema.Attribute.Integer;
+    productName: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     quantity: Schema.Attribute.Integer;
-    sidebar_product: Schema.Attribute.Relation<
-      'oneToOne',
-      'api::sidebar-item.sidebar-item'
-    >;
+    unitPrice: Schema.Attribute.Decimal;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -571,38 +607,53 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    billingAddress: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::order-address.order-address'
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    deliveryDate: Schema.Attribute.DateTime;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
       Schema.Attribute.Private;
     notes: Schema.Attribute.String;
-    order_items: Schema.Attribute.Relation<
+    orderItems: Schema.Attribute.Relation<
       'oneToMany',
       'api::order-item.order-item'
     >;
     orderNumber: Schema.Attribute.UID;
     orderStatus: Schema.Attribute.Enumeration<
-      ['Pending', 'Paid', 'Shipped', 'Completed']
+      [
+        'pending',
+        'confirmed',
+        'processing',
+        'shipped',
+        'delivered',
+        'cancelled',
+      ]
     >;
     paymentMethod: Schema.Attribute.Enumeration<
-      ['BnpAxepta', 'Paypal', 'WireTransfer']
+      ['credit_card', 'bank_transfer', 'paypal']
     >;
+    paymentStatus: Schema.Attribute.Enumeration<['pending', 'paid', 'failed']>;
     publishedAt: Schema.Attribute.DateTime;
-    totalAmount: Schema.Attribute.Decimal;
-    transactionId: Schema.Attribute.String;
+    shippingAddress: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::order-address.order-address'
+    >;
+    shippingCost: Schema.Attribute.Decimal;
+    subTotal: Schema.Attribute.Decimal;
+    total: Schema.Attribute.Decimal;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    user_address: Schema.Attribute.Relation<
-      'oneToOne',
-      'api::user-address.user-address'
-    >;
-    users_permissions_user: Schema.Attribute.Relation<
+    user: Schema.Attribute.Relation<
       'manyToOne',
       'plugin::users-permissions.user'
     >;
+    vat: Schema.Attribute.Decimal;
   };
 }
 
@@ -634,10 +685,6 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     order: Schema.Attribute.Integer;
-    order_item: Schema.Attribute.Relation<
-      'oneToOne',
-      'api::order-item.order-item'
-    >;
     parent: Schema.Attribute.Relation<
       'manyToOne',
       'api::sidebar-item.sidebar-item'
@@ -1224,6 +1271,7 @@ declare module '@strapi/strapi' {
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
       'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
+      'api::order-address.order-address': ApiOrderAddressOrderAddress;
       'api::order-item.order-item': ApiOrderItemOrderItem;
       'api::order.order': ApiOrderOrder;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;

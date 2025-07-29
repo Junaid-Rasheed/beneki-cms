@@ -11,19 +11,16 @@
     "draftAndPublish": true
   },
   "attributes": {
-    "sidebar_product": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::sidebar-item.sidebar-item",
-      "inversedBy": "order_item"
-    },
     "quantity": {
       "type": "integer"
     },
-    "productQuantity": {
-      "type": "integer"
+    "unitPrice": {
+      "type": "decimal"
     },
-    "price": {
+    "productName": {
+      "type": "string"
+    },
+    "lineTotal": {
       "type": "decimal"
     }
   }
