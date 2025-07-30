@@ -67,10 +67,7 @@
         "audios"
       ]
     },
-<<<<<<< Updated upstream
-    "quantityy": {
-      "type": "json"
-=======
+ 
     "order_item": {
       "type": "relation",
       "relation": "oneToOne",
@@ -79,7 +76,6 @@
     },
     "quantity": {
       "type": "string"
->>>>>>> Stashed changes
     }
   }
 }
