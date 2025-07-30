@@ -67,7 +67,6 @@
         "audios"
       ]
     },
- 
     "order_item": {
       "type": "relation",
       "relation": "oneToOne",
@@ -76,6 +75,12 @@
     },
     "quantity": {
       "type": "string"
+    },
+    "PD_Description2": {
+      "type": "blocks"
+    },
+    "PD_Points": {
+      "type": "text"
     }
   }
 }

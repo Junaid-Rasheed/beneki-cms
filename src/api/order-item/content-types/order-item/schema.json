@@ -22,6 +22,12 @@
     },
     "lineTotal": {
       "type": "decimal"
+    },
+    "sidebar_product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::sidebar-item.sidebar-item",
+      "inversedBy": "order_item"
     }
   }
 }
