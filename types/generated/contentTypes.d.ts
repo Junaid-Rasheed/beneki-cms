@@ -696,7 +696,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
     >;
     PD_PriceRange: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    quantityy: Schema.Attribute.JSON;
+    quantity: Schema.Attribute.String;
     slug: Schema.Attribute.UID<'title'>;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
