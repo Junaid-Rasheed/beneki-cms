@@ -55,11 +55,11 @@
     "email": {
       "type": "string"
     },
-    "users_permissions_users": {
+    "users_permissions_user": {
       "type": "relation",
-      "relation": "oneToMany",
+      "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
-      "mappedBy": "user_address"
+      "inversedBy": "user_addresses"
     }
   }
 }

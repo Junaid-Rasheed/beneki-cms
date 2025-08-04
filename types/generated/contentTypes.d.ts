@@ -753,8 +753,8 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    users_permissions_users: Schema.Attribute.Relation<
-      'oneToMany',
+    users_permissions_user: Schema.Attribute.Relation<
+      'manyToOne',
       'plugin::users-permissions.user'
     >;
   };
@@ -1253,8 +1253,8 @@ export interface PluginUsersPermissionsUser
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    user_address: Schema.Attribute.Relation<
-      'manyToOne',
+    user_addresses: Schema.Attribute.Relation<
+      'oneToMany',
       'api::user-address.user-address'
     >;
     username: Schema.Attribute.String &
