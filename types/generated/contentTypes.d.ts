@@ -553,7 +553,6 @@ export interface ApiOrderAddressOrderAddress
       'api::order-address.order-address'
     > &
       Schema.Attribute.Private;
-    order: Schema.Attribute.Relation<'oneToOne', 'api::order.order'>;
     phoneNumber: Schema.Attribute.String;
     postalCode: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
@@ -586,7 +585,6 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
       'api::order-item.order-item'
     > &
       Schema.Attribute.Private;
-    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
     productName: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     quantity: Schema.Attribute.Integer;
