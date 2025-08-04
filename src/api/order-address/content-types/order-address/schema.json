@@ -40,6 +40,12 @@
     },
     "email": {
       "type": "string"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order",
+      "inversedBy": "shippingAddress"
     }
   }
 }

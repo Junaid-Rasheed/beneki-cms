@@ -34,7 +34,8 @@
     "orderItems": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::order-item.order-item"
+      "target": "api::order-item.order-item",
+      "mappedBy": "order"
     },
     "orderStatus": {
       "type": "enumeration",
@@ -73,12 +74,14 @@
     "billingAddress": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::order-address.order-address"
+      "target": "api::order-address.order-address",
+      "inversedBy": "order"
     },
     "shippingAddress": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::order-address.order-address"
+      "target": "api::order-address.order-address",
+      "inversedBy": "order"
     }
   }
 }
