@@ -534,7 +534,7 @@ export interface ApiOrderAddressOrderAddress
     singularName: 'order-address';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     appartment: Schema.Attribute.String;
