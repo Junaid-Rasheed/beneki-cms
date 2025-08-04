@@ -588,10 +588,6 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
     productName: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     quantity: Schema.Attribute.Integer;
-    sidebar_product: Schema.Attribute.Relation<
-      'oneToOne',
-      'api::sidebar-item.sidebar-item'
-    >;
     unitPrice: Schema.Attribute.Decimal;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -689,10 +685,6 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     order: Schema.Attribute.Integer;
-    order_item: Schema.Attribute.Relation<
-      'oneToOne',
-      'api::order-item.order-item'
-    >;
     parent: Schema.Attribute.Relation<
       'manyToOne',
       'api::sidebar-item.sidebar-item'
