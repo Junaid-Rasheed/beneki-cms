@@ -572,7 +572,7 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
     singularName: 'order-item';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     createdAt: Schema.Attribute.DateTime;
@@ -604,7 +604,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     singularName: 'order';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     billingAddress: Schema.Attribute.Relation<
