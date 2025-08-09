@@ -16,5 +16,18 @@ module.exports = {
       handler: 'bnpaxepta.createPayment',
       config: { auth: false }
     },
+    {
+      method: 'POST',
+      path: '/bnpaxepta/payment-callback',
+      handler: 'bnpaxepta.paymentCallback',
+      config: { auth: false }
+    },
+    // some 3DS flows may call via GET
+    {
+      method: 'GET',
+      path: '/bnpaxepta/payment-callback',
+      handler: 'bnpaxepta.paymentCallback',
+      config: { auth: false }
+    }
   ],
 };
