@@ -22,6 +22,8 @@
     "@strapi/strapi": "5.13.1",
     "axios": "^1.10.0",
     "crypto-js": "^4.2.0",
+    "egoroof-blowfish": "^4.0.1",
+    "iconv-lite": "^0.6.3",
     "node-fetch": "^2.7.0",
     "pg": "8.8.0",
     "react": "^18.0.0",
