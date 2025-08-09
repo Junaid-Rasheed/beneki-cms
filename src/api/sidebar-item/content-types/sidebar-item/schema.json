@@ -4,7 +4,7 @@
   "info": {
     "singularName": "sidebar-item",
     "pluralName": "sidebar-items",
-    "displayName": "SidebarProduct",
+    "displayName": "Products",
     "description": ""
   },
   "options": {
@@ -75,6 +75,9 @@
     },
     "PD_Points": {
       "type": "text"
+    },
+    "isHomeProduct": {
+      "type": "boolean"
     }
   }
 }

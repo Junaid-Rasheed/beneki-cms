@@ -661,7 +661,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
   collectionName: 'sidebar_items';
   info: {
     description: '';
-    displayName: 'SidebarProduct';
+    displayName: 'Products';
     pluralName: 'sidebar-items';
     singularName: 'sidebar-item';
   };
@@ -678,6 +678,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     isActive: Schema.Attribute.Boolean;
+    isHomeProduct: Schema.Attribute.Boolean;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
