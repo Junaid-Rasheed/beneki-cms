@@ -1,12 +1,12 @@
 module.exports = ({ env }) => ({
-  // ...
+  // Cloudinary upload configuration
   upload: {
     config: {
-      provider: 'cloudinary',
+      provider: "cloudinary",
       providerOptions: {
-        cloud_name: env('CLOUDINARY_NAME'),
-        api_key: env('CLOUDINARY_KEY'),
-        api_secret: env('CLOUDINARY_SECRET'),
+        cloud_name: env("CLOUDINARY_NAME"),
+        api_key: env("CLOUDINARY_KEY"),
+        api_secret: env("CLOUDINARY_SECRET"),
       },
       actionOptions: {
         upload: {},
@@ -15,17 +15,37 @@ module.exports = ({ env }) => ({
       },
     },
   },
+
+  // SendGrid email configuration
   email: {
     config: {
       provider: 'sendgrid',
       providerOptions: {
-        apiKey: process.env.SENDGRID_API_KEY,
+        apiKey: env('SENDGRID_API_KEY'),
       },
       settings: {
-        defaultFrom: 'dailyinfouniverse@gmail.com',
-        defaultReplyTo: 'dailyinfouniverse@gmail.com',
+        defaultFrom: 'elveniaschmall@gmail.com',
+        defaultReplyTo: 'elveniaschmall@gmail.com',
       },
     },
-    // ddfs
   },
+
+  // Users-permissions plugin configuration (merged into one)
+  // 'users-permissions': {
+  //   config: {
+  //     forgotPassword: {
+  //       resetPasswordUrl: 'http://localhost:5173/reset-password', // Match your frontend URL
+  //     },
+  //   },
+  // },
+  // config/plugins.js
+'users-permissions': {
+  config: {
+    forgotPassword: {
+      resetPasswordUrl: (user) => {
+        return `http://localhost:5173/reset-password/${user.resetPasswordToken}`;
+      }
+    }
+  }
+}
 });
