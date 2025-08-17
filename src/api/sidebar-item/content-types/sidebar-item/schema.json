@@ -78,6 +78,19 @@
     },
     "isHomeProduct": {
       "type": "boolean"
+    },
+    "VAT": {
+      "type": "decimal",
+      "default": 20,
+      "max": 20,
+      "min": 5
+    },
+    "weight": {
+      "type": "decimal"
+    },
+    "numberOfBoxes": {
+      "private": true,
+      "type": "decimal"
     }
   }
 }

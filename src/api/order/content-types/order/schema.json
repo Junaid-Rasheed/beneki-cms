@@ -42,6 +42,7 @@
         "pending",
         "confirmed",
         "processing",
+        "Partially Shipped",
         "shipped",
         "delivered",
         "cancelled"
@@ -84,6 +85,18 @@
       "type": "string"
     },
     "discountAmount": {
+      "type": "decimal"
+    },
+    "refundStatus": {
+      "type": "enumeration",
+      "enum": [
+        "requested",
+        "approved",
+        "denied",
+        "processed"
+      ]
+    },
+    "numberOfBoxes": {
       "type": "decimal"
     }
   }
