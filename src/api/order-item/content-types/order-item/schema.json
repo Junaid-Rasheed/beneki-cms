@@ -22,6 +22,9 @@
     },
     "lineTotal": {
       "type": "decimal"
+    },
+    "productQuantity": {
+      "type": "biginteger"
     }
   }
 }

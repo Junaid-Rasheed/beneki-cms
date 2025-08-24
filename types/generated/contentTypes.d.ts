@@ -373,6 +373,37 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiBenekiSampleBenekiSample
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'beneki_samples';
+  info: {
+    description: '';
+    displayName: 'beneki-sample';
+    pluralName: 'beneki-samples';
+    singularName: 'beneki-sample';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    img: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::beneki-sample.beneki-sample'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
   collectionName: 'coupons';
   info: {
@@ -590,6 +621,7 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     productName: Schema.Attribute.String;
+    productQuantity: Schema.Attribute.BigInteger;
     publishedAt: Schema.Attribute.DateTime;
     quantity: Schema.Attribute.Integer;
     unitPrice: Schema.Attribute.Decimal;
@@ -1291,6 +1323,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::beneki-sample.beneki-sample': ApiBenekiSampleBenekiSample;
       'api::coupon.coupon': ApiCouponCoupon;
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
