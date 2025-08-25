@@ -666,6 +666,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     orderStatus: Schema.Attribute.Enumeration<
       [
         'pending',
+        'refund',
         'confirmed',
         'processing',
         'Partially Shipped',

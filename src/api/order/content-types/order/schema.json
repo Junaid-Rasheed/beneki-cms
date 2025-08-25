@@ -40,6 +40,7 @@
       "type": "enumeration",
       "enum": [
         "pending",
+        "refund",
         "confirmed",
         "processing",
         "Partially Shipped",
