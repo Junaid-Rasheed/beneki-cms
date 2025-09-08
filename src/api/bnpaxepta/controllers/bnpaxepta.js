@@ -30,18 +30,16 @@ module.exports = {
     // URLs must be HTTPS, no query strings
     const clearParams = [
       `MerchantID=${merchantId}`,
-      `MsgVer=2.0`,
       `TransID=${orderId}`,
+      `MsgVer=2.0`,
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
-      `URLNotify=${process.env.URL_NOTIFY}`,
-      `URLSuccess=${process.env.URL_SUCCESS}`,
-      `URLFailure=${process.env.URL_FAILURE}`,
-      `Response=encrypt`,
       `OrderDesc=${orderDesc}`,
-      `MAC=${mac}`,
-      `Language=en`,
+      `URLSuccess=${process.env.URL_SUCCESS}`,
+      `URLFailure=${process.env.URL_FAILURE}`,    
+      `URLNotify=${process.env.URL_NOTIFY}`,
+      `MAC=${mac}`
     ].join("&");
 
     // LEN = byte length of UNENCRYPTED string
