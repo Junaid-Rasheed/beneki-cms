@@ -26,7 +26,7 @@ module.exports = {
     const blowfishKey = process.env.BNP_BLOWFISH_KEY; // plain string from BNP
     const hmacKey    = process.env.BNP_HMAC_KEY;      // plain string from BNP
 
-    const acceptHeaders = String(ctx.request.headers["accept"] || "*/*").slice(0, 2048);
+    const acceptHeaders = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
     // try X-Forwarded-For chain, fall back to connection ip
     const xff = (ctx.request.headers["x-forwarded-for"] || "").split(",")[0].trim();
     const ipAddress = xff || ctx.request.ip || "";
@@ -77,7 +77,7 @@ module.exports = {
 
     const refNr = orderId.toString().padStart(12, "0");
     const browserInfoJson = JSON.stringify(normalized);
-     strapi.log.info("BrowserInfor"+ JSON.stringify(browserInfoJson));
+     strapi.log.info("BrowserInfor"+ browserInfoJson);
     // Build the clear param string (order and casing matter)
     // URLs must be HTTPS, no query strings
     const clearParams = [
