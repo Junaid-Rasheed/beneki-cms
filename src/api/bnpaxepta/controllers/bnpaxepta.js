@@ -4,15 +4,66 @@ const iconv = require('iconv-lite');
 const crypto = require('crypto');
 const fetch = require("node-fetch");
 
+function clampColorDepth(depth) {
+  // BNP allows: 1,4,8,15,16,24,32,48; if 30/36, step down to nearest lower allowed
+  const allowed = [1, 4, 8, 15, 16, 24, 32, 48];
+  if (allowed.includes(depth)) return depth;
+  if (depth === 36) return 32;
+  if (depth === 30) return 24;
+  // fall back to 24 if something weird shows up
+  return 24;
+}
+
+
+
 module.exports = {
   async createSession(ctx) {
-    const { amount, currency, orderId, orderDesc = "Test:0000" } = ctx.request.body;
+    const { amount, currency, orderId, orderDesc = "Test:0000",browserInfo: biClient = {}, } = ctx.request.body;
 
     const { Blowfish } = await import("egoroof-blowfish");
 
     const merchantId = process.env.BNP_MERCHANT_ID;
     const blowfishKey = process.env.BNP_BLOWFISH_KEY; // plain string from BNP
     const hmacKey    = process.env.BNP_HMAC_KEY;      // plain string from BNP
+
+    const acceptHeaders = String(ctx.request.headers["accept"] || "*/*").slice(0, 2048);
+    // try X-Forwarded-For chain, fall back to connection ip
+    const xff = (ctx.request.headers["x-forwarded-for"] || "").split(",")[0].trim();
+    const ipAddress = xff || ctx.request.ip || "";
+
+    // From client (JS-only fields) with normalization:
+    const jsEnabled = true; // this endpoint is called from JS
+    const normalized = {
+      acceptHeaders,
+      ipAddress,
+      javaEnabled: Boolean(biClient.javaEnabled),
+      javaScriptEnabled: jsEnabled,
+      language: String(biClient.language || "en-US").slice(0, 8),
+      colorDepth: clampColorDepth(Number(biClient.colorDepth ?? 24)),
+      screenHeight: Number(biClient.screenHeight ?? 0),
+      screenWidth: Number(biClient.screenWidth ?? 0),
+      timeZoneOffset: String(biClient.timeZoneOffset ?? new Date().getTimezoneOffset()),
+      userAgent: String(biClient.userAgent || ctx.request.headers["user-agent"] || "").slice(0, 2048),
+    };
+
+    // Validate minimal requirements from the schema:
+    // When javaScriptEnabled = true, required fields are:
+    // acceptHeaders, javaEnabled, javaScriptEnabled, colorDepth, screenHeight, screenWidth,
+    // timeZoneOffset, language, userAgent. (ipAddress is not required in this branch)
+    const requiredKeys = [
+      "acceptHeaders","javaEnabled","javaScriptEnabled","colorDepth",
+      "screenHeight","screenWidth","timeZoneOffset","language","userAgent"
+    ];
+    for (const k of requiredKeys) {
+      if (
+        normalized[k] === undefined ||
+        normalized[k] === null ||
+        (typeof normalized[k] === "string" && normalized[k].length === 0)
+      ) {
+        ctx.throw(400, `browserInfo.${k} is required`);
+      }
+    }
+
 
     // Amount in minor units
     const amountMinor = Math.round(Number(amount) * 100);
@@ -25,7 +76,7 @@ module.exports = {
       .toUpperCase();
 
     const refNr = orderId.toString().padStart(12, "0");
-
+    const browserInfoJson = encodeURIComponent(JSON.stringify(normalized));
     // Build the clear param string (order and casing matter)
     // URLs must be HTTPS, no query strings
     const clearParams = [
@@ -36,6 +87,7 @@ module.exports = {
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
       `OrderDesc=${orderDesc}`,
+      `browserInfo=${browserInfoJson}`,
       `URLSuccess=${process.env.URL_SUCCESS}`,
       `URLFailure=${process.env.URL_FAILURE}`,    
       `URLNotify=${process.env.URL_NOTIFY}`,
