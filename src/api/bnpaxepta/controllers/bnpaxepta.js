@@ -76,8 +76,6 @@ module.exports = {
       .toUpperCase();
 
     const refNr = orderId.toString().padStart(12, "0");
-     const browserInfoJson = encodeURIComponent(JSON.stringify(normalized));
-    
     // Build parameter string with proper encoding
     const clearParams = [
       `MerchantID=${merchantId}`,
@@ -86,7 +84,7 @@ module.exports = {
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
-      `browserInfo=${browserInfoJson}`,
+      `browserInfo=${JSON.stringify(normalized).replace(/"/g, '"')}`,
       `URLSuccess=${process.env.URL_SUCCESS}`,
       `URLFailure=${process.env.URL_FAILURE}`,    
       `URLNotify=${process.env.URL_NOTIFY}`,
