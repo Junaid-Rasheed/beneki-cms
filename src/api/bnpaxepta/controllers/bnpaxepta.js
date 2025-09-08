@@ -76,10 +76,9 @@ module.exports = {
       .toUpperCase();
 
     const refNr = orderId.toString().padStart(12, "0");
-    const browserInfoJson = JSON.stringify(normalized);
-     strapi.log.info("BrowserInfor"+ browserInfoJson);
-    // Build the clear param string (order and casing matter)
-    // URLs must be HTTPS, no query strings
+     const browserInfoJson = encodeURIComponent(JSON.stringify(normalized));
+    
+    // Build parameter string with proper encoding
     const clearParams = [
       `MerchantID=${merchantId}`,
       `TransID=${orderId}`,
@@ -87,11 +86,11 @@ module.exports = {
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
-      `OrderDesc=${orderDesc}`,
+      `OrderDesc=${encodeURIComponent(orderDesc)}`,
       `browserInfo=${browserInfoJson}`,
-      `URLSuccess=${process.env.URL_SUCCESS}`,
-      `URLFailure=${process.env.URL_FAILURE}`,    
-      `URLNotify=${process.env.URL_NOTIFY}`,
+      `URLSuccess=${encodeURIComponent(process.env.URL_SUCCESS)}`,
+      `URLFailure=${encodeURIComponent(process.env.URL_FAILURE)}`,    
+      `URLNotify=${encodeURIComponent(process.env.URL_NOTIFY)}`,
       `MAC=${mac}`
     ].join("&");
 
