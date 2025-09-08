@@ -53,8 +53,7 @@ module.exports = {
     ctx.send({
       MerchantID: merchantId,
       Len: len,
-      Data: dataHex,
-      MAC: mac
+      Data: dataHex
     });
   },
 
