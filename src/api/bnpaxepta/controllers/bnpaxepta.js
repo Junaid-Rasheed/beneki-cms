@@ -77,7 +77,7 @@ module.exports = {
 
     const refNr = orderId.toString().padStart(12, "0");
     const browserInfoJson = JSON.stringify(normalized);
-    
+     strapi.log.info("BrowserInfor", browserInfoJson);
     // Build the clear param string (order and casing matter)
     // URLs must be HTTPS, no query strings
     const clearParams = [
@@ -95,6 +95,7 @@ module.exports = {
       `MAC=${mac}`
     ].join("&");
 
+     strapi.log.info("Data", clearParams);
     // LEN = byte length of UNENCRYPTED string
     const len = Buffer.byteLength(clearParams, "utf8");
 
