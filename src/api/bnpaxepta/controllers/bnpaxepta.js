@@ -77,7 +77,7 @@ module.exports = {
 
     const refNr = orderId.toString().padStart(12, "0");
     const browserInfoJson = JSON.stringify(normalized);
-     strapi.log.info("BrowserInfor", browserInfoJson);
+     strapi.log.info("BrowserInfor"+ JSON.stringify(browserInfoJson));
     // Build the clear param string (order and casing matter)
     // URLs must be HTTPS, no query strings
     const clearParams = [
@@ -95,7 +95,7 @@ module.exports = {
       `MAC=${mac}`
     ].join("&");
 
-     strapi.log.info("Data", clearParams);
+     strapi.log.info("Data"+ JSON.stringify(clearParams));
     // LEN = byte length of UNENCRYPTED string
     const len = Buffer.byteLength(clearParams, "utf8");
 
@@ -114,7 +114,7 @@ module.exports = {
   async notify(ctx) {
     // With Response=encrypt you’ll get LEN & DATA here; decrypt & verify MAC
     const payload = ctx.request.body || ctx.query;
-    strapi.log.info("BNP Notify payload", payload);
+    strapi.log.info("BNP Notify payload" + JSON.stringify(payload));
     ctx.send({ ok: true });
   },
 
