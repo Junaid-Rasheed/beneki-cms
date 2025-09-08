@@ -18,7 +18,7 @@ function clampColorDepth(depth) {
 
 module.exports = {
   async createSession(ctx) {
-    const { amount, currency, orderId, orderDesc = "Test:0000",browserInfo: biClient = {}, } = ctx.request.body;
+    const { amount, currency, orderId,browserInfo: biClient = {}, } = ctx.request.body;
 
     const { Blowfish } = await import("egoroof-blowfish");
 
@@ -86,11 +86,10 @@ module.exports = {
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
-      `OrderDesc=${encodeURIComponent(orderDesc)}`,
       `browserInfo=${browserInfoJson}`,
-      `URLSuccess=${encodeURIComponent(process.env.URL_SUCCESS)}`,
-      `URLFailure=${encodeURIComponent(process.env.URL_FAILURE)}`,    
-      `URLNotify=${encodeURIComponent(process.env.URL_NOTIFY)}`,
+      `URLSuccess=${process.env.URL_SUCCESS}`,
+      `URLFailure=${process.env.URL_FAILURE}`,    
+      `URLNotify=${process.env.URL_NOTIFY}`,
       `MAC=${mac}`
     ].join("&");
 
