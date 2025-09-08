@@ -56,6 +56,7 @@ module.exports = {
       MerchantID: merchantId,
       Len: len,
       Data: dataHex,
+      MAC: mac
     });
   },
 
