@@ -76,7 +76,8 @@ module.exports = {
       .toUpperCase();
 
     const refNr = orderId.toString().padStart(12, "0");
-    const browserInfoJson = encodeURIComponent(JSON.stringify(normalized));
+    const browserInfoJson = JSON.stringify(normalized);
+    
     // Build the clear param string (order and casing matter)
     // URLs must be HTTPS, no query strings
     const clearParams = [
