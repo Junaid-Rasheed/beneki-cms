@@ -273,6 +273,8 @@ module.exports = {
 
   async createSession(ctx) {
   const { amount, currency, orderId } = ctx.request.body;
+  const { Blowfish } = await import("egoroof-blowfish");
+  
   const merchantId = process.env.BNP_MERCHANT_ID;
   const blowfishKey = process.env.BNP_BLOWFISH_KEY;
   const hmacKey = process.env.BNP_HMAC_KEY;
