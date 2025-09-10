@@ -75,7 +75,11 @@ module.exports = {
       .digest("hex")
       .toUpperCase();
 
-    const refNr = orderId.toString().padStart(12, "0");
+    // Extract number part
+    const numberPart = orderId.replace(/\D/g, ""); // removes non-digits
+
+    // Pad to 12 digits
+    const refNr = numberPart.padStart(12, "0");
     // Build parameter string with proper encoding
     const clearParams = [
       `MerchantID=${merchantId}`,
@@ -84,7 +88,7 @@ module.exports = {
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
-      `browserInfo=${JSON.stringify(normalized).replace(/"/g, '"')}`,
+      `browserInfo=${encodeURIComponent(JSON.stringify(normalized))}`,
       `URLSuccess=${process.env.URL_SUCCESS}`,
       `URLFailure=${process.env.URL_FAILURE}`,    
       `URLNotify=${process.env.URL_NOTIFY}`,
