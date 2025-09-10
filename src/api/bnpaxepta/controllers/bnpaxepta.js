@@ -14,7 +14,11 @@ function clampColorDepth(depth) {
   return 24;
 }
 
-
+function buildQueryString(params) {
+  return Object.keys(params)
+    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+    .join('&');
+}
 
 module.exports = {
   async createSession(ctx) {
@@ -81,20 +85,22 @@ module.exports = {
     // Pad to 12 digits
     const refNr = numberPart.padStart(12, "0");
     // Build parameter string with proper encoding
-    const clearParams = [
-      `MerchantID=${merchantId}`,
-      `TransID=${orderId}`,
-      `MsgVer=2.0`,
-      `RefNr=${refNr}`,
-      `Amount=${amountMinor}`,
-      `Currency=${currency}`,
-      `browserInfo=${encodeURIComponent(JSON.stringify(normalized))}`,
-      `URLSuccess=${process.env.URL_SUCCESS}`,
-      `URLFailure=${process.env.URL_FAILURE}`,    
-      `URLNotify=${process.env.URL_NOTIFY}`,
-      `MAC=${mac}`
-    ].join("&");
+     const params = {
+      MerchantID: merchantId,
+      TransID: orderId,
+      MsgVer: "2.0",
+      RefNr: refNr,
+      Amount: amountMinor.toString(),
+      Currency: currency,
+      browserInfo: JSON.stringify(normalized), // Just stringify, don't encode here
+      URLSuccess: process.env.URL_SUCCESS,
+      URLFailure: process.env.URL_FAILURE,
+      URLNotify: process.env.URL_NOTIFY,
+      MAC: mac
+    };
 
+    // Build the query string with proper URL encoding
+    const clearParams = buildQueryString(params);
      strapi.log.info("Data"+ JSON.stringify(clearParams));
     // LEN = byte length of UNENCRYPTED string
     const len = Buffer.byteLength(clearParams, "utf8");
