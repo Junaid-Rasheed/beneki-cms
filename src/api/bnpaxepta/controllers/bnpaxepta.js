@@ -16,7 +16,16 @@ function clampColorDepth(depth) {
 
 function buildQueryString(params) {
   return Object.keys(params)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+    .map(key => {
+      let value = params[key];
+      // For URLs, use encodeURI instead of encodeURIComponent to avoid over-encoding
+      if (key.includes('URL')) {
+        value = encodeURI(value);
+      } else {
+        value = encodeURIComponent(value);
+      }
+      return `${encodeURIComponent(key)}=${value}`;
+    })
     .join('&');
 }
 
