@@ -75,11 +75,8 @@ module.exports = {
       .digest("hex")
       .toUpperCase();
 
-    // Extract number part
-    const numberPart = orderId.replace(/\D/g, ""); // removes non-digits
-
     // Pad to 12 digits
-    const refNr = numberPart.padStart(12, "0");
+    const refNr = orderId.replace(/[^a-zA-Z0-9]/g, "").substring(0, 40);
     // Build parameter string with proper encoding
     const browserInfoBase64 = Buffer.from(JSON.stringify(normalized)).toString("base64");
 
