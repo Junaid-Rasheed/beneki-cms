@@ -81,6 +81,8 @@ module.exports = {
     // Pad to 12 digits
     const refNr = numberPart.padStart(12, "0");
     // Build parameter string with proper encoding
+    const browserInfoBase64 = Buffer.from(JSON.stringify(normalized)).toString("base64");
+
     const clearParams = [
       `MerchantID=${merchantId}`,
       `TransID=${orderId}`,
@@ -88,7 +90,7 @@ module.exports = {
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
-      `browserInfo=${JSON.stringify(normalized)}`,
+      `browserInfo=${browserInfoBase64}`,
       `URLSuccess=${process.env.URL_SUCCESS}`,
       `URLFailure=${process.env.URL_FAILURE}`,    
       `URLNotify=${process.env.URL_NOTIFY}`,
