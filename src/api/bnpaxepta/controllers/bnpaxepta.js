@@ -14,20 +14,7 @@ function clampColorDepth(depth) {
   return 24;
 }
 
-function buildQueryString(params) {
-  return Object.keys(params)
-    .map(key => {
-      let value = params[key];
-      // For URLs, use encodeURI instead of encodeURIComponent to avoid over-encoding
-      if (key.includes('URL')) {
-        value = value;
-      } else {
-        value = encodeURIComponent(value);
-      }
-      return `${encodeURIComponent(key)}=${value}`;
-    })
-    .join('&');
-}
+
 
 module.exports = {
   async createSession(ctx) {
@@ -94,22 +81,20 @@ module.exports = {
     // Pad to 12 digits
     const refNr = numberPart.padStart(12, "0");
     // Build parameter string with proper encoding
-     const params = {
-      MerchantID: merchantId,
-      TransID: orderId,
-      MsgVer: "2.0",
-      RefNr: refNr,
-      Amount: amountMinor.toString(),
-      Currency: currency,
-      browserInfo: JSON.stringify(normalized), // Just stringify, don't encode here
-      URLSuccess: process.env.URL_SUCCESS,
-      URLFailure: process.env.URL_FAILURE,
-      URLNotify: process.env.URL_NOTIFY,
-      MAC: mac
-    };
+    const clearParams = [
+      `MerchantID=${merchantId}`,
+      `TransID=${orderId}`,
+      `MsgVer=2.0`,
+      `RefNr=${refNr}`,
+      `Amount=${amountMinor}`,
+      `Currency=${currency}`,
+      `browserInfo=${JSON.stringify(normalized).replace(/"/g, '"')}`,
+      `URLSuccess=${process.env.URL_SUCCESS}`,
+      `URLFailure=${process.env.URL_FAILURE}`,    
+      `URLNotify=${process.env.URL_NOTIFY}`,
+      `MAC=${mac}`
+    ].join("&");
 
-    // Build the query string with proper URL encoding
-    const clearParams = buildQueryString(params);
      strapi.log.info("Data"+ JSON.stringify(clearParams));
     // LEN = byte length of UNENCRYPTED string
     const len = Buffer.byteLength(clearParams, "utf8");
