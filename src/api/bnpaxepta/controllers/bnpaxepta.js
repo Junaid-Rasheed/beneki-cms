@@ -80,6 +80,7 @@ module.exports = {
 
     // Pad to 12 digits
     const refNr = numberPart.padStart(12, "0");
+    const browserInfo = `{"acceptHeaders":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8","ipAddress":"223.123.20.53","javaEnabled":false,"javaScriptEnabled":true,"language":"en-PK","colorDepth":24,"screenHeight":1080,"screenWidth":1920,"timeZoneOffset":"-300","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"}`;
     // Build parameter string with proper encoding
     const clearParams = [
       `MerchantID=${merchantId}`,
@@ -88,7 +89,7 @@ module.exports = {
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
-      `browserInfo=${JSON.stringify(normalized).replace(/"/g, '"')}`,
+      `browserInfo=${browserInfo}`,
       `URLSuccess=${process.env.URL_SUCCESS}`,
       `URLFailure=${process.env.URL_FAILURE}`,    
       `URLNotify=${process.env.URL_NOTIFY}`,
