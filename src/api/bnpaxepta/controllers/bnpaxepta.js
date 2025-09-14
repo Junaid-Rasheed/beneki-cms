@@ -76,7 +76,9 @@ module.exports = {
       .toUpperCase();
 
     // Pad to 12 digits
-    const refNr = orderId.replace(/[^a-zA-Z0-9]/g, "").substring(0, 40);
+    let refNr = orderId.replace(/\D/g, "");
+    if (!refNr) refNr = String(Date.now()); // fallback
+    refNr = refNr.substring(0, 12);
     // Build parameter string with proper encoding
     const browserInfoBase64 = Buffer.from(JSON.stringify(normalized)).toString("base64");
 
