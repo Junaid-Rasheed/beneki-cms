@@ -488,6 +488,83 @@ export interface ApiCtaBannerCtaBanner extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiHomePageHeroSectionHomePageHeroSection
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'home_page_hero_sections';
+  info: {
+    description: '';
+    displayName: 'HomePageHeroSection';
+    pluralName: 'home-page-hero-sections';
+    singularName: 'home-page-hero-section';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    bigImage: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    isActive: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::home-page-hero-section.home-page-hero-section'
+    >;
+    newPrice: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    oldPrice: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    smallImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
+    > &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiHomePagePartnerSectionHomePagePartnerSection
   extends Struct.CollectionTypeSchema {
   collectionName: 'home_page_partner_sections';
@@ -1686,6 +1763,7 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser;
       'api::coupon.coupon': ApiCouponCoupon;
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;
+      'api::home-page-hero-section.home-page-hero-section': ApiHomePageHeroSectionHomePageHeroSection;
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
       'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
