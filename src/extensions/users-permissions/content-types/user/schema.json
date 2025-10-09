@@ -85,6 +85,38 @@
       "relation": "oneToMany",
       "target": "api::user-address.user-address",
       "mappedBy": "users_permissions_user"
+    },
+    "accountType": {
+      "type": "enumeration",
+      "enum": [
+        "Individual",
+        "Business"
+      ]
+    },
+    "businessRegistrationNumber": {
+      "type": "string"
+    },
+    "businessRegistrationCountry": {
+      "type": "enumeration",
+      "enum": [
+        "France",
+        "Belgium",
+        "Germany",
+        "Austria",
+        "Italia",
+        "Netherlands",
+        "Spain",
+        "Poland",
+        "Denmark",
+        "Hungary",
+        "Luxembourg",
+        "Portugal",
+        "Slovakia",
+        "Czech Republic"
+      ]
+    },
+    "vatNumber": {
+      "type": "string"
     }
   }
 }

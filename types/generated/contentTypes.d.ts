@@ -1172,7 +1172,24 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
-    country: Schema.Attribute.Enumeration<['France', 'Netherland']> &
+    country: Schema.Attribute.Enumeration<
+      [
+        'France',
+        'Belgium ',
+        'Germany',
+        'Austria ',
+        'Italy ',
+        'Netherland ',
+        'Spain',
+        'Poland',
+        'Denmark',
+        'Hungary',
+        'Luxembourg',
+        'Portugal',
+        'Slovakia',
+        'Czech Republic',
+      ]
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -1702,7 +1719,27 @@ export interface PluginUsersPermissionsUser
     draftAndPublish: false;
   };
   attributes: {
+    accountType: Schema.Attribute.Enumeration<['Individual', 'Business']>;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    businessRegistrationCountry: Schema.Attribute.Enumeration<
+      [
+        'France',
+        'Belgium',
+        'Germany',
+        'Austria',
+        'Italia',
+        'Netherlands',
+        'Spain',
+        'Poland',
+        'Denmark',
+        'Hungary',
+        'Luxembourg',
+        'Portugal',
+        'Slovakia',
+        'Czech Republic',
+      ]
+    >;
+    businessRegistrationNumber: Schema.Attribute.String;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     createdAt: Schema.Attribute.DateTime;
@@ -1748,6 +1785,7 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 3;
       }>;
+    vatNumber: Schema.Attribute.String;
   };
 }
 

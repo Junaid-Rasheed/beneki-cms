@@ -52,7 +52,19 @@
       "type": "enumeration",
       "enum": [
         "France",
-        "Netherland"
+        "Belgium ",
+        "Germany",
+        "Austria ",
+        "Italy ",
+        "Netherland ",
+        "Spain",
+        "Poland",
+        "Denmark",
+        "Hungary",
+        "Luxembourg",
+        "Portugal",
+        "Slovakia",
+        "Czech Republic"
       ],
       "pluginOptions": {
         "i18n": {
