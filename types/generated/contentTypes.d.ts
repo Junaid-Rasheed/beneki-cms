@@ -1175,11 +1175,11 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
     country: Schema.Attribute.Enumeration<
       [
         'France',
-        'Belgium ',
+        'Belgium',
         'Germany',
-        'Austria ',
-        'Italy ',
-        'Netherland ',
+        'Austria',
+        'Italy',
+        'Netherlands',
         'Spain',
         'Poland',
         'Denmark',
