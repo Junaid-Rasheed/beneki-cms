@@ -45,8 +45,8 @@ module.exports = {
         body: JSON.stringify({
           intent: "CAPTURE",
           application_context: {
-            return_url: `${UiUrl}/paypalpayment-success`,
-            cancel_url: `${UiUrl}/paypalpayment-cancel`,
+            return_url: `${UiUrl}paypalpayment-success`,
+            cancel_url: `${UiUrl}paypalpayment-cancel`,
           },
           purchase_units: [
             {
