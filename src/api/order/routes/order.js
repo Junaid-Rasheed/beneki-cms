@@ -1,16 +1,11 @@
-// 'use strict';
+'use strict';
 
-// /**
-//  * order router
-//  */
+/**
+ * order router
+ */
 
-// const { createCoreRouter } = require('@strapi/strapi').factories;
+const { createCoreRouter } = require('@strapi/strapi').factories;
 
-// module.exports = createCoreRouter('api::order.order');
+module.exports = createCoreRouter('api::order.order');
 
 
-module.exports = {
-  routes: [
-    ...require("./custom-order").routes,
-  ],
-};
