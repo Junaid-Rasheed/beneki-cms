@@ -90,8 +90,7 @@ module.exports = {
       `Amount=${amountMinor}`,
       `Currency=${currency}`,
       `browserInfo=${browserInfoBase64}`,
-      `URLSuccess=${encodeURIComponent(`${process.env.URL_SUCCESS}?orderId=${orderId}&status=success`)}`,
-      //`URLSuccess=${process.env.URL_SUCCESS}?orderId=${orderId}&status=success`,
+      `URLSuccess=${process.env.URL_SUCCESS}`,
       `URLFailure=${process.env.URL_FAILURE}`,    
       `URLNotify=${process.env.URL_NOTIFY}`,
       `MAC=${mac}`
