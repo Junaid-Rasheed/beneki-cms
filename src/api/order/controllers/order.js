@@ -34,11 +34,16 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         return ctx.notFound("User not found");
       }
 
+      console.log("ORDER",order)
+            console.log("USER",user)
+
       // ✅ Generate PDF file
       const pdfPath = await generateInvoicePDF(order);
 
+      console.log("PDF PRINT",pdfPath)
       // ✅ Send email with attachment
       await sendInvoiceEmail(user.email, order, pdfPath);
+      console.log("PDF Sent")
 
       // ✅ Clean up PDF file (optional)
       fs.unlinkSync(pdfPath);

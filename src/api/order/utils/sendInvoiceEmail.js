@@ -8,7 +8,7 @@ module.exports = async function sendInvoiceEmail(toEmail, order, pdfPath) {
 
   const msg = {
     to: toEmail,
-    from: "no-reply@yourdomain.com",
+    from: "elveniaschmall@gmail.com",
     subject: `Your Invoice for Order #${order.id}`,
     text: `Thank you for your purchase! Please find your invoice attached.`,
     attachments: [
@@ -21,5 +21,9 @@ module.exports = async function sendInvoiceEmail(toEmail, order, pdfPath) {
     ],
   };
 
+  console.log("Message email context",msg)
   await sgMail.send(msg);
+  console.log("email sent success")
+
+  
 };
