@@ -6,15 +6,17 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 module.exports = async function sendInvoiceEmail(toEmail, order, pdfPath) {
   const pdfBuffer = fs.readFileSync(pdfPath);
 
+  console.log("PDF BUFFER",pdfBuffer)
+  
   const msg = {
     to: toEmail,
     from: "elveniaschmall@gmail.com",
-    subject: `Your Invoice for Order #${order.id}`,
+    subject: `Your Invoice for Order #${order.orderNumber}`,
     text: `Thank you for your purchase! Please find your invoice attached.`,
     attachments: [
       {
         content: pdfBuffer.toString("base64"),
-        filename: `invoice-${order.id}.pdf`,
+        filename: `invoice-${order.orderNumber}.pdf`,
         type: "application/pdf",
         disposition: "attachment",
       },
