@@ -18,7 +18,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
       // ✅ Fetch order and user info from DB
       const order = await strapi.db.query("api::order.order").findOne({
-        where: { id: orderId },
+        where: { documentId: orderId },
         populate: { items: true, user: true },
       });
 
