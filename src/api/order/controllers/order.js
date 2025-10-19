@@ -4,8 +4,8 @@
 const path = require("path");
 const fs = require("fs");
 const { createCoreController } = require("@strapi/strapi").factories;
-const generateInvoicePDF = require("../../../utils/generateInvoicePDF");
-const sendInvoiceEmail = require("../../../utils/sendInvoiceEmail");
+const generateInvoicePDF = require("../utils/generateInvoicePDF");
+const sendInvoiceEmail = require("../utils/sendInvoiceEmail");
 
 module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   async sendInvoice(ctx) {
