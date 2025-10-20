@@ -17,7 +17,7 @@ module.exports = async function generateInvoicePDF(order) {
   const black = "#000000";
 
   // ===== HEADER SECTION =====
-  // Company Info (Left) - Could be dynamic if you have company info in Strapi
+  // Company Info (Left)
   doc
     .fontSize(11)
     .fillColor(black)
@@ -106,16 +106,12 @@ module.exports = async function generateInvoicePDF(order) {
     .font("Helvetica-Bold")
     .fontSize(8);
 
-// In the products table section, update the reference display:
-doc
-  .font("Helvetica")
-  .fontSize(8)
-  .text(product.reference?.substring(0, 15) || 'N/A', colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 }) // Limit reference length
-  .text(product.name || 'N/A', colPositions.product + 4, y + 4, { width: colWidths.product - 8 })
-  .text(String(product.qty || 0), colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 })
-  .text(product.unitPrice || '0.00 €', colPositions.price + 4, y + 4, { width: colWidths.price - 8 })
-  .text(product.totalExclVat || '0.00 €', colPositions.total + 4, y + 4, { width: colWidths.total - 8 })
-  .text(`${product.vatRate || 0}%`, colPositions.vat + 4, y + 4, { width: colWidths.vat - 8 });
+  doc.text("Reference", colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 });
+  doc.text("Product", colPositions.product + 4, y + 4, { width: colWidths.product - 8 });
+  doc.text("Qty", colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 });
+  doc.text("Price VAT excluded", colPositions.price + 4, y + 4, { width: colWidths.price - 8 });
+  doc.text("Total VAT excluded", colPositions.total + 4, y + 4, { width: colWidths.total - 8 });
+  doc.text("VAT %", colPositions.vat + 4, y + 4, { width: colWidths.vat - 8 });
 
   y += 15;
   doc.fillColor(black);
@@ -134,10 +130,15 @@ doc
     products.forEach((product, index) => {
       doc.moveTo(30, y).lineTo(565, y).stroke();
       
+      // FIXED: Use shorter reference and limit length
+      const reference = product.reference && product.reference.length > 12 
+        ? product.reference.substring(0, 12) + '...' 
+        : product.reference || 'N/A';
+      
       doc
         .font("Helvetica")
         .fontSize(8)
-        .text(product.reference || 'N/A', colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 })
+        .text(reference, colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 })
         .text(product.name || 'N/A', colPositions.product + 4, y + 4, { width: colWidths.product - 8 })
         .text(String(product.qty || 0), colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 })
         .text(product.unitPrice || '0.00 €', colPositions.price + 4, y + 4, { width: colWidths.price - 8 })
@@ -218,7 +219,7 @@ doc
     .fontSize(8)
     .text("Bank Details", 35, bankY + 5)
     .font("Helvetica")
-    .text(order.bankDetails?.bankName || "BNP PARIBAS", 35, bankY + 15)
+    .text("BNP PARIBAS", 35, bankY + 15)
     .text(`IBAN: ${order.bankDetails?.iban || 'N/A'}`, 35, bankY + 25)
     .text(`BIC: ${order.bankDetails?.bic || 'N/A'}`, 35, bankY + 35);
 
@@ -234,13 +235,13 @@ doc
       { width: 535, align: "justify", lineGap: 1 }
     );
 
-  // ===== LEGAL FOOTER - Dynamic =====
+  // ===== LEGAL FOOTER =====
   const legalFooterY = footerY + 40;
   doc
     .moveTo(30, legalFooterY).lineTo(565, legalFooterY).stroke()
     .fontSize(7)
     .text(
-      `BENEKI SARL / Capital ${order.companyLegal?.capital || "150 000€"} / VAT Number : ${order.companyLegal?.vatNumber || "FR61889408019"} / Siret ${order.companyLegal?.siret || "88940801900020"} / APE ${order.companyLegal?.ape || "4690Z"}`,
+      "BENEKI SARL / Capital 150 000€ / VAT Number : FR61889408019 / Siret 88940801900020 / APE 4690Z",
       30,
       legalFooterY + 5,
       { width: 535, align: "center" }

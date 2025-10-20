@@ -57,7 +57,6 @@
 // }));
 
 
-
 // @ts-nocheck
 "use strict";
 
@@ -76,7 +75,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         return ctx.badRequest("Missing orderId or userId");
       }
 
-      // ✅ Fetch order and user info from DB with all necessary relations
+      // ✅ Fetch order and user info from DB
       const order = await strapi.db.query("api::order.order").findOne({
         where: { documentId: orderId },
         populate: { 
@@ -99,21 +98,22 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         return ctx.notFound("User not found");
       }
 
-      console.log("ORDERTESTTT", order);
+      console.log("ORDER DATA:", order);
+      console.log("USER DATA:", user);
 
       // ✅ Transform Strapi data to match PDF expected format
       const invoiceData = this.transformOrderToInvoiceFormat(order, user);
 
-      console.log("TRANSFORMED DATA:", invoiceData);
+      console.log("TRANSFORMED INVOICE DATA:", invoiceData);
 
       // ✅ Generate PDF file with transformed data
       const pdfPath = await generateInvoicePDF(invoiceData);
 
-      console.log("PDF PRINT", pdfPath);
+      console.log("PDF PATH:", pdfPath);
       
       // ✅ Send email with attachment
       await sendInvoiceEmail(user.email, order, pdfPath);
-      console.log("PDF Sent");
+      console.log("PDF Sent Successfully");
 
       // ✅ Clean up PDF file (optional)
       fs.unlinkSync(pdfPath);
@@ -132,14 +132,18 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     const totalVatNum = order.vat || 0;
     const grandTotalNum = order.total || 0;
 
-    console.log("Using order totals:", { totalExclVatNum, totalVatNum, grandTotalNum });
+    console.log("Order Totals:", { 
+      subTotal: totalExclVatNum, 
+      vat: totalVatNum, 
+      total: grandTotalNum 
+    });
 
     // Create product entry from actual order data
     const products = [];
     if (totalExclVatNum > 0) {
       products.push({
-        reference: "ORDER-" + (order.documentId || order.id),
-        name: "Order Products",
+        reference: "PROD-001", // Simple reference instead of long documentId
+        name: "Web Hosting Service",
         qty: 1,
         unitPrice: this.formatCurrency(totalExclVatNum),
         totalExclVat: this.formatCurrency(totalExclVatNum),
@@ -152,37 +156,39 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     const userLastName = user.name || user.lastname || "";
     const fullName = `${userFirstName} ${userLastName}`.trim() || user.username || "Customer";
 
-    // Get addresses dynamically - check all possible address fields
+    // Get addresses dynamically
     const shippingAddress = order.shipping_address || order.shippingAddress || {};
     const billingAddress = order.billing_address || order.billingAddress || {};
 
-    console.log("Shipping Address:", shippingAddress);
-    console.log("Billing Address:", billingAddress);
+    console.log("Address Data:", {
+      shipping: shippingAddress,
+      billing: billingAddress
+    });
 
     // Build the invoice data object with dynamic data
     const invoiceData = {
       id: order.id,
       documentId: order.documentId,
-      // FIX: Use orderNumber directly instead of documentId
+      // FIXED: Use orderNumber for invoice number
       invoiceNumber: order.orderNumber || `ORD-${String(order.id).padStart(7, '0')}`,
       invoiceDate: new Date(order.createdAt).toLocaleDateString('en-US'),
       
-      // Customer Information - Use billing address or user info
+      // Customer Information - Dynamic
       customerCompany: user.accountType === 'Business' ? user.businessName : fullName,
-      customerAddress: this.getAddressLine(billingAddress, 1),
-      customerCity: billingAddress.city || this.getAddressLine(billingAddress, 2) || "N/A", 
-      customerCountry: billingAddress.country || "N/A",
+      customerAddress: this.extractAddress(billingAddress),
+      customerCity: billingAddress.city || this.extractCity(billingAddress) || "N/A", 
+      customerCountry: billingAddress.country || user.businessRegistrationCountry || "France",
       customerVAT: user.vatNumber || "N/A",
       
       // Client Reference - Dynamic
       clientRef: user.documentId || "N/A",
       clientEmail: user.email,
       
-      // Delivery Information - Use shipping address or fallback to billing address
-      deliveryName: shippingAddress.full_name || shippingAddress.name || fullName,
-      deliveryAddress: this.getAddressLine(shippingAddress, 1) || this.getAddressLine(billingAddress, 1) || "N/A",
+      // Delivery Information - Dynamic
+      deliveryName: fullName,
+      deliveryAddress: this.extractAddress(shippingAddress) || this.extractAddress(billingAddress) || "Address not provided",
       deliveryPhone: shippingAddress.phone || user.phone || "N/A",
-      deliveryNote: order.delivery_notes || order.notes || "",
+      deliveryNote: order.notes || "",
       
       // Products - Dynamic
       products: products,
@@ -218,21 +224,33 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     return invoiceData;
   },
 
-  // Helper function to extract address lines from different field structures
-  getAddressLine(address, lineNumber) {
+  // Helper function to extract address from different field structures
+  extractAddress(address) {
     if (!address) return null;
     
     // Try different field naming conventions
-    if (lineNumber === 1) {
-      return address.address_line1 || address.address_line_1 || address.street || address.address || null;
-    } else if (lineNumber === 2) {
-      const cityPart = address.city || '';
-      const postalPart = address.postalCode || address.postal_code || '';
-      if (cityPart && postalPart) {
-        return `${postalPart} ${cityPart}`;
-      }
-      return cityPart || postalPart || address.address_line2 || address.address_line_2 || null;
+    if (address.address) return address.address;
+    if (address.street) return address.street;
+    if (address.address_line1) return address.address_line1;
+    if (address.address_line_1) return address.address_line_1;
+    if (address.line1) return address.line1;
+    
+    return null;
+  },
+
+  // Helper function to extract city information
+  extractCity(address) {
+    if (!address) return null;
+    
+    if (address.city && address.postalCode) {
+      return `${address.postalCode} ${address.city}`;
     }
+    if (address.city && address.postal_code) {
+      return `${address.postal_code} ${address.city}`;
+    }
+    if (address.city) return address.city;
+    if (address.postalCode) return address.postalCode;
+    if (address.postal_code) return address.postal_code;
     
     return null;
   },
@@ -250,11 +268,3 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     return '0.00 €';
   }
 }));
-
-// Add this right after fetching the order
-console.log("ORDER ADDRESSES:", {
-  shipping_address: order.shipping_address,
-  billing_address: order.billing_address,
-  shippingAddress: order.shippingAddress,
-  billingAddress: order.billingAddress
-});
