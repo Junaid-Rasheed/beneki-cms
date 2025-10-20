@@ -117,8 +117,19 @@ module.exports = async function generateInvoicePDF(order) {
   doc.fillColor(black);
 
   // Table rows with dynamic data
-  const products = order.products || order.items || [];
-  
+const products = order.products || order.items || [];
+
+if (products.length === 0) {
+  // Add a default product row to show something
+  products.push({
+    reference: "N/A",
+    name: "No products in order",
+    qty: 0,
+    unitPrice: "0.00 €",
+    totalExclVat: "0.00 €", 
+    vatRate: 0
+  });
+}  
   if (products.length === 0) {
     // Add empty row if no products
     doc.moveTo(30, y).lineTo(565, y).stroke();

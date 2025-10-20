@@ -59,6 +59,7 @@
 
 
 // @ts-nocheck
+// @ts-nocheck
 "use strict";
 
 const path = require("path");
@@ -105,6 +106,8 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       // ✅ Transform Strapi data to match PDF expected format
       const invoiceData = this.transformOrderToInvoiceFormat(order, user);
 
+      console.log("TRANSFORMED DATA:", invoiceData);
+
       // ✅ Generate PDF file with transformed data
       const pdfPath = await generateInvoicePDF(invoiceData);
 
@@ -124,38 +127,68 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     }
   },
 
-  // Helper function to transform Strapi order data to PDF format
+  // Transform Strapi order data to PDF format
   transformOrderToInvoiceFormat(order, user) {
-    // Calculate totals from items
-    const products = order.items?.map(item => ({
-      reference: item.sku || item.productId || `ITEM-${item.id}`,
-      name: item.name || item.title || "Product",
-      quantity: item.quantity || 1,
-      price: item.price || item.unitPrice || 0,
-      vatRate: item.vatRate || item.taxRate || 20,
-      totalExclVat: (item.quantity || 1) * (item.price || item.unitPrice || 0)
-    })) || [];
+    console.log("Original order items:", order.items);
+    
+    // Calculate products from order items - FIXED
+    const products = (order.items || []).map(item => {
+      const quantity = item.quantity || 1;
+      const unitPrice = item.price || item.unitPrice || 0;
+      const totalExclVat = quantity * unitPrice;
+      const vatRate = item.vatRate || item.taxRate || 20;
+      
+      return {
+        reference: item.sku || item.productId || item.reference || `ITEM-${item.id}`,
+        name: item.name || item.title || "Product",
+        qty: quantity,
+        unitPrice: this.formatCurrency(unitPrice),
+        totalExclVat: this.formatCurrency(totalExclVat),
+        vatRate: vatRate
+      };
+    });
 
-    const totalExclVat = products.reduce((sum, product) => sum + product.totalExclVat, 0);
-    const totalVat = products.reduce((sum, product) => {
-      return sum + (product.totalExclVat * (product.vatRate / 100));
+    console.log("Transformed products:", products);
+
+    // Calculate totals - FIXED
+    const totalExclVatNum = products.reduce((sum, product) => {
+      const quantity = product.qty || 1;
+      const unitPrice = parseFloat(String(product.unitPrice).replace('€', '').replace(',', '.').trim()) || 0;
+      return sum + (quantity * unitPrice);
     }, 0);
-    const grandTotal = totalExclVat + totalVat;
+    
+    const totalVatNum = products.reduce((sum, product) => {
+      const quantity = product.qty || 1;
+      const unitPrice = parseFloat(String(product.unitPrice).replace('€', '').replace(',', '.').trim()) || 0;
+      const vatRate = product.vatRate || 20;
+      const productTotal = quantity * unitPrice;
+      return sum + (productTotal * (vatRate / 100));
+    }, 0);
+    
+    const grandTotalNum = totalExclVatNum + totalVatNum;
 
-    // Get addresses - adjust field names based on your Strapi schema
+    console.log("Calculated totals:", { totalExclVatNum, totalVatNum, grandTotalNum });
+
+    // Get addresses - FIXED field access
     const shippingAddress = order.shipping_address || order.shippingAddress || {};
     const billingAddress = order.billing_address || order.billingAddress || {};
+    
+    // Get user names - FIXED
+    const userFirstName = user.firstname || user.firstName || user.name || "";
+    const userLastName = user.lastname || user.lastName || "";
+    const fullName = `${userFirstName} ${userLastName}`.trim() || "N/A";
 
-    return {
+    // Build the invoice data object matching the PDF expected format
+    const invoiceData = {
       id: order.id,
       documentId: order.documentId,
       invoiceNumber: order.invoiceNumber || `ORD-${String(order.documentId).padStart(7, '0')}`,
       invoiceDate: order.invoiceDate || new Date(order.createdAt || order.created_at).toLocaleDateString('en-US'),
       
-      // Customer Information
+      // Customer Information - FIXED
       customerCompany: order.companyName || user.company || billingAddress.company || "N/A",
-      customerAddress: billingAddress.address_line_1 || billingAddress.street || billingAddress.address || "N/A",
-      customerCity: billingAddress.city || "N/A",
+      customerAddress: billingAddress.address_line1 || billingAddress.address_line_1 || billingAddress.street || billingAddress.address || "N/A",
+      customerCity: billingAddress.city || "N/A", 
       customerCountry: billingAddress.country || "N/A",
       customerVAT: order.vatNumber || user.vatNumber || "N/A",
       
@@ -163,9 +196,9 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       clientRef: order.clientReference || user.customerId || "N/A",
       clientEmail: user.email,
       
-      // Delivery Information
-      deliveryName: shippingAddress.full_name || shippingAddress.name || `${user.firstname} ${user.lastname}`.trim() || "N/A",
-      deliveryAddress: shippingAddress.address_line_1 || shippingAddress.street || shippingAddress.address || "N/A",
+      // Delivery Information - FIXED
+      deliveryName: shippingAddress.full_name || shippingAddress.name || fullName,
+      deliveryAddress: shippingAddress.address_line1 || shippingAddress.address_line_1 || shippingAddress.street || shippingAddress.address || "N/A",
       deliveryPhone: shippingAddress.phone || user.phone || "N/A",
       deliveryNote: order.delivery_note || shippingAddress.note || "",
       
@@ -176,8 +209,8 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       paymentMethod: order.paymentMethod || order.payment_method || "Credit Card",
       paymentData: [
         {
-          paymentType: order.paymentMethod || order.payment_method || "Credit Card",
-          amount: grandTotal.toFixed(2) + ' €'
+          paymentType: order.paymentMethod || order.payment_method || "Credit Card", 
+          amount: this.formatCurrency(grandTotalNum)
         }
       ],
       
@@ -188,25 +221,29 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       },
       
       // Calculated Totals
-      totalExclVat: totalExclVat,
-      totalVat: totalVat,
-      grandTotal: grandTotal,
+      totalExclVat: this.formatCurrency(totalExclVatNum),
+      totalVat: this.formatCurrency(totalVatNum),
+      grandTotal: this.formatCurrency(grandTotalNum),
       
-      // VAT Breakdown (calculated from products)
+      // VAT Breakdown
       vatBreakdown: this.calculateVatBreakdown(products),
       
-      // User reference for fallbacks
-      user: user
+      // Include original data for fallback
+      ...order
     };
+
+    return invoiceData;
   },
 
-  // Calculate VAT breakdown from products
+  // Calculate VAT breakdown from products - FIXED
   calculateVatBreakdown(products) {
     const vatRates = {};
     
     products.forEach(product => {
       const rate = product.vatRate || 20;
-      const base = product.totalExclVat || 0;
+      const quantity = product.qty || 1;
+      const unitPrice = parseFloat(String(product.unitPrice).replace('€', '').replace(',', '.').trim()) || 0;
+      const base = quantity * unitPrice;
       const vatAmount = base * (rate / 100);
       
       if (!vatRates[rate]) {
@@ -219,8 +256,21 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
     return Object.entries(vatRates).map(([rate, amounts]) => ({
       rate: `${parseFloat(rate).toFixed(2)}%`,
-      base: amounts.base.toFixed(2) + ' €',
-      total: amounts.total.toFixed(2) + ' €'
+      base: this.formatCurrency(amounts.base),
+      total: this.formatCurrency(amounts.total)
     }));
+  },
+
+  // Format currency helper
+  formatCurrency(amount) {
+    if (typeof amount === 'string') return amount;
+    if (typeof amount === 'number') {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 2
+      }).format(amount);
+    }
+    return '0.00 €';
   }
 }));
