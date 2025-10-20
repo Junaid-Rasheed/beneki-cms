@@ -142,7 +142,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     const products = [];
     if (totalExclVatNum > 0) {
       products.push({
-        reference: "PROD-001", // Simple reference instead of long documentId
+        reference: "PROD-001",
         name: "Web Hosting Service",
         qty: 1,
         unitPrice: this.formatCurrency(totalExclVatNum),
@@ -156,7 +156,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     const userLastName = user.name || user.lastname || "";
     const fullName = `${userFirstName} ${userLastName}`.trim() || user.username || "Customer";
 
-    // Get addresses dynamically
+    // Get addresses dynamically - with better fallbacks
     const shippingAddress = order.shipping_address || order.shippingAddress || {};
     const billingAddress = order.billing_address || order.billingAddress || {};
 
@@ -164,6 +164,9 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       shipping: shippingAddress,
       billing: billingAddress
     });
+
+    // Extract user address from user fields as fallback
+    const userAddress = this.extractUserAddress(user);
 
     // Build the invoice data object with dynamic data
     const invoiceData = {
@@ -173,10 +176,10 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       invoiceNumber: order.orderNumber || `ORD-${String(order.id).padStart(7, '0')}`,
       invoiceDate: new Date(order.createdAt).toLocaleDateString('en-US'),
       
-      // Customer Information - Dynamic
+      // Customer Information - Dynamic with better fallbacks
       customerCompany: user.accountType === 'Business' ? user.businessName : fullName,
-      customerAddress: this.extractAddress(billingAddress),
-      customerCity: billingAddress.city || this.extractCity(billingAddress) || "N/A", 
+      customerAddress: this.extractAddress(billingAddress) || userAddress || "Address not provided",
+      customerCity: billingAddress.city || this.extractCity(billingAddress) || user.businessRegistrationCountry || "N/A", 
       customerCountry: billingAddress.country || user.businessRegistrationCountry || "France",
       customerVAT: user.vatNumber || "N/A",
       
@@ -184,9 +187,9 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       clientRef: user.documentId || "N/A",
       clientEmail: user.email,
       
-      // Delivery Information - Dynamic
+      // Delivery Information - Dynamic with better fallbacks
       deliveryName: fullName,
-      deliveryAddress: this.extractAddress(shippingAddress) || this.extractAddress(billingAddress) || "Address not provided",
+      deliveryAddress: this.extractAddress(shippingAddress) || this.extractAddress(billingAddress) || userAddress || "Address not provided",
       deliveryPhone: shippingAddress.phone || user.phone || "N/A",
       deliveryNote: order.notes || "",
       
@@ -226,7 +229,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
   // Helper function to extract address from different field structures
   extractAddress(address) {
-    if (!address) return null;
+    if (!address || Object.keys(address).length === 0) return null;
     
     // Try different field naming conventions
     if (address.address) return address.address;
@@ -240,7 +243,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
   // Helper function to extract city information
   extractCity(address) {
-    if (!address) return null;
+    if (!address || Object.keys(address).length === 0) return null;
     
     if (address.city && address.postalCode) {
       return `${address.postalCode} ${address.city}`;
@@ -253,6 +256,21 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     if (address.postal_code) return address.postal_code;
     
     return null;
+  },
+
+  // Extract address from user fields as fallback
+  extractUserAddress(user) {
+    if (user.address) return user.address;
+    if (user.street) return user.street;
+    if (user.location) return user.location;
+    
+    // Check if user has any address-related fields
+    const addressParts = [];
+    if (user.address_line1) addressParts.push(user.address_line1);
+    if (user.city) addressParts.push(user.city);
+    if (user.postalCode) addressParts.push(user.postalCode);
+    
+    return addressParts.length > 0 ? addressParts.join(', ') : null;
   },
 
   // Format currency helper
