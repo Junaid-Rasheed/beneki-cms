@@ -17,7 +17,7 @@ module.exports = async function generateInvoicePDF(order) {
   const black = "#000000";
 
   // ===== HEADER SECTION =====
-  // Company Info (Left)
+  // Company Info (Left) - Could be dynamic if you have company info in Strapi
   doc
     .fontSize(11)
     .fillColor(black)
@@ -70,8 +70,12 @@ module.exports = async function generateInvoicePDF(order) {
     .text(order.deliveryAddress || 'N/A', 35, deliveryY + 38)
     .text(order.deliveryPhone || 'N/A', 35, deliveryY + 51);
 
+  if (order.deliveryNote) {
+    doc.text(`Note: ${order.deliveryNote}`, 35, deliveryY + 64);
+  }
+
   // ===== PRODUCTS TABLE =====
-  const tableStartY = deliveryY + 70;
+  const tableStartY = order.deliveryNote ? deliveryY + 80 : deliveryY + 70;
   let y = tableStartY;
 
   // Column widths (12%, 32%, 10%, 18%, 18%, 10%)
@@ -210,7 +214,7 @@ module.exports = async function generateInvoicePDF(order) {
     .fontSize(8)
     .text("Bank Details", 35, bankY + 5)
     .font("Helvetica")
-    .text("BNP PARIBAS", 35, bankY + 15)
+    .text(order.bankDetails?.bankName || "BNP PARIBAS", 35, bankY + 15)
     .text(`IBAN: ${order.bankDetails?.iban || 'N/A'}`, 35, bankY + 25)
     .text(`BIC: ${order.bankDetails?.bic || 'N/A'}`, 35, bankY + 35);
 
@@ -226,13 +230,13 @@ module.exports = async function generateInvoicePDF(order) {
       { width: 535, align: "justify", lineGap: 1 }
     );
 
-  // ===== LEGAL FOOTER =====
+  // ===== LEGAL FOOTER - Dynamic =====
   const legalFooterY = footerY + 40;
   doc
     .moveTo(30, legalFooterY).lineTo(565, legalFooterY).stroke()
     .fontSize(7)
     .text(
-      "BENEKI SARL / Capital 150 000€ / VAT Number : FR61889408019 / Siret 88940801900020 / APE 4690Z",
+      `BENEKI SARL / Capital ${order.companyLegal?.capital || "150 000€"} / VAT Number : ${order.companyLegal?.vatNumber || "FR61889408019"} / Siret ${order.companyLegal?.siret || "88940801900020"} / APE ${order.companyLegal?.ape || "4690Z"}`,
       30,
       legalFooterY + 5,
       { width: 535, align: "center" }
