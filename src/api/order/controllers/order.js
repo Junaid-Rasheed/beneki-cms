@@ -128,55 +128,62 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   // Transform Strapi order data to PDF format
   transformOrderToInvoiceFormat(order, user) {
     // Use the actual order totals from your data
-    const totalExclVatNum = order.subTotal || 15; // From your data: 15
-    const totalVatNum = order.vat || 3; // From your data: 3
-    const grandTotalNum = order.total || 18; // From your data: 18
+    const totalExclVatNum = order.subTotal || 0;
+    const totalVatNum = order.vat || 0;
+    const grandTotalNum = order.total || 0;
 
     console.log("Using order totals:", { totalExclVatNum, totalVatNum, grandTotalNum });
 
-    // Create product entry that matches the reference image
-    const products = [{
-      reference: "HOSTING-001",
-      name: "Web Hosting Service",
-      qty: 1,
-      unitPrice: this.formatCurrency(totalExclVatNum),
-      totalExclVat: this.formatCurrency(totalExclVatNum),
-      vatRate: 20 // 3/15 = 20% VAT rate
-    }];
+    // Create product entry from actual order data
+    const products = [];
+    if (totalExclVatNum > 0) {
+      products.push({
+        reference: "ORDER-" + (order.documentId || order.id),
+        name: "Order Products",
+        qty: 1,
+        unitPrice: this.formatCurrency(totalExclVatNum),
+        totalExclVat: this.formatCurrency(totalExclVatNum),
+        vatRate: totalExclVatNum > 0 ? Math.round((totalVatNum / totalExclVatNum) * 100) : 20
+      });
+    }
 
-    // Get user names
-    const userFirstName = user.firstName || user.firstname || "daily";
-    const userLastName = user.name || user.lastname || "info";
-    const fullName = `${userFirstName} ${userLastName}`.trim();
+    // Get user names dynamically
+    const userFirstName = user.firstName || user.firstname || "";
+    const userLastName = user.name || user.lastname || "";
+    const fullName = `${userFirstName} ${userLastName}`.trim() || user.username || "Customer";
 
-    // Build the invoice data object matching the reference image
+    // Get addresses dynamically
+    const shippingAddress = order.shipping_address || order.shippingAddress || {};
+    const billingAddress = order.billing_address || order.billingAddress || {};
+
+    // Build the invoice data object with dynamic data
     const invoiceData = {
       id: order.id,
       documentId: order.documentId,
       invoiceNumber: order.orderNumber || `ORD-${String(order.documentId).padStart(7, '0')}`,
       invoiceDate: new Date(order.createdAt).toLocaleDateString('en-US'),
       
-      // Customer Information - like reference image
-      customerCompany: "Alpha", // Hardcoded like reference
-      customerAddress: "w-223",
-      customerCity: "59320 Kahror", 
-      customerCountry: "France",
-      customerVAT: "N/A",
+      // Customer Information - Dynamic
+      customerCompany: user.accountType === 'Business' ? user.businessName : fullName,
+      customerAddress: billingAddress.address || billingAddress.street || billingAddress.address_line1 || "N/A",
+      customerCity: billingAddress.city || "N/A", 
+      customerCountry: billingAddress.country || user.businessRegistrationCountry || "N/A",
+      customerVAT: user.vatNumber || "N/A",
       
-      // Client Reference
-      clientRef: "N/A",
+      // Client Reference - Dynamic
+      clientRef: user.documentId || "N/A",
       clientEmail: user.email,
       
-      // Delivery Information - like reference image
-      deliveryName: "Geoffrey Khan", // Hardcoded like reference
-      deliveryAddress: "w-223",
-      deliveryPhone: "0644871944",
-      deliveryNote: "",
+      // Delivery Information - Dynamic
+      deliveryName: shippingAddress.full_name || shippingAddress.name || fullName,
+      deliveryAddress: shippingAddress.address || shippingAddress.street || shippingAddress.address_line1 || "N/A",
+      deliveryPhone: shippingAddress.phone || user.phone || "N/A",
+      deliveryNote: order.notes || "",
       
-      // Products
+      // Products - Dynamic
       products: products,
       
-      // Payment Information
+      // Payment Information - Dynamic
       paymentMethod: order.paymentMethod || "paypal",
       paymentData: [
         {
@@ -185,10 +192,10 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         }
       ],
       
-      // Bank Details - like reference image
+      // Bank Details - Use your actual bank details or fallback
       bankDetails: {
-        iban: "FR76 1695 8000 0109 8453 4533 296",
-        bic: "ONTORPPXXX"
+        iban: order.bankIban || "FR76 3000 4000 0100 1234 5678 900",
+        bic: order.bankBic || "BNPAFRPP"
       },
       
       // Use the actual order totals
@@ -196,9 +203,9 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       totalVat: this.formatCurrency(totalVatNum),
       grandTotal: this.formatCurrency(grandTotalNum),
       
-      // VAT Breakdown
+      // VAT Breakdown - Dynamic
       vatBreakdown: [{
-        rate: "20.00%",
+        rate: totalExclVatNum > 0 ? `${Math.round((totalVatNum / totalExclVatNum) * 100)}%` : "20%",
         base: this.formatCurrency(totalExclVatNum),
         total: this.formatCurrency(totalVatNum)
       }]

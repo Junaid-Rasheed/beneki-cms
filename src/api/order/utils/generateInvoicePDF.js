@@ -16,7 +16,7 @@ module.exports = async function generateInvoicePDF(order) {
   const green = "#4e5f4b";
   const black = "#000000";
 
-  // ===== HEADER SECTION - Exact like reference image =====
+  // ===== HEADER SECTION =====
   // Company Info (Left)
   doc
     .fontSize(11)
@@ -28,7 +28,7 @@ module.exports = async function generateInvoicePDF(order) {
     .text("www.beneki.net", 30, 114)
     .text("Tel. 03 74 09 81 86", 30, 127);
 
-  // Invoice Info (Right) - Exact positioning like reference
+  // Invoice Info (Right)
   const rightSectionX = 350;
   doc
     .fontSize(14)
@@ -36,22 +36,22 @@ module.exports = async function generateInvoicePDF(order) {
     .text("INVOICE", rightSectionX, 60)
     .fontSize(9)
     .font("Helvetica")
-    .text(`N° ${order.invoiceNumber}`, rightSectionX, 85)
-    .text(`Date : ${order.invoiceDate}`, rightSectionX, 98);
+    .text(`N° ${order.invoiceNumber || 'N/A'}`, rightSectionX, 85)
+    .text(`Date : ${order.invoiceDate || 'N/A'}`, rightSectionX, 98);
 
-  // Customer Info - Exact like reference
+  // Customer Info - Dynamic
   doc
     .font("Helvetica-Bold")
     .fontSize(9)
     .text("Customer Company Name", rightSectionX, 120)
     .font("Helvetica")
-    .text(order.customerCompany, rightSectionX, 133)
-    .text(order.customerAddress, rightSectionX, 146)
-    .text(order.customerCity, rightSectionX, 159)
-    .text(order.customerCountry, rightSectionX, 172)
-    .text(`Client ref : ${order.clientRef}`, rightSectionX, 190)
-    .text(`Email : ${order.clientEmail}`, rightSectionX, 203)
-    .text(`TVA Intracom : ${order.customerVAT}`, rightSectionX, 216);
+    .text(order.customerCompany || 'N/A', rightSectionX, 133)
+    .text(order.customerAddress || 'N/A', rightSectionX, 146)
+    .text(order.customerCity || 'N/A', rightSectionX, 159)
+    .text(order.customerCountry || 'N/A', rightSectionX, 172)
+    .text(`Client ref : ${order.clientRef || 'N/A'}`, rightSectionX, 190)
+    .text(`Email : ${order.clientEmail || 'N/A'}`, rightSectionX, 203)
+    .text(`TVA Intracom : ${order.customerVAT || 'N/A'}`, rightSectionX, 216);
 
   // ===== DELIVERY ADDRESS SECTION =====
   const deliveryY = 250;
@@ -66,9 +66,9 @@ module.exports = async function generateInvoicePDF(order) {
     .fillColor(black)
     .font("Helvetica")
     .fontSize(9)
-    .text(order.deliveryName, 35, deliveryY + 25)
-    .text(order.deliveryAddress, 35, deliveryY + 38)
-    .text(order.deliveryPhone, 35, deliveryY + 51);
+    .text(order.deliveryName || 'N/A', 35, deliveryY + 25)
+    .text(order.deliveryAddress || 'N/A', 35, deliveryY + 38)
+    .text(order.deliveryPhone || 'N/A', 35, deliveryY + 51);
 
   // ===== PRODUCTS TABLE =====
   const tableStartY = deliveryY + 70;
@@ -112,28 +112,38 @@ module.exports = async function generateInvoicePDF(order) {
   y += 15;
   doc.fillColor(black);
 
-  // Table rows
+  // Table rows - Dynamic
   const products = order.products || [];
-  products.forEach((product, index) => {
+  if (products.length === 0) {
+    // Add empty row if no products
     doc.moveTo(30, y).lineTo(565, y).stroke();
-    
     doc
       .font("Helvetica")
       .fontSize(8)
-      .text(product.reference, colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 })
-      .text(product.name, colPositions.product + 4, y + 4, { width: colWidths.product - 8 })
-      .text(String(product.qty), colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 })
-      .text(product.unitPrice, colPositions.price + 4, y + 4, { width: colWidths.price - 8 })
-      .text(product.totalExclVat, colPositions.total + 4, y + 4, { width: colWidths.total - 8 })
-      .text(`${product.vatRate}%`, colPositions.vat + 4, y + 4, { width: colWidths.vat - 8 });
-
+      .text("No products", colPositions.product + 4, y + 4, { width: colWidths.product - 8 });
     y += 15;
-  });
+  } else {
+    products.forEach((product, index) => {
+      doc.moveTo(30, y).lineTo(565, y).stroke();
+      
+      doc
+        .font("Helvetica")
+        .fontSize(8)
+        .text(product.reference || 'N/A', colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 })
+        .text(product.name || 'N/A', colPositions.product + 4, y + 4, { width: colWidths.product - 8 })
+        .text(String(product.qty || 0), colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 })
+        .text(product.unitPrice || '0.00 €', colPositions.price + 4, y + 4, { width: colWidths.price - 8 })
+        .text(product.totalExclVat || '0.00 €', colPositions.total + 4, y + 4, { width: colWidths.total - 8 })
+        .text(`${product.vatRate || 0}%`, colPositions.vat + 4, y + 4, { width: colWidths.vat - 8 });
+
+      y += 15;
+    });
+  }
 
   // Final table bottom line
   doc.moveTo(30, y).lineTo(565, y).stroke();
 
-  // ===== TOTALS SECTION - Exact like reference image =====
+  // ===== TOTALS SECTION =====
   const totalsY = y + 20;
 
   // Payment Type Section (Left)
@@ -152,23 +162,26 @@ module.exports = async function generateInvoicePDF(order) {
   let paymentY = totalsY + 18;
   doc.fillColor(black);
 
-  // Payment row
-  doc
-    .font("Helvetica-Bold")
-    .fontSize(9)
-    .text(order.paymentMethod, paymentSectionX + 10, paymentY + 6)
-    .text(order.paymentData[0].amount, paymentSectionX + paymentSectionWidth - 40, paymentY + 6, { align: "right" });
+  // Payment row - Dynamic
+  const paymentData = order.paymentData || [];
+  if (paymentData.length > 0) {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(9)
+      .text(paymentData[0].paymentType || 'N/A', paymentSectionX + 10, paymentY + 6)
+      .text(paymentData[0].amount || '0.00 €', paymentSectionX + paymentSectionWidth - 40, paymentY + 6, { align: "right" });
+  }
 
-  // Summary Table (Right) - Exact layout like reference
+  // Summary Table (Right) - Dynamic
   const summarySectionX = 307;
   const summarySectionWidth = 258;
 
-  // Summary rows
+  // Summary rows - Dynamic
   const summaryRows = [
-    { label: "TOTAL", value: order.grandTotal, bold: true, bgColor: "#f0f0f0" },
-    { label: "Total VAT EXCL", value: order.totalExclVat, bold: false },
-    { label: "VAT", value: order.totalVat, bold: false },
-    { label: "Total VAT INCL", value: order.grandTotal, bold: true }
+    { label: "TOTAL", value: order.grandTotal || '0.00 €', bold: true, bgColor: "#f0f0f0" },
+    { label: "Total VAT EXCL", value: order.totalExclVat || '0.00 €', bold: false },
+    { label: "VAT", value: order.totalVat || '0.00 €', bold: false },
+    { label: "Total VAT INCL", value: order.grandTotal || '0.00 €', bold: true }
   ];
 
   let summaryY = totalsY;
@@ -198,8 +211,8 @@ module.exports = async function generateInvoicePDF(order) {
     .text("Bank Details", 35, bankY + 5)
     .font("Helvetica")
     .text("BNP PARIBAS", 35, bankY + 15)
-    .text(`IBAN: ${order.bankDetails.iban}`, 35, bankY + 25)
-    .text(`BIC: ${order.bankDetails.bic}`, 35, bankY + 35);
+    .text(`IBAN: ${order.bankDetails?.iban || 'N/A'}`, 35, bankY + 25)
+    .text(`BIC: ${order.bankDetails?.bic || 'N/A'}`, 35, bankY + 35);
 
   // ===== FOOTER TEXT =====
   const footerY = bankY + 45;
