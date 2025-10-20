@@ -59,7 +59,6 @@
 
 
 // @ts-nocheck
-// @ts-nocheck
 "use strict";
 
 const path = require("path");
@@ -131,85 +130,69 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   transformOrderToInvoiceFormat(order, user) {
     console.log("Original order items:", order.items);
     
-    // Calculate products from order items - FIXED
-    const products = (order.items || []).map(item => {
-      const quantity = item.quantity || 1;
-      const unitPrice = item.price || item.unitPrice || 0;
-      const totalExclVat = quantity * unitPrice;
-      const vatRate = item.vatRate || item.taxRate || 20;
-      
-      return {
-        reference: item.sku || item.productId || item.reference || `ITEM-${item.id}`,
-        name: item.name || item.title || "Product",
-        qty: quantity,
-        unitPrice: this.formatCurrency(unitPrice),
-        totalExclVat: this.formatCurrency(totalExclVat),
-        vatRate: vatRate
-      };
-    });
+    // Use the existing order totals since items are not populated
+    const totalExclVatNum = order.subTotal || 0;
+    const totalVatNum = order.vat || 0;
+    const grandTotalNum = order.total || 0;
+
+    console.log("Using order totals:", { totalExclVatNum, totalVatNum, grandTotalNum });
+
+    // Create a generic product entry based on order totals
+    const products = [];
+    if (totalExclVatNum > 0) {
+      products.push({
+        reference: "ORDER-ITEM",
+        name: "Order Products",
+        qty: 1,
+        unitPrice: this.formatCurrency(totalExclVatNum),
+        totalExclVat: this.formatCurrency(totalExclVatNum),
+        vatRate: totalExclVatNum > 0 ? Math.round((totalVatNum / totalExclVatNum) * 100) : 20
+      });
+    }
 
     console.log("Transformed products:", products);
 
-    // Calculate totals - FIXED
-    const totalExclVatNum = products.reduce((sum, product) => {
-      const quantity = product.qty || 1;
-      const unitPrice = parseFloat(String(product.unitPrice).replace('€', '').replace(',', '.').trim()) || 0;
-      return sum + (quantity * unitPrice);
-    }, 0);
-    
-    const totalVatNum = products.reduce((sum, product) => {
-      const quantity = product.qty || 1;
-      const unitPrice = parseFloat(String(product.unitPrice).replace('€', '').replace(',', '.').trim()) || 0;
-      const vatRate = product.vatRate || 20;
-      const productTotal = quantity * unitPrice;
-      return sum + (productTotal * (vatRate / 100));
-    }, 0);
-    
-    const grandTotalNum = totalExclVatNum + totalVatNum;
-
-    console.log("Calculated totals:", { totalExclVatNum, totalVatNum, grandTotalNum });
-
-    // Get addresses - FIXED field access
+    // Get addresses
     const shippingAddress = order.shipping_address || order.shippingAddress || {};
     const billingAddress = order.billing_address || order.billingAddress || {};
     
-    // Get user names - FIXED
-    const userFirstName = user.firstname || user.firstName || user.name || "";
-    const userLastName = user.lastname || user.lastName || "";
-    const fullName = `${userFirstName} ${userLastName}`.trim() || "N/A";
+    // Get user names
+    const userFirstName = user.firstName || user.firstname || "";
+    const userLastName = user.name || user.lastname || "";
+    const fullName = `${userFirstName} ${userLastName}`.trim() || user.username || "N/A";
 
     // Build the invoice data object matching the PDF expected format
     const invoiceData = {
       id: order.id,
       documentId: order.documentId,
-      invoiceNumber: order.invoiceNumber || `ORD-${String(order.documentId).padStart(7, '0')}`,
+      invoiceNumber: order.invoiceNumber || order.orderNumber || `ORD-${String(order.documentId).padStart(7, '0')}`,
       invoiceDate: order.invoiceDate || new Date(order.createdAt || order.created_at).toLocaleDateString('en-US'),
       
-      // Customer Information - FIXED
-      customerCompany: order.companyName || user.company || billingAddress.company || "N/A",
-      customerAddress: billingAddress.address_line1 || billingAddress.address_line_1 || billingAddress.street || billingAddress.address || "N/A",
+      // Customer Information
+      customerCompany: user.accountType === 'Business' ? user.businessName : `${userFirstName} ${userLastName}`.trim(),
+      customerAddress: billingAddress.address || billingAddress.street || "N/A",
       customerCity: billingAddress.city || "N/A", 
-      customerCountry: billingAddress.country || "N/A",
-      customerVAT: order.vatNumber || user.vatNumber || "N/A",
+      customerCountry: billingAddress.country || user.businessRegistrationCountry || "N/A",
+      customerVAT: user.vatNumber || "N/A",
       
       // Client Reference
-      clientRef: order.clientReference || user.customerId || "N/A",
+      clientRef: user.documentId || "N/A",
       clientEmail: user.email,
       
-      // Delivery Information - FIXED
-      deliveryName: shippingAddress.full_name || shippingAddress.name || fullName,
-      deliveryAddress: shippingAddress.address_line1 || shippingAddress.address_line_1 || shippingAddress.street || shippingAddress.address || "N/A",
+      // Delivery Information
+      deliveryName: fullName,
+      deliveryAddress: shippingAddress.address || shippingAddress.street || "N/A",
       deliveryPhone: shippingAddress.phone || user.phone || "N/A",
-      deliveryNote: order.delivery_note || shippingAddress.note || "",
+      deliveryNote: order.notes || "",
       
-      // Products
+      // Products - use the calculated ones
       products: products,
       
       // Payment Information
-      paymentMethod: order.paymentMethod || order.payment_method || "Credit Card",
+      paymentMethod: order.paymentMethod || "paypal",
       paymentData: [
         {
-          paymentType: order.paymentMethod || order.payment_method || "Credit Card", 
+          paymentType: order.paymentMethod || "paypal", 
           amount: this.formatCurrency(grandTotalNum)
         }
       ],
@@ -220,45 +203,23 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         bic: order.bankBic || "BNPAFRPP"
       },
       
-      // Calculated Totals
+      // Use the actual order totals
       totalExclVat: this.formatCurrency(totalExclVatNum),
       totalVat: this.formatCurrency(totalVatNum),
       grandTotal: this.formatCurrency(grandTotalNum),
       
       // VAT Breakdown
-      vatBreakdown: this.calculateVatBreakdown(products),
+      vatBreakdown: [{
+        rate: totalExclVatNum > 0 ? `${Math.round((totalVatNum / totalExclVatNum) * 100)}%` : "20%",
+        base: this.formatCurrency(totalExclVatNum),
+        total: this.formatCurrency(totalVatNum)
+      }],
       
       // Include original data for fallback
       ...order
     };
 
     return invoiceData;
-  },
-
-  // Calculate VAT breakdown from products - FIXED
-  calculateVatBreakdown(products) {
-    const vatRates = {};
-    
-    products.forEach(product => {
-      const rate = product.vatRate || 20;
-      const quantity = product.qty || 1;
-      const unitPrice = parseFloat(String(product.unitPrice).replace('€', '').replace(',', '.').trim()) || 0;
-      const base = quantity * unitPrice;
-      const vatAmount = base * (rate / 100);
-      
-      if (!vatRates[rate]) {
-        vatRates[rate] = { base: 0, total: 0 };
-      }
-      
-      vatRates[rate].base += base;
-      vatRates[rate].total += vatAmount;
-    });
-
-    return Object.entries(vatRates).map(([rate, amounts]) => ({
-      rate: `${parseFloat(rate).toFixed(2)}%`,
-      base: this.formatCurrency(amounts.base),
-      total: this.formatCurrency(amounts.total)
-    }));
   },
 
   // Format currency helper

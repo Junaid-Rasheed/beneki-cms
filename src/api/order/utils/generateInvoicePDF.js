@@ -4,6 +4,17 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports = async function generateInvoicePDF(order) {
+  // If no products but we have totals, create a generic product
+if ((!order.products || order.products.length === 0) && order.total > 0) {
+  order.products = [{
+    reference: "ORDER-ITEM",
+    name: "Order Products",
+    qty: 1,
+    unitPrice: order.totalExclVat || "0.00 €",
+    totalExclVat: order.totalExclVat || "0.00 €",
+    vatRate: 20
+  }];
+}
   // Ensure tmp directory exists
   const tmpDir = path.join(__dirname, "../../tmp");
   if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
