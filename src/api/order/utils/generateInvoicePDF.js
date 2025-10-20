@@ -16,18 +16,19 @@ module.exports = async function generateInvoicePDF(order) {
   const green = "#4e5f4b";
   const black = "#000000";
 
-  // ===== HEADER SECTION - Matching React layout =====
-  // Left Section - Company Info with Logo
+  // ===== HEADER SECTION - Like Image 1 =====
+  // Company Info (Left - 60% width)
   doc
     .fontSize(11)
     .fillColor(black)
-    .text("691 rue Maurice Caullery", 30, 60)
-    .text("59500 Douai", 30, 71)
-    .text("FRANCE", 30, 82)
-    .text("www.beneki.net", 30, 93)
-    .text("Tel. 03 74 09 81 86", 30, 104);
+    .text("BENEKI", 30, 60)
+    .text("691 rue Maurice Caullery", 30, 75)
+    .text("59500 Douai", 30, 88)
+    .text("FRANCE", 30, 101)
+    .text("www.beneki.net", 30, 114)
+    .text("Tel. 03 74 09 81 86", 30, 127);
 
-  // Right Section - Invoice Info
+  // Invoice Info (Right - 35% width)
   const rightSectionX = 350;
   doc
     .fontSize(14)
@@ -35,24 +36,25 @@ module.exports = async function generateInvoicePDF(order) {
     .text("INVOICE", rightSectionX, 60)
     .fontSize(9)
     .font("Helvetica")
-    .text(`N° ${order.invoiceNumber || order.id}`, rightSectionX, 85)
-    .text(`Date : ${order.invoiceDate || new Date(order.createdAt).toLocaleDateString()}`, rightSectionX, 96);
+    .text(`N° ${order.invoiceNumber || `ORD-${String(order.id).padStart(7, '0')}`}`, rightSectionX, 85)
+    .text(`Date : ${order.invoiceDate || new Date(order.createdAt).toLocaleDateString('en-US')}`, rightSectionX, 98);
 
   // Customer Info
   doc
     .font("Helvetica-Bold")
-    .text("Customer Company Name", rightSectionX, 115)
+    .fontSize(9)
+    .text("Customer Company Name", rightSectionX, 120)
     .font("Helvetica")
-    .text(order.customerCompany || order.user?.username || "N/A", rightSectionX, 126)
-    .text(order.customerAddress || "", rightSectionX, 137)
-    .text(order.customerCity || "", rightSectionX, 148)
-    .text(order.customerCountry || "", rightSectionX, 159)
-    .text(`Client ref : ${order.clientRef || ""}`, rightSectionX, 175)
-    .text(`Email : ${order.clientEmail || ""}`, rightSectionX, 186)
-    .text(`TVA Intracom : ${order.customerVAT || "N/A"}`, rightSectionX, 197);
+    .text(order.customerCompany || order.user?.company || "N/A", rightSectionX, 133)
+    .text(order.customerAddress || order.user?.address || "N/A", rightSectionX, 146)
+    .text(order.customerCity || order.user?.city || "N/A", rightSectionX, 159)
+    .text(order.customerCountry || order.user?.country || "N/A", rightSectionX, 172)
+    .text(`Client ref : ${order.clientRef || "N/A"}`, rightSectionX, 190)
+    .text(`Email : ${order.clientEmail || order.user?.email || "N/A"}`, rightSectionX, 203)
+    .text(`TVA Intracom : ${order.customerVAT || "N/A"}`, rightSectionX, 216);
 
-  // ===== DELIVERY ADDRESS SECTION - Like React =====
-  const deliveryY = 220;
+  // ===== DELIVERY ADDRESS SECTION =====
+  const deliveryY = 250;
   doc
     .rect(30, deliveryY, 535, 18)
     .fill(green)
@@ -64,21 +66,21 @@ module.exports = async function generateInvoicePDF(order) {
     .fillColor(black)
     .font("Helvetica")
     .fontSize(9)
-    .text(order.deliveryName || "N/A", 35, deliveryY + 25)
-    .text(order.deliveryAddress || "N/A", 35, deliveryY + 38)
-    .text(order.deliveryPhone || "N/A", 35, deliveryY + 51);
+    .text(order.deliveryName || order.shippingAddress?.name || "N/A", 35, deliveryY + 25)
+    .text(order.deliveryAddress || order.shippingAddress?.address || "N/A", 35, deliveryY + 38)
+    .text(order.deliveryPhone || order.shippingAddress?.phone || "N/A", 35, deliveryY + 51);
 
-  if (order.deliveryNote) {
-    doc.text(`Note: ${order.deliveryNote}`, 35, deliveryY + 64);
+  if (order.deliveryNote || order.shippingAddress?.note) {
+    doc.text(`Note: ${order.deliveryNote || order.shippingAddress?.note}`, 35, deliveryY + 64);
   }
 
-  // ===== PRODUCTS TABLE - Exact column widths like React =====
-  const tableStartY = order.deliveryNote ? deliveryY + 80 : deliveryY + 70;
+  // ===== PRODUCTS TABLE =====
+  const tableStartY = (order.deliveryNote || order.shippingAddress?.note) ? deliveryY + 80 : deliveryY + 70;
   let y = tableStartY;
 
-  // Table header with exact React column widths
+  // Column widths matching React PDF (12%, 32%, 10%, 18%, 18%, 10%)
   const colWidths = {
-    reference: 67, // 12% of 535
+    reference: 64, // 12% of 535
     product: 171,   // 32% of 535
     qty: 54,       // 10% of 535
     price: 96,      // 18% of 535
@@ -114,52 +116,54 @@ module.exports = async function generateInvoicePDF(order) {
   y += 15;
   doc.fillColor(black);
 
-  // Table rows
-  const products = order.products || order.items || [
-    {
-      reference: "B3002ITCAR",
-      name: "Product name + variation",
-      qty: 3,
-      unitPrice: "24.90 €",
-      totalExclVat: "74.70 €",
-      vatRate: 20,
-    },
-    {
-      reference: "B3002ITV",
-      name: "Product name",
-      qty: 1,
-      unitPrice: "48.76 €",
-      totalExclVat: "48.76 €",
-      vatRate: 5.5,
-    },
-  ];
-
-  products.forEach((product, index) => {
-    // Draw horizontal line
+  // Table rows with dynamic data
+  const products = order.products || order.items || [];
+  
+  if (products.length === 0) {
+    // Add empty row if no products
     doc.moveTo(30, y).lineTo(565, y).stroke();
-    
     doc
       .font("Helvetica")
       .fontSize(8)
-      .text(product.reference || "-", colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 })
-      .text(product.name || "-", colPositions.product + 4, y + 4, { width: colWidths.product - 8 })
-      .text(String(product.qty || product.quantity || 0), colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 })
-      .text(product.unitPrice || "-", colPositions.price + 4, y + 4, { width: colWidths.price - 8 })
-      .text(product.totalExclVat || "-", colPositions.total + 4, y + 4, { width: colWidths.total - 8 })
-      .text(`${product.vatRate}%`, colPositions.vat + 4, y + 4, { width: colWidths.vat - 8 });
-
+      .text("No products", colPositions.product + 4, y + 4, { width: colWidths.product - 8 });
     y += 15;
-  });
+  } else {
+    products.forEach((product, index) => {
+      // Draw horizontal line
+      doc.moveTo(30, y).lineTo(565, y).stroke();
+      
+      doc
+        .font("Helvetica")
+        .fontSize(8)
+        .text(product.reference || product.sku || "-", colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 })
+        .text(product.name || product.title || "-", colPositions.product + 4, y + 4, { width: colWidths.product - 8 })
+        .text(String(product.quantity || product.qty || 0), colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 })
+        .text(formatCurrency(product.unitPrice || product.price || 0), colPositions.price + 4, y + 4, { width: colWidths.price - 8 })
+        .text(formatCurrency(product.totalExclVat || (product.quantity * product.price) || 0), colPositions.total + 4, y + 4, { width: colWidths.total - 8 })
+        .text(`${product.vatRate || product.taxRate || 20}%`, colPositions.vat + 4, y + 4, { width: colWidths.vat - 8 });
+
+      y += 15;
+    });
+  }
 
   // Final table bottom line
   doc.moveTo(30, y).lineTo(565, y).stroke();
 
-  // ===== TOTALS SECTION - Matching React layout =====
+  // ===== TOTALS SECTION - Clean layout like Image 1 =====
   const totalsY = y + 20;
 
-  // Payment Type Section (Left)
+  // Calculate totals dynamically
+  const totalExclVat = products.reduce((sum, product) => sum + (product.totalExclVat || (product.quantity * product.price) || 0), 0);
+  const totalVat = products.reduce((sum, product) => {
+    const productTotal = product.totalExclVat || (product.quantity * product.price) || 0;
+    const vatRate = product.vatRate || product.taxRate || 20;
+    return sum + (productTotal * vatRate / 100);
+  }, 0);
+  const grandTotal = totalExclVat + totalVat;
+
+  // Payment Type Section (Left - 48% width)
   const paymentSectionX = 30;
-  const paymentSectionWidth = 257; // ~48% of page width
+  const paymentSectionWidth = 257;
 
   doc
     .rect(paymentSectionX, totalsY, paymentSectionWidth, 18)
@@ -168,13 +172,16 @@ module.exports = async function generateInvoicePDF(order) {
     .fillColor("white")
     .font("Helvetica-Bold")
     .fontSize(10)
-    .text("Payment Type", paymentSectionX + 85, totalsY + 4, { align: "center" });
+    .text("Payment Type", paymentSectionX + (paymentSectionWidth / 2), totalsY + 4, { align: "center" });
 
   let paymentY = totalsY + 18;
   doc.fillColor(black);
 
   const paymentData = order.paymentData || [
-    { paymentType: "Credit Card", amount: "141.08 €" }
+    { 
+      paymentType: order.paymentMethod || "Credit Card", 
+      amount: formatCurrency(grandTotal) 
+    }
   ];
 
   paymentData.forEach((payment, index) => {
@@ -184,40 +191,45 @@ module.exports = async function generateInvoicePDF(order) {
       .text(payment.paymentType, paymentSectionX + 10, paymentY + 6)
       .text(payment.amount, paymentSectionX + paymentSectionWidth - 40, paymentY + 6, { align: "right" });
 
-    // Draw separator line
-    if (index < paymentData.length - 1) {
-      doc.moveTo(paymentSectionX, paymentY + 18).lineTo(paymentSectionX + paymentSectionWidth, paymentY + 18).stroke();
-    }
     paymentY += 18;
   });
 
-  // VAT Breakdown
-  const vatBreakdown = order.vatBreakdown || [
-    { rate: "20.00%", base: "74.70 €", total: "14.94 €" },
-    { rate: "5.50%", base: "48.76 €", total: "2.68 €" }
-  ];
+  // VAT Breakdown (only if multiple VAT rates)
+  const vatRates = {};
+  products.forEach(product => {
+    const rate = product.vatRate || product.taxRate || 20;
+    const productTotal = product.totalExclVat || (product.quantity * product.price) || 0;
+    if (!vatRates[rate]) {
+      vatRates[rate] = { base: 0, total: 0 };
+    }
+    vatRates[rate].base += productTotal;
+    vatRates[rate].total += productTotal * rate / 100;
+  });
 
   const vatStartY = paymentY + 10;
   let vatY = vatStartY;
 
-  vatBreakdown.forEach((vat, index) => {
-    doc
-      .font("Helvetica")
-      .fontSize(8)
-      .text("VAT", paymentSectionX + 10, vatY)
-      .text(vat.rate, paymentSectionX + paymentSectionWidth - 40, vatY, { align: "right" })
-      .text("Base", paymentSectionX + 10, vatY + 10)
-      .text(vat.base, paymentSectionX + paymentSectionWidth - 40, vatY + 10, { align: "right" })
-      .text("Total", paymentSectionX + 10, vatY + 20)
-      .text(vat.total, paymentSectionX + paymentSectionWidth - 40, vatY + 20, { align: "right" });
+  Object.entries(vatRates).forEach(([rate, amounts], index) => {
+    if (Object.keys(vatRates).length > 1) { // Only show breakdown if multiple rates
+      doc
+        .font("Helvetica")
+        .fontSize(8)
+        .text("VAT", paymentSectionX + 10, vatY)
+        .text(`${parseFloat(rate).toFixed(2)}%`, paymentSectionX + paymentSectionWidth - 40, vatY, { align: "right" })
+        .text("Base", paymentSectionX + 10, vatY + 10)
+        .text(formatCurrency(amounts.base), paymentSectionX + paymentSectionWidth - 40, vatY + 10, { align: "right" })
+        .text("Total", paymentSectionX + 10, vatY + 20)
+        .text(formatCurrency(amounts.total), paymentSectionX + paymentSectionWidth - 40, vatY + 20, { align: "right" });
 
-    vatY += 35;
+      vatY += 35;
+    }
   });
 
-  // Summary Table (Right)
+  // Summary Table (Right - 48% width)
   const summarySectionX = 307;
   const summarySectionWidth = 258;
 
+  // TOTAL row with background
   doc
     .rect(summarySectionX, totalsY, summarySectionWidth, 18)
     .fill("#f0f0f0")
@@ -226,17 +238,20 @@ module.exports = async function generateInvoicePDF(order) {
     .font("Helvetica-Bold")
     .fontSize(9)
     .text("TOTAL", summarySectionX + 10, totalsY + 6)
-    .text(order.grandTotal || "141.08 €", summarySectionX + summarySectionWidth - 40, totalsY + 6, { align: "right" });
+    .text(formatCurrency(grandTotal), summarySectionX + summarySectionWidth - 40, totalsY + 6, { align: "right" });
 
   let summaryY = totalsY + 18;
 
   const summaryRows = [
-    { label: "Total VAT EXCL", value: order.totalExclVat || "123.46 €", bold: false },
-    { label: "VAT", value: order.totalVat || "17.62 €", bold: false },
-    { label: "Total VAT INCL", value: order.grandTotal || "141.08 €", bold: true }
+    { label: "Total VAT EXCL", value: formatCurrency(totalExclVat), bold: false },
+    { label: "VAT", value: formatCurrency(totalVat), bold: false },
+    { label: "Total VAT INCL", value: formatCurrency(grandTotal), bold: true }
   ];
 
   summaryRows.forEach((row, index) => {
+    // Draw separator line
+    doc.moveTo(summarySectionX, summaryY).lineTo(summarySectionX + summarySectionWidth, summaryY).stroke();
+    
     const font = row.bold ? "Helvetica-Bold" : "Helvetica";
     doc
       .font(font)
@@ -244,16 +259,13 @@ module.exports = async function generateInvoicePDF(order) {
       .text(row.label, summarySectionX + 10, summaryY + 6)
       .text(row.value, summarySectionX + summarySectionWidth - 40, summaryY + 6, { align: "right" });
 
-    if (index < summaryRows.length - 1) {
-      doc.moveTo(summarySectionX, summaryY + 18).lineTo(summarySectionX + summarySectionWidth, summaryY + 18).stroke();
-    }
     summaryY += 18;
   });
 
   // ===== BANK DETAILS =====
   const bankY = Math.max(vatY, summaryY) + 20;
   doc
-    .rect(30, bankY, 535, 35)
+    .rect(30, bankY, 535, 30)
     .stroke()
     .font("Helvetica-Bold")
     .fontSize(8)
@@ -264,7 +276,7 @@ module.exports = async function generateInvoicePDF(order) {
     .text(`BIC: ${order.bankDetails?.bic || "BNPAFRPP"}`, 35, bankY + 35);
 
   // ===== FOOTER TEXT =====
-  const footerY = bankY + 50;
+  const footerY = bankY + 45;
   doc
     .fontSize(7)
     .fillColor(black)
@@ -302,3 +314,13 @@ module.exports = async function generateInvoicePDF(order) {
 
   return filePath;
 };
+
+// Helper function to format currency
+function formatCurrency(amount) {
+  if (typeof amount === 'string') return amount;
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2
+  }).format(amount);
+}
