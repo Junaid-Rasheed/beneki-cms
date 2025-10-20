@@ -84,8 +84,6 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
           user: true,
           shipping_address: true,
           billing_address: true,
-          company: true,
-          bank_details: true
         },
       });
 
@@ -95,7 +93,6 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
       const user = await strapi.db.query("plugin::users-permissions.user").findOne({
         where: { id: userId },
-        populate: ['address', 'company']
       });
 
       if (!user) {
@@ -155,37 +152,37 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     const userLastName = user.name || user.lastname || "";
     const fullName = `${userFirstName} ${userLastName}`.trim() || user.username || "Customer";
 
-    // Get addresses dynamically - check multiple possible field names
-    const shippingAddress = order.shipping_address || order.shippingAddress || user.shipping_address || {};
-    const billingAddress = order.billing_address || order.billingAddress || user.billing_address || user.address || {};
-    const company = order.company || user.company || {};
+    // Get addresses dynamically - check all possible address fields
+    const shippingAddress = order.shipping_address || order.shippingAddress || {};
+    const billingAddress = order.billing_address || order.billingAddress || {};
 
-    // Get bank details dynamically
-    const bankDetails = order.bank_details || order.bankDetails || company.bank_details || {};
+    console.log("Shipping Address:", shippingAddress);
+    console.log("Billing Address:", billingAddress);
 
     // Build the invoice data object with dynamic data
     const invoiceData = {
       id: order.id,
       documentId: order.documentId,
-      invoiceNumber: order.orderNumber || `ORD-${String(order.documentId).padStart(7, '0')}`,
+      // FIX: Use orderNumber directly instead of documentId
+      invoiceNumber: order.orderNumber || `ORD-${String(order.id).padStart(7, '0')}`,
       invoiceDate: new Date(order.createdAt).toLocaleDateString('en-US'),
       
-      // Customer Information - Dynamic from company or user
-      customerCompany: company.name || user.companyName || (user.accountType === 'Business' ? user.businessName : fullName),
-      customerAddress: this.formatAddress(billingAddress),
-      customerCity: billingAddress.city || company.city || "N/A", 
-      customerCountry: billingAddress.country || company.country || user.businessRegistrationCountry || "N/A",
-      customerVAT: company.vatNumber || user.vatNumber || "N/A",
+      // Customer Information - Use billing address or user info
+      customerCompany: user.accountType === 'Business' ? user.businessName : fullName,
+      customerAddress: this.getAddressLine(billingAddress, 1),
+      customerCity: billingAddress.city || this.getAddressLine(billingAddress, 2) || "N/A", 
+      customerCountry: billingAddress.country || "N/A",
+      customerVAT: user.vatNumber || "N/A",
       
       // Client Reference - Dynamic
-      clientRef: user.customerCode || user.documentId || "N/A",
+      clientRef: user.documentId || "N/A",
       clientEmail: user.email,
       
-      // Delivery Information - Dynamic from shipping address
+      // Delivery Information - Use shipping address or fallback to billing address
       deliveryName: shippingAddress.full_name || shippingAddress.name || fullName,
-      deliveryAddress: this.formatAddress(shippingAddress),
+      deliveryAddress: this.getAddressLine(shippingAddress, 1) || this.getAddressLine(billingAddress, 1) || "N/A",
       deliveryPhone: shippingAddress.phone || user.phone || "N/A",
-      deliveryNote: order.delivery_notes || order.notes || shippingAddress.notes || "",
+      deliveryNote: order.delivery_notes || order.notes || "",
       
       // Products - Dynamic
       products: products,
@@ -199,20 +196,10 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         }
       ],
       
-      // Bank Details - Dynamic from company or order
+      // Bank Details
       bankDetails: {
-        iban: bankDetails.iban || company.iban || "FR76 3000 4000 0100 1234 5678 900",
-        bic: bankDetails.bic || company.bic || "BNPAFRPP",
-        bankName: bankDetails.bankName || company.bankName || "BNP PARIBAS",
-        accountHolder: bankDetails.accountHolder || company.name || "BENEKI"
-      },
-      
-      // Company Legal Information - Dynamic
-      companyLegal: {
-        capital: company.capital || "150 000€",
-        vatNumber: company.vatNumber || "FR61889408019",
-        siret: company.siret || "88940801900020",
-        ape: company.ape || "4690Z"
+        iban: "FR76 3000 4000 0100 1234 5678 900",
+        bic: "BNPAFRPP"
       },
       
       // Use the actual order totals
@@ -231,22 +218,23 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     return invoiceData;
   },
 
-  // Helper function to format address from different field structures
-  formatAddress(address) {
-    if (!address) return "N/A";
+  // Helper function to extract address lines from different field structures
+  getAddressLine(address, lineNumber) {
+    if (!address) return null;
     
-    if (address.street && address.city && address.postalCode) {
-      return `${address.street}, ${address.postalCode} ${address.city}`;
-    } else if (address.address_line1) {
-      const line2 = address.address_line2 ? `, ${address.address_line2}` : '';
-      return `${address.address_line1}${line2}, ${address.postal_code || ''} ${address.city || ''}`.trim();
-    } else if (address.address) {
-      return address.address;
-    } else if (address.street) {
-      return address.street;
+    // Try different field naming conventions
+    if (lineNumber === 1) {
+      return address.address_line1 || address.address_line_1 || address.street || address.address || null;
+    } else if (lineNumber === 2) {
+      const cityPart = address.city || '';
+      const postalPart = address.postalCode || address.postal_code || '';
+      if (cityPart && postalPart) {
+        return `${postalPart} ${cityPart}`;
+      }
+      return cityPart || postalPart || address.address_line2 || address.address_line_2 || null;
     }
     
-    return "N/A";
+    return null;
   },
 
   // Format currency helper
@@ -262,3 +250,11 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     return '0.00 €';
   }
 }));
+
+// Add this right after fetching the order
+console.log("ORDER ADDRESSES:", {
+  shipping_address: order.shipping_address,
+  billing_address: order.billing_address,
+  shippingAddress: order.shippingAddress,
+  billingAddress: order.billingAddress
+});

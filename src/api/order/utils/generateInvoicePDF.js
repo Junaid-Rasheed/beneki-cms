@@ -106,12 +106,16 @@ module.exports = async function generateInvoicePDF(order) {
     .font("Helvetica-Bold")
     .fontSize(8);
 
-  doc.text("Reference", colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 });
-  doc.text("Product", colPositions.product + 4, y + 4, { width: colWidths.product - 8 });
-  doc.text("Qty", colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 });
-  doc.text("Price VAT excluded", colPositions.price + 4, y + 4, { width: colWidths.price - 8 });
-  doc.text("Total VAT excluded", colPositions.total + 4, y + 4, { width: colWidths.total - 8 });
-  doc.text("VAT %", colPositions.vat + 4, y + 4, { width: colWidths.vat - 8 });
+// In the products table section, update the reference display:
+doc
+  .font("Helvetica")
+  .fontSize(8)
+  .text(product.reference?.substring(0, 15) || 'N/A', colPositions.reference + 4, y + 4, { width: colWidths.reference - 8 }) // Limit reference length
+  .text(product.name || 'N/A', colPositions.product + 4, y + 4, { width: colWidths.product - 8 })
+  .text(String(product.qty || 0), colPositions.qty + 4, y + 4, { width: colWidths.qty - 8 })
+  .text(product.unitPrice || '0.00 €', colPositions.price + 4, y + 4, { width: colWidths.price - 8 })
+  .text(product.totalExclVat || '0.00 €', colPositions.total + 4, y + 4, { width: colWidths.total - 8 })
+  .text(`${product.vatRate || 0}%`, colPositions.vat + 4, y + 4, { width: colWidths.vat - 8 });
 
   y += 15;
   doc.fillColor(black);
