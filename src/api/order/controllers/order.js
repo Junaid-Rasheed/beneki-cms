@@ -58,13 +58,14 @@
 
 
 // @ts-nocheck
+// src/api/order/controllers/order.js
 "use strict";
 
-const path = require("path");
-const fs = require("fs");
 const { createCoreController } = require("@strapi/strapi").factories;
-const generateInvoicePDF = require("../utils/generateInvoicePDF");
+const { PDFService } = require("../../../../services/pdfService");
 const sendInvoiceEmail = require("../utils/sendInvoiceEmail");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   async sendInvoice(ctx) {
@@ -106,8 +107,12 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
       console.log("TRANSFORMED INVOICE DATA:", invoiceData);
 
-      // ✅ Generate PDF file with transformed data
-      const pdfPath = await generateInvoicePDF(invoiceData);
+      // ✅ Generate PDF file using shared React-PDF component
+      const tmpDir = path.join(process.cwd(), "tmp");
+      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+      
+      const pdfPath = path.join(tmpDir, `invoice-${order.id}.pdf`);
+      await PDFService.generateAndSaveInvoice(invoiceData, pdfPath);
 
       console.log("PDF PATH:", pdfPath);
       
@@ -125,7 +130,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     }
   },
 
-  // Transform Strapi order data to PDF format
+  // Keep your existing transform method - NO CHANGES NEEDED
   transformOrderToInvoiceFormat(order, user) {
     // Use the actual order totals from your data
     const totalExclVatNum = order.subTotal || 0;

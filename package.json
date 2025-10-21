@@ -13,10 +13,10 @@
     "strapi": "strapi",
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry",
-      "postinstall": "npm install pdfkit --legacy-peer-deps"
-
+    "postinstall": "npm install pdfkit --legacy-peer-deps"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.1",
     "@strapi/design-system": "1.19.0",
     "@strapi/helper-plugin": "^4.25.23",
     "@strapi/plugin-cloud": "5.13.1",
