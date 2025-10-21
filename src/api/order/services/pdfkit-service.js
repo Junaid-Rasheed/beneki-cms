@@ -69,34 +69,42 @@ class PDFKitService {
 
     // ===== DELIVERY ADDRESS SECTION =====
     const deliveryY = 220;
-    doc.rect(50, deliveryY, 495, 60).stroke();
-    doc.fontSize(10).font('Helvetica-Bold')
-       .fillColor('white')
-       .rect(50, deliveryY, 495, 15).fillAndStroke('#4e5f4b', '#4e5f4b')
-       .fillColor('black')
+    doc.rect(50, deliveryY, 495, 40).stroke();
+    
+    // Green header
+    doc.rect(50, deliveryY, 495, 15).fillAndStroke('#4e5f4b', '#4e5f4b');
+    doc.fillColor('white').fontSize(10).font('Helvetica-Bold')
        .text('Delivery address :', 53, deliveryY + 3);
     
-    doc.fontSize(9).font('Helvetica')
+    // Delivery content
+    doc.fillColor('black').fontSize(9).font('Helvetica')
        .text(order.deliveryName || 'N/A', 52, deliveryY + 20)
-       .text(order.deliveryAddress || 'N/A', 52, deliveryY + 32)
-       .text(order.deliveryPhone || 'N/A', 52, deliveryY + 44);
+       .text(order.deliveryAddress || 'N/A', 52, deliveryY + 32);
     
-    if (order.deliveryNote) {
-      doc.text(`Note: ${order.deliveryNote}`, 52, deliveryY + 56);
+    if (order.deliveryPhone && order.deliveryPhone !== 'N/A') {
+      doc.text(order.deliveryPhone, 52, deliveryY + 44);
     }
 
     // ===== PRODUCTS TABLE =====
-    const tableY = deliveryY + 70;
-    
+    const tableY = deliveryY + 50;
+    const colWidths = {
+      reference: 495 * 0.12,    // 12%
+      product: 495 * 0.32,      // 32% 
+      qty: 495 * 0.10,          // 10%
+      price: 495 * 0.18,        // 18%
+      total: 495 * 0.18,        // 18%
+      vat: 495 * 0.10           // 10%
+    };
+
     // Table Header
     doc.rect(50, tableY, 495, 15).fillAndStroke('#4e5f4b', '#4e5f4b');
     doc.fillColor('white').fontSize(8).font('Helvetica-Bold')
        .text('Reference', 52, tableY + 4)
-       .text('Product', 50 + (495 * 0.12) + 2, tableY + 4)
-       .text('Qty', 50 + (495 * 0.44) + 2, tableY + 4)
-       .text('Price VAT Excluded', 50 + (495 * 0.54) + 2, tableY + 4)
-       .text('Total VAT Excluded', 50 + (495 * 0.72) + 2, tableY + 4)
-       .text('VAT %', 50 + (495 * 0.90) + 2, tableY + 4);
+       .text('Product', 50 + colWidths.reference + 2, tableY + 4)
+       .text('Qty', 50 + colWidths.reference + colWidths.product + 2, tableY + 4)
+       .text('Price VAT Excluded', 50 + colWidths.reference + colWidths.product + colWidths.qty + 2, tableY + 4)
+       .text('Total VAT Excluded', 50 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + 2, tableY + 4)
+       .text('VAT %', 50 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + colWidths.total + 2, tableY + 4);
 
     doc.fillColor('black');
     let currentY = tableY + 15;
@@ -111,11 +119,11 @@ class PDFKitService {
       doc.rect(50, currentY, 495, 20).stroke();
       doc.fontSize(8).font('Helvetica')
          .text(product.reference || 'N/A', 52, currentY + 6)
-         .text(product.name || 'N/A', 50 + (495 * 0.12) + 2, currentY + 6)
-         .text(product.qty?.toString() || '0', 50 + (495 * 0.44) + 2, currentY + 6)
-         .text(product.unitPrice || '0.00 €', 50 + (495 * 0.54) + 2, currentY + 6)
-         .text(product.totalExclVat || '0.00 €', 50 + (495 * 0.72) + 2, currentY + 6)
-         .text(`${product.vatRate || 0}%`, 50 + (495 * 0.90) + 2, currentY + 6);
+         .text(product.name || 'N/A', 50 + colWidths.reference + 2, currentY + 6)
+         .text(product.qty?.toString() || '0', 50 + colWidths.reference + colWidths.product + 2, currentY + 6)
+         .text(product.unitPrice || '0.00 €', 50 + colWidths.reference + colWidths.product + colWidths.qty + 2, currentY + 6)
+         .text(product.totalExclVat || '0.00 €', 50 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + 2, currentY + 6)
+         .text(`${product.vatRate || 0}%`, 50 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + colWidths.total + 2, currentY + 6);
       
       currentY += 20;
     });
@@ -129,68 +137,76 @@ class PDFKitService {
 
     // ===== TOTALS SECTION =====
     const totalsY = currentY + 20;
-    
+    const sectionWidth = 240;
+    const gap = 15;
+
     // Payment Type Section (Left)
-    const paymentSectionWidth = 240;
-    doc.rect(50, totalsY, paymentSectionWidth, 120).stroke();
+    doc.rect(50, totalsY, sectionWidth, 100).stroke();
     
     // Payment Title
-    doc.rect(50, totalsY, paymentSectionWidth, 15).fillAndStroke('#4e5f4b', '#4e5f4b');
+    doc.rect(50, totalsY, sectionWidth, 15).fillAndStroke('#4e5f4b', '#4e5f4b');
     doc.fillColor('white').fontSize(10).font('Helvetica-Bold')
-       .text('Payment Type', 50, totalsY + 3, { width: paymentSectionWidth, align: 'center' });
+       .text('Payment Type', 50, totalsY + 3, { width: sectionWidth, align: 'center' });
     
     doc.fillColor('black');
-    let paymentY = totalsY + 15;
     
     // Payment Methods
+    let paymentY = totalsY + 15;
     paymentData.forEach((payment, index) => {
-      doc.rect(50, paymentY, paymentSectionWidth, 20).stroke();
+      doc.rect(50, paymentY, sectionWidth, 25).stroke();
       doc.fontSize(9).font('Helvetica-Bold')
-         .text(payment.paymentType || 'N/A', 56, paymentY + 6)
-         .text(payment.amount || '0.00 €', 50 + paymentSectionWidth - 56, paymentY + 6, { align: 'right' });
-      paymentY += 20;
+         .text(payment.paymentType || 'N/A', 56, paymentY + 8)
+         .text(payment.amount || '0.00 €', 50 + sectionWidth - 56, paymentY + 8, { align: 'right' });
+      paymentY += 25;
     });
 
     // VAT Breakdown
-    const vatStartY = paymentY;
-    vatBreakdown.forEach((vat, index) => {
-      doc.fontSize(8).font('Helvetica')
-         .text('VAT', 56, vatStartY + (index * 20) + 6)
-         .text(vat.rate || '0%', 50 + paymentSectionWidth - 56, vatStartY + (index * 20) + 6, { align: 'right' })
-         .text('Base', 56, vatStartY + (index * 20) + 18)
-         .text(vat.base || '0.00 €', 50 + paymentSectionWidth - 56, vatStartY + (index * 20) + 18, { align: 'right' })
-         .text('Total', 56, vatStartY + (index * 20) + 30)
-         .text(vat.total || '0.00 €', 50 + paymentSectionWidth - 56, vatStartY + (index * 20) + 30, { align: 'right' });
-    });
+    if (vatBreakdown.length > 0) {
+      const vatY = paymentY;
+      vatBreakdown.forEach((vat, index) => {
+        doc.fontSize(8).font('Helvetica')
+           .text('VAT', 56, vatY + 5)
+           .text(vat.rate || '0%', 50 + sectionWidth - 56, vatY + 5, { align: 'right' })
+           .text('Base', 56, vatY + 15)
+           .text(vat.base || '0.00 €', 50 + sectionWidth - 56, vatY + 15, { align: 'right' })
+           .text('Total', 56, vatY + 25)
+           .text(vat.total || '0.00 €', 50 + sectionWidth - 56, vatY + 25, { align: 'right' });
+      });
+    }
 
     // Summary Table (Right)
-    const summaryX = 50 + paymentSectionWidth + 15;
-    const summaryWidth = 240;
-    doc.rect(summaryX, totalsY, summaryWidth, 120).stroke();
+    const summaryX = 50 + sectionWidth + gap;
+    doc.rect(summaryX, totalsY, sectionWidth, 100).stroke();
     
     // Summary Rows
-    doc.rect(summaryX, totalsY, summaryWidth, 30).fillAndStroke('#f0f0f0', '#000');
+    const rowHeight = 25;
+    
+    // TOTAL row (gray background)
+    doc.rect(summaryX, totalsY, sectionWidth, rowHeight).fillAndStroke('#f0f0f0', '#000');
     doc.fontSize(9).font('Helvetica-Bold')
-       .text('TOTAL', summaryX + 6, totalsY + 10)
-       .text(order.grandTotal || '0.00 €', summaryX + summaryWidth - 6, totalsY + 10, { align: 'right' });
+       .text('TOTAL', summaryX + 6, totalsY + 8)
+       .text(order.grandTotal || '0.00 €', summaryX + sectionWidth - 6, totalsY + 8, { align: 'right' });
     
-    doc.rect(summaryX, totalsY + 30, summaryWidth, 30).stroke();
+    // Total VAT EXCL
+    doc.rect(summaryX, totalsY + rowHeight, sectionWidth, rowHeight).stroke();
     doc.font('Helvetica')
-       .text('Total VAT EXCL', summaryX + 6, totalsY + 40)
-       .text(order.totalExclVat || '0.00 €', summaryX + summaryWidth - 6, totalsY + 40, { align: 'right' });
+       .text('Total VAT EXCL', summaryX + 6, totalsY + rowHeight + 8)
+       .text(order.totalExclVat || '0.00 €', summaryX + sectionWidth - 6, totalsY + rowHeight + 8, { align: 'right' });
     
-    doc.rect(summaryX, totalsY + 60, summaryWidth, 30).stroke();
-    doc.text('VAT', summaryX + 6, totalsY + 70)
-       .text(order.totalVat || '0.00 €', summaryX + summaryWidth - 6, totalsY + 70, { align: 'right' });
+    // VAT
+    doc.rect(summaryX, totalsY + (rowHeight * 2), sectionWidth, rowHeight).stroke();
+    doc.text('VAT', summaryX + 6, totalsY + (rowHeight * 2) + 8)
+       .text(order.totalVat || '0.00 €', summaryX + sectionWidth - 6, totalsY + (rowHeight * 2) + 8, { align: 'right' });
     
-    doc.rect(summaryX, totalsY + 90, summaryWidth, 30).stroke();
+    // Total VAT INCL
+    doc.rect(summaryX, totalsY + (rowHeight * 3), sectionWidth, rowHeight).stroke();
     doc.font('Helvetica-Bold')
-       .text('Total VAT INCL', summaryX + 6, totalsY + 100)
-       .text(order.grandTotal || '0.00 €', summaryX + summaryWidth - 6, totalsY + 100, { align: 'right' });
+       .text('Total VAT INCL', summaryX + 6, totalsY + (rowHeight * 3) + 8)
+       .text(order.grandTotal || '0.00 €', summaryX + sectionWidth - 6, totalsY + (rowHeight * 3) + 8, { align: 'right' });
 
     // ===== BANK DETAILS =====
-    const bankY = totalsY + 140;
-    doc.rect(50, bankY, 495, 40).stroke();
+    const bankY = totalsY + 120;
+    doc.rect(50, bankY, 495, 30).stroke();
     doc.fontSize(8).font('Helvetica-Bold')
        .text('Bank Details', 52, bankY + 5);
     
@@ -198,16 +214,16 @@ class PDFKitService {
        .text('BNP PARIBAS', 52, bankY + 15);
     doc.font('Helvetica')
        .text(`IBAN: ${order.bankDetails?.iban || 'FR76 3000 4000 0100 1234 5678 900'}`, 52, bankY + 25)
-       .text(`BIC: ${order.bankDetails?.bic || 'BNPAFRPP'}`, 52, bankY + 35);
+       .text(`BIC: ${order.bankDetails?.bic || 'BNPAFRPP'}`, 200, bankY + 25);
 
     // ===== FOOTER TEXT =====
-    const footerY = bankY + 50;
+    const footerY = bankY + 40;
     doc.fontSize(7)
        .text('BENEKI conserve la propriété pleine et entière des marchandises jusqu\'au complet paiement du prix suivant la loi 80.335 du 12 mai 1980. Pas d\'escompte pour paiement anticipé. En cas de paiement hors délai, une pénalité égale à trois fois le taux de l\'intérêt légal sera appliquée, ainsi qu\'une indemnité forfaitaire de 40 €uros pour frais de recouvrement L-411-6 du Code de Commerce. Les conditions générales de ventes applicables sont disponibles sur notre site www.beneki.net', 
-             50, footerY, { width: 495, align: 'justify' });
+             50, footerY, { width: 495, align: 'justify', lineGap: 1 });
 
     // ===== LEGAL FOOTER =====
-    const legalY = footerY + 40;
+    const legalY = footerY + 35;
     doc.moveTo(50, legalY).lineTo(545, legalY).stroke();
     doc.fontSize(7)
        .text('BENEKI SARL / Capital 150 000€ / VAT Number : FR61889408019 / Siret 88940801900020 / APE 4690Z', 

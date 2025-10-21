@@ -221,92 +221,91 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     }
   },
 
-  transformOrderToInvoiceFormat(order, user) {
-    const totalExclVatNum = parseFloat(order.subTotal) || 0;
-    const totalVatNum = parseFloat(order.vat) || 0;
-    const grandTotalNum = parseFloat(order.total) || 0;
+ transformOrderToInvoiceFormat(order, user) {
+  const totalExclVatNum = parseFloat(order.subTotal) || 0;
+  const totalVatNum = parseFloat(order.vat) || 0;
+  const grandTotalNum = parseFloat(order.total) || 0;
 
-    console.log("💰 Order Totals:", { 
-      subTotal: totalExclVatNum, 
-      vat: totalVatNum, 
-      total: grandTotalNum 
-    });
+  console.log("💰 Order Totals:", { 
+    subTotal: totalExclVatNum, 
+    vat: totalVatNum, 
+    total: grandTotalNum 
+  });
 
-    // ✅ Handle empty products array
-    const products = [];
-    if (totalExclVatNum > 0) {
-      products.push({
-        reference: "PROD-001",
-        name: "Web Hosting Service",
-        qty: 1,
-        unitPrice: this.formatCurrency(totalExclVatNum),
-        totalExclVat: this.formatCurrency(totalExclVatNum),
-        vatRate: totalExclVatNum > 0 ? Math.round((totalVatNum / totalExclVatNum) * 100) : 20
-      });
-    }
+  // ✅ FIXED: Create proper product data
+  const products = [{
+    reference: "HOSTING-001",
+    name: "Web Hosting Service",
+    qty: 1,
+    unitPrice: this.formatCurrency(totalExclVatNum),
+    totalExclVat: this.formatCurrency(totalExclVatNum),
+    vatRate: totalExclVatNum > 0 ? Math.round((totalVatNum / totalExclVatNum) * 100) : 20
+  }];
 
-    const userFirstName = user.firstName || user.firstname || "";
-    const userLastName = user.name || user.lastname || "";
-    const fullName = `${userFirstName} ${userLastName}`.trim() || user.username || "Customer";
+  const userFirstName = user.firstName || user.firstname || "";
+  const userLastName = user.name || user.lastname || "";
+  const fullName = `${userFirstName} ${userLastName}`.trim() || user.username || "Customer";
 
-    const shippingAddress = order.shipping_address || order.shippingAddress || {};
-    const billingAddress = order.billing_address || order.billingAddress || {};
+  const shippingAddress = order.shipping_address || order.shippingAddress || {};
+  const billingAddress = order.billing_address || order.billingAddress || {};
 
-    console.log("🏠 Address Data:", {
-      shipping: shippingAddress,
-      billing: billingAddress
-    });
+  console.log("🏠 Address Data:", {
+    shipping: shippingAddress,
+    billing: billingAddress
+  });
 
-    const userAddress = this.extractUserAddress(user);
+  const userAddress = this.extractUserAddress(user);
 
-    const invoiceData = {
-      id: order.id,
-      documentId: order.documentId,
-      invoiceNumber: order.orderNumber || `ORD-${String(order.id).padStart(7, '0')}`,
-      invoiceDate: new Date(order.createdAt || new Date()).toLocaleDateString('en-US'),
-      
-      customerCompany: user.accountType === 'Business' ? user.businessName : fullName,
-      customerAddress: this.extractAddress(billingAddress) || userAddress || "Address not provided",
-      customerCity: billingAddress.city || this.extractCity(billingAddress) || user.businessRegistrationCountry || "N/A", 
-      customerCountry: billingAddress.country || user.businessRegistrationCountry || "France",
-      customerVAT: user.vatNumber || "N/A",
-      
-      clientRef: user.documentId || "N/A",
-      clientEmail: user.email,
-      
-      deliveryName: fullName,
-      deliveryAddress: this.extractAddress(shippingAddress) || this.extractAddress(billingAddress) || userAddress || "Address not provided",
-      deliveryPhone: shippingAddress.phone || user.phone || "N/A",
-      deliveryNote: order.notes || "",
-      
-      products: products,
-      
-      paymentMethod: order.paymentMethod || "paypal",
-      paymentData: [
-        {
-          paymentType: order.paymentMethod || "paypal", 
-          amount: this.formatCurrency(grandTotalNum)
-        }
-      ],
-      
-      bankDetails: {
-        iban: "FR76 3000 4000 0100 1234 5678 900",
-        bic: "BNPAFRPP"
-      },
-      
-      totalExclVat: this.formatCurrency(totalExclVatNum),
-      totalVat: this.formatCurrency(totalVatNum),
-      grandTotal: this.formatCurrency(grandTotalNum),
-      
-      vatBreakdown: [{
-        rate: totalExclVatNum > 0 ? `${Math.round((totalVatNum / totalExclVatNum) * 100)}%` : "20%",
-        base: this.formatCurrency(totalExclVatNum),
-        total: this.formatCurrency(totalVatNum)
-      }]
-    };
+  // ✅ FIXED: Create proper invoice data structure
+  const invoiceData = {
+    invoiceNumber: order.orderNumber || `ORD-${String(order.id).padStart(7, '0')}`,
+    invoiceDate: new Date(order.createdAt || new Date()).toLocaleDateString('en-US'),
+    
+    customerCompany: user.accountType === 'Business' ? user.businessName : fullName,
+    customerAddress: this.extractAddress(billingAddress) || userAddress || "Address not provided",
+    customerCity: billingAddress.city || this.extractCity(billingAddress) || "N/A", 
+    customerCountry: billingAddress.country || "France",
+    customerVAT: user.vatNumber || "N/A",
+    
+    clientRef: user.documentId || "N/A",
+    clientEmail: user.email,
+    
+    deliveryName: fullName,
+    deliveryAddress: this.extractAddress(shippingAddress) || this.extractAddress(billingAddress) || userAddress || "Address not provided",
+    deliveryPhone: shippingAddress.phone || user.phone || "N/A",
+    deliveryNote: order.notes || "",
+    
+    products: products,
+    
+    // ✅ FIXED: Proper payment data structure
+    paymentData: [
+      {
+        paymentType: order.paymentMethod?.toUpperCase() || "PAYPAL", 
+        amount: this.formatCurrency(grandTotalNum)
+      }
+    ],
+    
+    bankDetails: {
+      iban: "FR76 3000 4000 0100 1234 5678 900",
+      bic: "BNPAFRPP"
+    },
+    
+    totalExclVat: this.formatCurrency(totalExclVatNum),
+    totalVat: this.formatCurrency(totalVatNum),
+    grandTotal: this.formatCurrency(grandTotalNum),
+    
+    // ✅ FIXED: Proper VAT breakdown structure
+    vatBreakdown: [{
+      paymentType: 'BANK Transfer',
+      rate: totalExclVatNum > 0 ? `${Math.round((totalVatNum / totalExclVatNum) * 100)}%` : "20%",
+      base: this.formatCurrency(totalExclVatNum),
+      total: this.formatCurrency(totalVatNum)
+    }]
+  };
 
-    return invoiceData;
-  },
+  console.log("📊 Final Invoice Data:", invoiceData);
+  return invoiceData;
+},
 
   extractAddress(address) {
     if (!address || Object.keys(address).length === 0) return null;
