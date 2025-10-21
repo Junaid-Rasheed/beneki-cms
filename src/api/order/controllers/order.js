@@ -62,7 +62,7 @@
 "use strict";
 
 const { createCoreController } = require("@strapi/strapi").factories;
-const { PDFService } = require("../../../../services/pdfService");
+const { PDFService } = require("../services/pdfService");
 const sendInvoiceEmail = require("../utils/sendInvoiceEmail");
 const fs = require("fs");
 const path = require("path");
