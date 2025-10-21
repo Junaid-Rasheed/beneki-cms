@@ -58,7 +58,7 @@
 
 
 // @ts-nocheck
-// src/api/order/controllers/order.js - UPDATED
+// src/api/order/controllers/order.js - UPDATED FOR AUTH
 "use strict";
 
 const { createCoreController } = require("@strapi/strapi").factories;
@@ -70,19 +70,28 @@ const path = require("path");
 module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   async sendInvoice(ctx) {
     console.log('=== SEND INVOICE ENDPOINT CALLED ===');
+    console.log('Authenticated user:', ctx.state.user);
     console.log('Request body:', ctx.request.body);
     
     try {
-      const { orderId, userId } = ctx.request.body;
-      console.log('Received orderId:', orderId, 'userId:', userId);
+      // Get authenticated user from context
+      const authenticatedUser = ctx.state.user;
+      
+      if (!authenticatedUser) {
+        console.log('No authenticated user found');
+        return ctx.unauthorized("You must be logged in to send invoices");
+      }
 
-      if (!orderId || !userId) {
-        console.log('Missing orderId or userId');
-        return ctx.badRequest("Missing orderId or userId");
+      const { orderId } = ctx.request.body;
+      console.log('Received orderId:', orderId);
+
+      if (!orderId) {
+        console.log('Missing orderId');
+        return ctx.badRequest("Missing orderId");
       }
 
       console.log('Fetching order from database...');
-      // ✅ Fetch order and user info from DB
+      // ✅ Fetch order from DB
       const order = await strapi.db.query("api::order.order").findOne({
         where: { documentId: orderId },
         populate: { 
@@ -99,20 +108,16 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       }
       console.log('Order found:', order.id);
 
-      console.log('Fetching user from database...');
-      const user = await strapi.db.query("plugin::users-permissions.user").findOne({
-        where: { id: userId },
-      });
-
-      if (!user) {
-        console.log('User not found for id:', userId);
-        return ctx.notFound("User not found");
+      // Verify the order belongs to the authenticated user
+      if (order.user && order.user.id !== authenticatedUser.id) {
+        console.log('User does not have permission for this order');
+        console.log('Order user ID:', order.user?.id, 'Authenticated user ID:', authenticatedUser.id);
+        return ctx.forbidden("You don't have permission to access this order");
       }
-      console.log('User found:', user.email);
 
       // ✅ Transform Strapi data to match PDF expected format
       console.log('Transforming order data...');
-      const invoiceData = this.transformOrderToInvoiceFormat(order, user);
+      const invoiceData = this.transformOrderToInvoiceFormat(order, authenticatedUser);
       console.log('Transformed invoice number:', invoiceData.invoiceNumber);
 
       // ✅ Generate PDF file using shared React-PDF component
@@ -130,8 +135,8 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       console.log('PDF generated successfully');
 
       // ✅ Send email with attachment
-      console.log('Sending email to:', user.email);
-      await sendInvoiceEmail(user.email, order, pdfPath);
+      console.log('Sending email to:', authenticatedUser.email);
+      await sendInvoiceEmail(authenticatedUser.email, order, pdfPath);
       console.log('Email sent successfully');
 
       // ✅ Clean up PDF file
@@ -178,12 +183,12 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       });
     }
 
-    // Get user names dynamically
+    // Get user names from authenticated user
     const userFirstName = user.firstName || user.firstname || "";
     const userLastName = user.name || user.lastname || "";
     const fullName = `${userFirstName} ${userLastName}`.trim() || user.username || "Customer";
 
-    // Get addresses dynamically - with better fallbacks
+    // Get addresses from order or user
     const shippingAddress = order.shipping_address || order.shippingAddress || {};
     const billingAddress = order.billing_address || order.billingAddress || {};
 
@@ -192,38 +197,34 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       billing: billingAddress
     });
 
-    // Extract user address from user fields as fallback
-    const userAddress = this.extractUserAddress(user);
-
-    // Build the invoice data object with dynamic data
+    // Build the invoice data object
     const invoiceData = {
       id: order.id,
       documentId: order.documentId,
-      // FIXED: Use orderNumber for invoice number
       invoiceNumber: order.orderNumber || `ORD-${String(order.id).padStart(7, '0')}`,
       invoiceDate: new Date(order.createdAt || new Date()).toLocaleDateString('en-US'),
       
-      // Customer Information - Dynamic with better fallbacks
-      customerCompany: user.accountType === 'Business' ? user.businessName : fullName,
-      customerAddress: this.extractAddress(billingAddress) || userAddress || "Address not provided",
-      customerCity: billingAddress.city || this.extractCity(billingAddress) || user.businessRegistrationCountry || "N/A", 
+      // Customer Information
+      customerCompany: user.accountType === 'Business' ? (user.businessName || fullName) : fullName,
+      customerAddress: this.extractAddress(billingAddress) || this.extractUserAddress(user) || "Address not provided",
+      customerCity: billingAddress.city || this.extractCity(billingAddress) || (user.businessRegistrationCountry || "N/A"), 
       customerCountry: billingAddress.country || user.businessRegistrationCountry || "France",
       customerVAT: user.vatNumber || "N/A",
       
-      // Client Reference - Dynamic
-      clientRef: user.documentId || "N/A",
+      // Client Reference
+      clientRef: user.documentId || user.id.toString() || "N/A",
       clientEmail: user.email,
       
-      // Delivery Information - Dynamic with better fallbacks
+      // Delivery Information
       deliveryName: fullName,
-      deliveryAddress: this.extractAddress(shippingAddress) || this.extractAddress(billingAddress) || userAddress || "Address not provided",
+      deliveryAddress: this.extractAddress(shippingAddress) || this.extractAddress(billingAddress) || this.extractUserAddress(user) || "Address not provided",
       deliveryPhone: shippingAddress.phone || user.phone || "N/A",
       deliveryNote: order.notes || "",
       
-      // Products - Dynamic
+      // Products
       products: products,
       
-      // Payment Information - Dynamic
+      // Payment Information
       paymentMethod: order.paymentMethod || "paypal",
       paymentData: [
         {
@@ -238,12 +239,12 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         bic: "BNPAFRPP"
       },
       
-      // Use the actual order totals
+      // Totals
       totalExclVat: this.formatCurrency(totalExclVatNum),
       totalVat: this.formatCurrency(totalVatNum),
       grandTotal: this.formatCurrency(grandTotalNum),
       
-      // VAT Breakdown - Dynamic
+      // VAT Breakdown
       vatBreakdown: [{
         rate: totalExclVatNum > 0 ? `${Math.round((totalVatNum / totalExclVatNum) * 100)}%` : "20%",
         base: this.formatCurrency(totalExclVatNum),

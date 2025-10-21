@@ -1,11 +1,9 @@
-// src/services/pdfService.js
+// src/services/pdfService.js - OPTIMIZED
 "use strict";
 
 // @ts-ignore
 const { pdf, Document, Page, Text, View, Image, StyleSheet } = require('@react-pdf/renderer');
 const React = require('react');
-// @ts-ignore
-const path = require('path');
 
 // Reuse the exact same styles from your frontend component
 const styles = StyleSheet.create({
@@ -189,7 +187,6 @@ const styles = StyleSheet.create({
 const InvoicePDF = ({ order }) => {
   const products = order.products || [];
   const paymentData = order.paymentData || [];
-  // @ts-ignore
   const vatBreakdown = order.vatBreakdown || [];
 
   return React.createElement(Document, {},
@@ -273,6 +270,25 @@ const InvoicePDF = ({ order }) => {
               React.createElement(Text, { style: styles.paymentTypeLabel }, payment.paymentType),
               React.createElement(Text, { style: styles.paymentTypeAmount }, payment.amount)
             )
+          ),
+          // Add VAT Breakdown if needed
+          vatBreakdown.length > 0 && React.createElement(View, { style: styles.vatBreakdown },
+            vatBreakdown.map((vat, index) =>
+              React.createElement(View, { key: index },
+                React.createElement(View, { style: styles.vatRow },
+                  React.createElement(Text, {}, "VAT"),
+                  React.createElement(Text, {}, vat.rate)
+                ),
+                React.createElement(View, { style: styles.vatRow },
+                  React.createElement(Text, {}, "Base"),
+                  React.createElement(Text, {}, vat.base)
+                ),
+                React.createElement(View, { style: styles.vatRow },
+                  React.createElement(Text, {}, "Total"),
+                  React.createElement(Text, {}, vat.total)
+                )
+              )
+            )
           )
         ),
         React.createElement(View, { style: styles.summaryTable },
@@ -320,36 +336,57 @@ const InvoicePDF = ({ order }) => {
   );
 };
 
-// SIMPLE WORKING VERSION - Use this if above doesn't work
+// Enhanced PDFService with better error handling
 class PDFService {
   static async generateInvoicePDF(orderData) {
     return new Promise((resolve, reject) => {
       try {
-        console.log('Generating PDF for order:', orderData.invoiceNumber);
+        console.log('📄 Generating PDF for order:', orderData.invoiceNumber);
         
         const invoiceDocument = InvoicePDF({ order: orderData });
         const stream = pdf(invoiceDocument);
         
         const chunks = [];
         
-        // @ts-ignore
-        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-        // @ts-ignore
-        stream.on('end', () => resolve(Buffer.concat(chunks)));
-        // @ts-ignore
-        stream.on('error', reject);
+        stream.on('data', (chunk) => {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        });
+        
+        stream.on('end', () => {
+          try {
+            const pdfBuffer = Buffer.concat(chunks);
+            console.log('✅ PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+            resolve(pdfBuffer);
+          } catch (error) {
+            console.error('❌ Error creating buffer from chunks:', error);
+            reject(error);
+          }
+        });
+        
+        stream.on('error', (error) => {
+          console.error('❌ PDF stream error:', error);
+          reject(error);
+        });
         
       } catch (error) {
+        console.error('❌ PDF generation setup error:', error);
         reject(error);
       }
     });
   }
 
   static async generateAndSaveInvoice(orderData, filePath) {
-    const fs = require('fs').promises;
-    const pdfBuffer = await this.generateInvoicePDF(orderData);
-    await fs.writeFile(filePath, pdfBuffer);
-    return filePath;
+    try {
+      const fs = require('fs').promises;
+      console.log('💾 Saving PDF to:', filePath);
+      const pdfBuffer = await this.generateInvoicePDF(orderData);
+      await fs.writeFile(filePath, pdfBuffer);
+      console.log('✅ PDF saved successfully');
+      return filePath;
+    } catch (error) {
+      console.error('❌ Error saving PDF:', error);
+      throw error;
+    }
   }
 }
 

@@ -5,7 +5,7 @@ module.exports = {
       path: "/orders/send-invoice",
       handler: "order.sendInvoice",
       config: {
-        auth: false, // change to true if you want to require login
+        auth: true, // change to true if you want to require login
       },
     },
   ],
