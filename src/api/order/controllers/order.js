@@ -58,7 +58,7 @@
 
 
 // @ts-nocheck
-// src/api/order/controllers/order.js - FIXED
+// @ts-nocheck
 "use strict";
 
 const { createCoreController } = require("@strapi/strapi").factories;
@@ -67,82 +67,52 @@ const sendInvoiceEmail = require("../utils/sendInvoiceEmail");
 const fs = require("fs");
 const path = require("path");
 
+// Add request tracking to prevent duplicates
+const pendingRequests = new Map();
+
 module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   async sendInvoice(ctx) {
     console.log('🎯 SEND INVOICE ENDPOINT HIT!');
     console.log('📝 Method:', ctx.method);
     console.log('🔗 URL:', ctx.url);
     console.log('📦 Request Body:', ctx.request.body);
-    console.log('👤 User:', ctx.state.user);
-    console.log('🔑 Headers:', ctx.headers);
     
+    // ✅ Handle CORS preflight requests
+    if (ctx.method === 'OPTIONS') {
+      ctx.set('Access-Control-Allow-Origin', '*');
+      ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      ctx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      return ctx.send({}, 204);
+    }
+
     try {
       const { orderId, userId } = ctx.request.body;
       console.log('📨 Received orderId:', orderId, 'userId:', userId);
 
+      // ✅ Validate required fields
       if (!orderId || !userId) {
         console.log('❌ Missing orderId or userId');
         return ctx.badRequest("Missing orderId or userId");
       }
 
-      console.log('🔍 Fetching order from database...');
-      const order = await strapi.db.query("api::order.order").findOne({
-        where: { documentId: orderId },
-        populate: { 
-          items: true, 
-          user: true,
-          shipping_address: true,
-          billing_address: true,
-        },
-      });
-
-      if (!order) {
-        console.log('❌ Order not found for documentId:', orderId);
-        return ctx.notFound("Order not found");
+      // ✅ Create request key to prevent duplicate processing
+      const requestKey = `${orderId}-${userId}`;
+      if (pendingRequests.has(requestKey)) {
+        console.log('🔄 Request already in progress, returning existing promise');
+        return await pendingRequests.get(requestKey);
       }
-      console.log('✅ Order found:', order.id);
 
-      console.log('🔍 Fetching user from database...');
-      const user = await strapi.db.query("plugin::users-permissions.user").findOne({
-        where: { id: userId },
-      });
+      // ✅ Create promise for this request
+      const requestPromise = this.processInvoiceRequest(orderId, userId, ctx);
+      pendingRequests.set(requestKey, requestPromise);
 
-      if (!user) {
-        console.log('❌ User not found for id:', userId);
-        return ctx.notFound("User not found");
+      try {
+        const result = await requestPromise;
+        return result;
+      } finally {
+        // ✅ Clean up request tracking
+        pendingRequests.delete(requestKey);
       }
-      console.log('✅ User found:', user.email);
-
-      console.log('🔄 Transforming order data...');
-      const invoiceData = this.transformOrderToInvoiceFormat(order, user);
-      console.log('✅ Transformed invoice number:', invoiceData.invoiceNumber);
-
-      console.log('📄 Generating PDF...');
-      const tmpDir = path.join(process.cwd(), "tmp");
-      if (!fs.existsSync(tmpDir)) {
-        console.log('📁 Creating tmp directory...');
-        fs.mkdirSync(tmpDir, { recursive: true });
-      }
-      
-      const pdfPath = path.join(tmpDir, `invoice-${order.id}.pdf`);
-      console.log('📁 PDF path:', pdfPath);
-      
-      await PDFService.generateAndSaveInvoice(invoiceData, pdfPath);
-      console.log('✅ PDF generated successfully');
-
-      console.log('📧 Sending email to:', user.email);
-      await sendInvoiceEmail(user.email, order, pdfPath);
-      console.log('✅ Email sent successfully');
-
-      console.log('🧹 Cleaning up PDF file...');
-      fs.unlinkSync(pdfPath);
-
-      console.log('🎉 INVOICE PROCESS COMPLETED SUCCESSFULLY');
-      return ctx.send({ 
-        success: true, 
-        message: "Invoice sent successfully",
-        invoiceNumber: invoiceData.invoiceNumber
-      });
 
     } catch (err) {
       console.error("💥 ERROR IN SEND INVOICE:");
@@ -152,10 +122,96 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     }
   },
 
+  async processInvoiceRequest(orderId, userId, ctx) {
+    console.log('🔍 Fetching order from database...');
+    const order = await strapi.db.query("api::order.order").findOne({
+      where: { documentId: orderId },
+      populate: { 
+        items: true, 
+        user: true,
+        shipping_address: true,
+        billing_address: true,
+      },
+    });
+
+    if (!order) {
+      console.log('❌ Order not found for documentId:', orderId);
+      return ctx.notFound("Order not found");
+    }
+    console.log('✅ Order found:', order.id);
+
+    console.log('🔍 Fetching user from database...');
+    const user = await strapi.db.query("plugin::users-permissions.user").findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      console.log('❌ User not found for id:', userId);
+      return ctx.notFound("User not found");
+    }
+    console.log('✅ User found:', user.email);
+
+    // ✅ Validate order has required data
+    if (!order.subTotal || !order.total) {
+      console.log('❌ Order missing financial data:', {
+        subTotal: order.subTotal,
+        total: order.total
+      });
+      return ctx.badRequest("Order missing financial data");
+    }
+
+    console.log('🔄 Transforming order data...');
+    const invoiceData = this.transformOrderToInvoiceFormat(order, user);
+    console.log('✅ Transformed invoice number:', invoiceData.invoiceNumber);
+
+    console.log('📄 Generating PDF...');
+    const tmpDir = path.join(process.cwd(), "tmp");
+    if (!fs.existsSync(tmpDir)) {
+      console.log('📁 Creating tmp directory...');
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
+    
+    const pdfPath = path.join(tmpDir, `invoice-${order.id}.pdf`);
+    console.log('📁 PDF path:', pdfPath);
+    
+    try {
+      await PDFService.generateAndSaveInvoice(invoiceData, pdfPath);
+      console.log('✅ PDF generated successfully');
+
+      console.log('📧 Sending email to:', user.email);
+      await sendInvoiceEmail(user.email, order, pdfPath);
+      console.log('✅ Email sent successfully');
+
+      console.log('🧹 Cleaning up PDF file...');
+      if (fs.existsSync(pdfPath)) {
+        fs.unlinkSync(pdfPath);
+      }
+
+      console.log('🎉 INVOICE PROCESS COMPLETED SUCCESSFULLY');
+      return ctx.send({ 
+        success: true, 
+        message: "Invoice sent successfully",
+        invoiceNumber: invoiceData.invoiceNumber
+      });
+
+    } catch (pdfError) {
+      console.error('❌ PDF/Email processing error:', pdfError);
+      // Clean up PDF file if it exists
+      if (fs.existsSync(pdfPath)) {
+        try {
+          fs.unlinkSync(pdfPath);
+        } catch (cleanupError) {
+          console.error('❌ Error cleaning up PDF:', cleanupError);
+        }
+      }
+      throw pdfError;
+    }
+  },
+
   transformOrderToInvoiceFormat(order, user) {
-    const totalExclVatNum = order.subTotal || 0;
-    const totalVatNum = order.vat || 0;
-    const grandTotalNum = order.total || 0;
+    const totalExclVatNum = parseFloat(order.subTotal) || 0;
+    const totalVatNum = parseFloat(order.vat) || 0;
+    const grandTotalNum = parseFloat(order.total) || 0;
 
     console.log("💰 Order Totals:", { 
       subTotal: totalExclVatNum, 
@@ -163,6 +219,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       total: grandTotalNum 
     });
 
+    // ✅ Handle empty products array
     const products = [];
     if (totalExclVatNum > 0) {
       products.push({
@@ -241,6 +298,8 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   extractAddress(address) {
     if (!address || Object.keys(address).length === 0) return null;
     
+    if (typeof address === 'string') return address;
+    
     if (address.address) return address.address;
     if (address.street) return address.street;
     if (address.address_line1) return address.address_line1;
@@ -252,6 +311,8 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
   extractCity(address) {
     if (!address || Object.keys(address).length === 0) return null;
+    
+    if (typeof address === 'string') return address;
     
     if (address.city && address.postalCode) {
       return `${address.postalCode} ${address.city}`;
@@ -280,7 +341,12 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   },
 
   formatCurrency(amount) {
-    if (typeof amount === 'string') return amount;
+    if (typeof amount === 'string') {
+      const num = parseFloat(amount);
+      if (isNaN(num)) return '0.00 €';
+      amount = num;
+    }
+    
     if (typeof amount === 'number') {
       return new Intl.NumberFormat('fr-FR', {
         style: 'currency',
