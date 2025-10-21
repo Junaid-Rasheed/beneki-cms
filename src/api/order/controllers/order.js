@@ -72,11 +72,23 @@ const pendingRequests = new Map();
 
 module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   async sendInvoice(ctx) {
+      console.log('🎯 SEND INVOICE ENDPOINT HIT!');
+  console.log('📦 Request Body:', ctx.request.body);
     console.log('🎯 SEND INVOICE ENDPOINT HIT!');
     console.log('📝 Method:', ctx.method);
     console.log('🔗 URL:', ctx.url);
     console.log('📦 Request Body:', ctx.request.body);
-    
+      // ✅ TEMPORARY: Immediate response to test if endpoint works
+  if (ctx.method === 'POST') {
+    console.log('✅ Immediate test response sent');
+    return ctx.send({ 
+      success: true, 
+      message: "Endpoint working!",
+      test: true,
+      received: ctx.request.body
+    });
+  }
+  
     // ✅ Handle CORS preflight requests
     if (ctx.method === 'OPTIONS') {
       ctx.set('Access-Control-Allow-Origin', '*');
