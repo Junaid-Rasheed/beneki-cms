@@ -58,7 +58,7 @@
 
 
 // @ts-nocheck
-// src/api/order/controllers/order.js
+// src/api/order/controllers/order.js - UPDATED
 "use strict";
 
 const { createCoreController } = require("@strapi/strapi").factories;
@@ -69,13 +69,19 @@ const path = require("path");
 
 module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   async sendInvoice(ctx) {
+    console.log('=== SEND INVOICE ENDPOINT CALLED ===');
+    console.log('Request body:', ctx.request.body);
+    
     try {
       const { orderId, userId } = ctx.request.body;
+      console.log('Received orderId:', orderId, 'userId:', userId);
 
       if (!orderId || !userId) {
+        console.log('Missing orderId or userId');
         return ctx.badRequest("Missing orderId or userId");
       }
 
+      console.log('Fetching order from database...');
       // ✅ Fetch order and user info from DB
       const order = await strapi.db.query("api::order.order").findOne({
         where: { documentId: orderId },
@@ -88,49 +94,65 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       });
 
       if (!order) {
+        console.log('Order not found for documentId:', orderId);
         return ctx.notFound("Order not found");
       }
+      console.log('Order found:', order.id);
 
+      console.log('Fetching user from database...');
       const user = await strapi.db.query("plugin::users-permissions.user").findOne({
         where: { id: userId },
       });
 
       if (!user) {
+        console.log('User not found for id:', userId);
         return ctx.notFound("User not found");
       }
-
-      console.log("ORDER DATA:", order);
-      console.log("USER DATA:", user);
+      console.log('User found:', user.email);
 
       // ✅ Transform Strapi data to match PDF expected format
+      console.log('Transforming order data...');
       const invoiceData = this.transformOrderToInvoiceFormat(order, user);
-
-      console.log("TRANSFORMED INVOICE DATA:", invoiceData);
+      console.log('Transformed invoice number:', invoiceData.invoiceNumber);
 
       // ✅ Generate PDF file using shared React-PDF component
+      console.log('Generating PDF...');
       const tmpDir = path.join(process.cwd(), "tmp");
-      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+      if (!fs.existsSync(tmpDir)) {
+        console.log('Creating tmp directory...');
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
       
       const pdfPath = path.join(tmpDir, `invoice-${order.id}.pdf`);
-      await PDFService.generateAndSaveInvoice(invoiceData, pdfPath);
-
-      console.log("PDF PATH:", pdfPath);
+      console.log('PDF path:', pdfPath);
       
-      // ✅ Send email with attachment
-      await sendInvoiceEmail(user.email, order, pdfPath);
-      console.log("PDF Sent Successfully");
+      await PDFService.generateAndSaveInvoice(invoiceData, pdfPath);
+      console.log('PDF generated successfully');
 
-      // ✅ Clean up PDF file (optional)
+      // ✅ Send email with attachment
+      console.log('Sending email to:', user.email);
+      await sendInvoiceEmail(user.email, order, pdfPath);
+      console.log('Email sent successfully');
+
+      // ✅ Clean up PDF file
+      console.log('Cleaning up PDF file...');
       fs.unlinkSync(pdfPath);
 
-      return ctx.send({ success: true, message: "Invoice sent successfully" });
+      console.log('=== INVOICE PROCESS COMPLETED SUCCESSFULLY ===');
+      return ctx.send({ 
+        success: true, 
+        message: "Invoice sent successfully",
+        invoiceNumber: invoiceData.invoiceNumber
+      });
+
     } catch (err) {
-      console.error("Error sending invoice:", err);
-      return ctx.internalServerError("Failed to send invoice");
+      console.error("=== ERROR IN SEND INVOICE ===");
+      console.error("Error details:", err);
+      console.error("Error stack:", err.stack);
+      return ctx.internalServerError("Failed to send invoice: " + err.message);
     }
   },
 
-  // Keep your existing transform method - NO CHANGES NEEDED
   transformOrderToInvoiceFormat(order, user) {
     // Use the actual order totals from your data
     const totalExclVatNum = order.subTotal || 0;
@@ -179,7 +201,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
       documentId: order.documentId,
       // FIXED: Use orderNumber for invoice number
       invoiceNumber: order.orderNumber || `ORD-${String(order.id).padStart(7, '0')}`,
-      invoiceDate: new Date(order.createdAt).toLocaleDateString('en-US'),
+      invoiceDate: new Date(order.createdAt || new Date()).toLocaleDateString('en-US'),
       
       // Customer Information - Dynamic with better fallbacks
       customerCompany: user.accountType === 'Business' ? user.businessName : fullName,
