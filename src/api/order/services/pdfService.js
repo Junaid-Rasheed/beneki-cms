@@ -1,12 +1,13 @@
-// src/services/pdfService.js - OPTIMIZED
+// src/services/pdfService.js - FIXED
+
+// @ts-nocheck
 "use strict";
 
-// @ts-ignore
 const { pdf, Document, Page, Text, View, Image, StyleSheet } = require('@react-pdf/renderer');
 const React = require('react');
 
-// Reuse the exact same styles from your frontend component
 const styles = StyleSheet.create({
+  // ... keep your existing styles (they look good)
   page: {
     flexDirection: "column",
     backgroundColor: "#FFFFFF",
@@ -183,160 +184,175 @@ const styles = StyleSheet.create({
   },
 });
 
-// Simple InvoicePDF component
+// FIXED: Simple InvoicePDF component with proper Text wrapping
 const InvoicePDF = ({ order }) => {
   const products = order.products || [];
   const paymentData = order.paymentData || [];
   const vatBreakdown = order.vatBreakdown || [];
 
-  return React.createElement(Document, {},
-    React.createElement(Page, { size: "A4", style: styles.page },
-      // Header
-      React.createElement(View, { style: styles.header },
-        React.createElement(View, { style: styles.leftSection },
-          React.createElement(View, { style: styles.companyAddress },
-            React.createElement(Text, {}, "691 rue Maurice Caullery"),
-            React.createElement(Text, {}, "59500 Douai"),
-            React.createElement(Text, {}, "FRANCE"),
-            React.createElement(Text, {}, "www.beneki.net"),
-            React.createElement(Text, {}, "Tel. 03 74 09 81 86")
-          )
-        ),
-        React.createElement(View, { style: styles.rightSection },
-          React.createElement(Text, { style: styles.invoiceTitle }, "INVOICE"),
-          React.createElement(View, { style: styles.invoiceInfo },
-            React.createElement(Text, {}, `N° ${order.invoiceNumber}`),
-            React.createElement(Text, {}, `Date : ${order.invoiceDate}`)
-          ),
-          React.createElement(View, { style: styles.customerInfo },
-            React.createElement(Text, { style: styles.bold }, "Customer Company Name"),
-            React.createElement(Text, {}, order.customerCompany),
-            React.createElement(Text, {}, order.customerAddress),
-            React.createElement(Text, {}, order.customerCity),
-            React.createElement(Text, {}, order.customerCountry)
-          ),
-          React.createElement(View, { style: styles.invoiceInfo },
-            React.createElement(Text, {}, `Client ref : ${order.clientRef}`),
-            React.createElement(Text, {}, `Email : ${order.clientEmail}`),
-            React.createElement(Text, {}, `TVA Intracom : ${order.customerVAT || "N/A"}`)
-          )
-        )
-      ),
+  return React.createElement(Document, {}, 
+    React.createElement(Page, { size: "A4", style: styles.page }, [
+      // Page number
+      React.createElement(Text, { key: "pageInfo", style: styles.pageInfo }, "Page 1/1"),
 
-      // Delivery Address
-      React.createElement(View, { style: styles.section },
-        React.createElement(Text, { style: styles.sectionTitle }, "Delivery address :"),
-        React.createElement(View, { style: styles.addressBox },
-          React.createElement(Text, {}, order.deliveryName),
-          React.createElement(Text, {}, order.deliveryAddress),
-          React.createElement(Text, {}, order.deliveryPhone),
-          order.deliveryNote && React.createElement(Text, {}, `Note: ${order.deliveryNote}`)
-        )
-      ),
+      // Header Section
+      React.createElement(View, { key: "header", style: styles.header }, [
+        // Left Section
+        React.createElement(View, { key: "leftSection", style: styles.leftSection }, [
+          React.createElement(View, { key: "companyAddress", style: styles.companyAddress }, [
+            React.createElement(Text, { key: "addr1" }, "691 rue Maurice Caullery"),
+            React.createElement(Text, { key: "addr2" }, "59500 Douai"),
+            React.createElement(Text, { key: "addr3" }, "FRANCE"),
+            React.createElement(Text, { key: "website" }, "www.beneki.net"),
+            React.createElement(Text, { key: "phone" }, "Tel. 03 74 09 81 86")
+          ])
+        ]),
+
+        // Right Section
+        React.createElement(View, { key: "rightSection", style: styles.rightSection }, [
+          React.createElement(Text, { key: "invoiceTitle", style: styles.invoiceTitle }, "INVOICE"),
+          React.createElement(View, { key: "invoiceInfo1", style: styles.invoiceInfo }, [
+            React.createElement(Text, { key: "invNum" }, `N° ${order.invoiceNumber}`),
+            React.createElement(Text, { key: "invDate" }, `Date : ${order.invoiceDate}`)
+          ]),
+          React.createElement(View, { key: "customerInfo", style: styles.customerInfo }, [
+            React.createElement(Text, { key: "custLabel", style: styles.bold }, "Customer Company Name"),
+            React.createElement(Text, { key: "custCompany" }, order.customerCompany || "N/A"),
+            React.createElement(Text, { key: "custAddr" }, order.customerAddress || "N/A"),
+            React.createElement(Text, { key: "custCity" }, order.customerCity || "N/A"),
+            React.createElement(Text, { key: "custCountry" }, order.customerCountry || "N/A")
+          ]),
+          React.createElement(View, { key: "invoiceInfo2", style: styles.invoiceInfo }, [
+            React.createElement(Text, { key: "clientRef" }, `Client ref : ${order.clientRef || "N/A"}`),
+            React.createElement(Text, { key: "clientEmail" }, `Email : ${order.clientEmail || "N/A"}`),
+            React.createElement(Text, { key: "clientVAT" }, `TVA Intracom : ${order.customerVAT || "N/A"}`)
+          ])
+        ])
+      ]),
+
+      // Delivery Address Section
+      React.createElement(View, { key: "deliverySection", style: styles.section }, [
+        React.createElement(Text, { key: "deliveryTitle", style: styles.sectionTitle }, "Delivery address :"),
+        React.createElement(View, { key: "addressBox", style: styles.addressBox }, [
+          React.createElement(Text, { key: "delName" }, order.deliveryName || "N/A"),
+          React.createElement(Text, { key: "delAddr" }, order.deliveryAddress || "N/A"),
+          React.createElement(Text, { key: "delPhone" }, order.deliveryPhone || "N/A"),
+          order.deliveryNote ? React.createElement(Text, { key: "delNote" }, `Note: ${order.deliveryNote}`) : null
+        ])
+      ]),
 
       // Products Table
-      React.createElement(View, { style: styles.section },
-        React.createElement(View, { style: styles.table },
+      React.createElement(View, { key: "productsSection", style: styles.section }, [
+        React.createElement(View, { key: "table", style: styles.table }, [
           // Table Header
-          React.createElement(View, { style: styles.tableRow },
-            React.createElement(Text, { style: [styles.tableHeader, styles.colReference] }, "Reference"),
-            React.createElement(Text, { style: [styles.tableHeader, styles.colProduct] }, "Product"),
-            React.createElement(Text, { style: [styles.tableHeader, styles.colQty] }, "Qty"),
-            React.createElement(Text, { style: [styles.tableHeader, styles.colPrice] }, "Price VAT Excluded"),
-            React.createElement(Text, { style: [styles.tableHeader, styles.colTotal] }, "Total VAT Excluded"),
-            React.createElement(Text, { style: [styles.tableHeader, styles.colVatPercent] }, "VAT %")
-          ),
+          React.createElement(View, { key: "tableHeader", style: styles.tableRow }, [
+            React.createElement(Text, { key: "refHeader", style: [styles.tableHeader, styles.colReference] }, "Reference"),
+            React.createElement(Text, { key: "prodHeader", style: [styles.tableHeader, styles.colProduct] }, "Product"),
+            React.createElement(Text, { key: "qtyHeader", style: [styles.tableHeader, styles.colQty] }, "Qty"),
+            React.createElement(Text, { key: "priceHeader", style: [styles.tableHeader, styles.colPrice] }, "Price VAT Excluded"),
+            React.createElement(Text, { key: "totalHeader", style: [styles.tableHeader, styles.colTotal] }, "Total VAT Excluded"),
+            React.createElement(Text, { key: "vatHeader", style: [styles.tableHeader, styles.colVatPercent] }, "VAT %")
+          ]),
 
-          // Table Rows
-          products.map((product, index) =>
-            React.createElement(View, { key: index, style: styles.tableRow },
-              React.createElement(Text, { style: [styles.tableCell, styles.colReference] }, product.reference),
-              React.createElement(Text, { style: [styles.tableCell, styles.colProduct] }, product.name),
-              React.createElement(Text, { style: [styles.tableCell, styles.colQty] }, product.qty),
-              React.createElement(Text, { style: [styles.tableCell, styles.colPrice] }, product.unitPrice),
-              React.createElement(Text, { style: [styles.tableCell, styles.colTotal] }, product.totalExclVat),
-              React.createElement(Text, { style: [styles.tableCell, styles.colVatPercent] }, `${product.vatRate}%`)
-            )
-          )
-        )
-      ),
+          // Table Rows - FIXED: Check for empty products array
+          products.length > 0 ? products.map((product, index) =>
+            React.createElement(View, { key: `product-${index}`, style: styles.tableRow }, [
+              React.createElement(Text, { key: "ref", style: [styles.tableCell, styles.colReference] }, product.reference || "N/A"),
+              React.createElement(Text, { key: "name", style: [styles.tableCell, styles.colProduct] }, product.name || "N/A"),
+              React.createElement(Text, { key: "qty", style: [styles.tableCell, styles.colQty] }, product.qty || "0"),
+              React.createElement(Text, { key: "price", style: [styles.tableCell, styles.colPrice] }, product.unitPrice || "0.00 €"),
+              React.createElement(Text, { key: "total", style: [styles.tableCell, styles.colTotal] }, product.totalExclVat || "0.00 €"),
+              React.createElement(Text, { key: "vat", style: [styles.tableCell, styles.colVatPercent] }, `${product.vatRate || 0}%`)
+            ])
+          ) : React.createElement(View, { key: "no-products", style: styles.tableRow }, [
+            React.createElement(Text, { key: "empty", style: [styles.tableCell, styles.colProduct] }, "No products")
+          ])
+        ])
+      ]),
 
       // Totals Section
-      React.createElement(View, { style: styles.totalsSection },
-        React.createElement(View, { style: styles.paymentSection },
-          React.createElement(Text, { style: styles.paymentTitle }, "Payment Type"),
-          paymentData.map((payment, index) =>
-            React.createElement(View, { key: index, style: styles.paymentTypeRow },
-              React.createElement(Text, { style: styles.paymentTypeLabel }, payment.paymentType),
-              React.createElement(Text, { style: styles.paymentTypeAmount }, payment.amount)
-            )
-          ),
-          // Add VAT Breakdown if needed
-          vatBreakdown.length > 0 && React.createElement(View, { style: styles.vatBreakdown },
+      React.createElement(View, { key: "totalsSection", style: styles.totalsSection }, [
+        // Payment Type Section
+        React.createElement(View, { key: "paymentSection", style: styles.paymentSection }, [
+          React.createElement(Text, { key: "paymentTitle", style: styles.paymentTitle }, "Payment Type"),
+          // FIXED: Check for empty payment data
+          paymentData.length > 0 ? paymentData.map((payment, index) =>
+            React.createElement(View, { key: `payment-${index}`, style: styles.paymentTypeRow }, [
+              React.createElement(Text, { key: "type", style: styles.paymentTypeLabel }, payment.paymentType || "N/A"),
+              React.createElement(Text, { key: "amount", style: styles.paymentTypeAmount }, payment.amount || "0.00 €")
+            ])
+          ) : React.createElement(View, { key: "no-payment", style: styles.paymentTypeRow }, [
+            React.createElement(Text, { key: "type", style: styles.paymentTypeLabel }, "No payment data"),
+            React.createElement(Text, { key: "amount", style: styles.paymentTypeAmount }, "0.00 €")
+          ]),
+          
+          // VAT Breakdown - FIXED: Only render if has data
+          vatBreakdown.length > 0 ? React.createElement(View, { key: "vatBreakdown", style: styles.vatBreakdown },
             vatBreakdown.map((vat, index) =>
-              React.createElement(View, { key: index },
-                React.createElement(View, { style: styles.vatRow },
-                  React.createElement(Text, {}, "VAT"),
-                  React.createElement(Text, {}, vat.rate)
-                ),
-                React.createElement(View, { style: styles.vatRow },
-                  React.createElement(Text, {}, "Base"),
-                  React.createElement(Text, {}, vat.base)
-                ),
-                React.createElement(View, { style: styles.vatRow },
-                  React.createElement(Text, {}, "Total"),
-                  React.createElement(Text, {}, vat.total)
-                )
-              )
+              React.createElement(View, { key: `vat-${index}` }, [
+                React.createElement(View, { key: "rate", style: styles.vatRow }, [
+                  React.createElement(Text, { key: "label1" }, "VAT"),
+                  React.createElement(Text, { key: "value1" }, vat.rate || "0%")
+                ]),
+                React.createElement(View, { key: "base", style: styles.vatRow }, [
+                  React.createElement(Text, { key: "label2" }, "Base"),
+                  React.createElement(Text, { key: "value2" }, vat.base || "0.00 €")
+                ]),
+                React.createElement(View, { key: "total", style: styles.vatRow }, [
+                  React.createElement(Text, { key: "label3" }, "Total"),
+                  React.createElement(Text, { key: "value3" }, vat.total || "0.00 €")
+                ])
+              ])
             )
-          )
-        ),
-        React.createElement(View, { style: styles.summaryTable },
-          React.createElement(View, { style: [styles.summaryRowBold, { backgroundColor: "#f0f0f0" }] },
-            React.createElement(Text, {}, "TOTAL"),
-            React.createElement(Text, {}, order.grandTotal || "141.08 €")
-          ),
-          React.createElement(View, { style: styles.summaryRow },
-            React.createElement(Text, {}, "Total VAT EXCL"),
-            React.createElement(Text, {}, order.totalExclVat || "123.46 €")
-          ),
-          React.createElement(View, { style: styles.summaryRow },
-            React.createElement(Text, {}, "VAT"),
-            React.createElement(Text, {}, order.totalVat || "17.62 €")
-          ),
-          React.createElement(View, { style: [styles.summaryRowBold, { borderBottom: "none" }] },
-            React.createElement(Text, {}, "Total VAT INCL"),
-            React.createElement(Text, {}, order.grandTotal || "141.08 €")
-          )
-        )
-      ),
+          ) : null
+        ]),
+
+        // Summary Table
+        React.createElement(View, { key: "summaryTable", style: styles.summaryTable }, [
+          React.createElement(View, { key: "totalRow", style: [styles.summaryRowBold, { backgroundColor: "#f0f0f0" }] }, [
+            React.createElement(Text, { key: "label1" }, "TOTAL"),
+            React.createElement(Text, { key: "value1" }, order.grandTotal || "0.00 €")
+          ]),
+          React.createElement(View, { key: "exclRow", style: styles.summaryRow }, [
+            React.createElement(Text, { key: "label2" }, "Total VAT EXCL"),
+            React.createElement(Text, { key: "value2" }, order.totalExclVat || "0.00 €")
+          ]),
+          React.createElement(View, { key: "vatRow", style: styles.summaryRow }, [
+            React.createElement(Text, { key: "label3" }, "VAT"),
+            React.createElement(Text, { key: "value3" }, order.totalVat || "0.00 €")
+          ]),
+          React.createElement(View, { key: "inclRow", style: [styles.summaryRowBold, { borderBottom: "none" }] }, [
+            React.createElement(Text, { key: "label4" }, "Total VAT INCL"),
+            React.createElement(Text, { key: "value4" }, order.grandTotal || "0.00 €")
+          ])
+        ])
+      ]),
 
       // Bank Details
-      React.createElement(View, { style: styles.bankDetails },
-        React.createElement(Text, { style: styles.bankTitle }, "Bank Details"),
-        React.createElement(Text, { style: styles.bold }, "BNP PARIBAS"),
-        React.createElement(Text, {}, `IBAN: ${order.bankDetails?.iban || "FR76 3000 4000 0100 1234 5678 900"}`),
-        React.createElement(Text, {}, `BIC: ${order.bankDetails?.bic || "BNPAFRPP"}`)
-      ),
+      React.createElement(View, { key: "bankDetails", style: styles.bankDetails }, [
+        React.createElement(Text, { key: "bankTitle", style: styles.bankTitle }, "Bank Details"),
+        React.createElement(Text, { key: "bankName", style: styles.bold }, "BNP PARIBAS"),
+        React.createElement(Text, { key: "iban" }, `IBAN: ${order.bankDetails?.iban || "FR76 3000 4000 0100 1234 5678 900"}`),
+        React.createElement(Text, { key: "bic" }, `BIC: ${order.bankDetails?.bic || "BNPAFRPP"}`)
+      ]),
 
-      // Footer
-      React.createElement(View, { style: styles.footer },
-        React.createElement(Text, {},
+      // Footer Text
+      React.createElement(View, { key: "footer", style: styles.footer }, [
+        React.createElement(Text, { key: "footerText" },
           "BENEKI conserve la propriété pleine et entière des marchandises jusqu'au complet paiement du prix suivant la loi 80.335 du 12 mai 1980. Pas d'escompte pour paiement anticipé. En cas de paiement hors délai, une pénalité égale à trois fois le taux de l'intérêt légal sera appliquée, ainsi qu'une indemnité forfaitaire de 40 €uros pour frais de recouvrement L-411-6 du Code de Commerce. Les conditions générales de ventes applicables sont disponibles sur notre site www.beneki.net"
         )
-      ),
+      ]),
 
       // Legal Footer
-      React.createElement(View, { style: styles.legalFooter },
-        React.createElement(Text, {},
+      React.createElement(View, { key: "legalFooter", style: styles.legalFooter }, [
+        React.createElement(Text, { key: "legalText" },
           "BENEKI SARL / Capital 150 000€ / VAT Number : FR61889408019 / Siret 88940801900020 / APE 4690Z"
         )
-      )
-    )
+      ])
+    ])
   );
 };
 
-// Enhanced PDFService with better error handling
 class PDFService {
   static async generateInvoicePDF(orderData) {
     return new Promise((resolve, reject) => {
