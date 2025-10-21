@@ -12,16 +12,13 @@
     "start": "strapi start",
     "strapi": "strapi",
     "upgrade": "npx @strapi/upgrade latest",
-    "upgrade:dry": "npx @strapi/upgrade latest --dry",
-    "postinstall": "npm install pdfkit --legacy-peer-deps"
+    "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.1",
-    "@strapi/design-system": "1.19.0",
-    "@strapi/helper-plugin": "^4.25.23",
     "@strapi/plugin-cloud": "5.13.1",
     "@strapi/plugin-users-permissions": "5.13.1",
-    "@strapi/provider-email-sendgrid": "^5.18.0",
+    "@strapi/provider-email-sendgrid": "^5.13.1",
     "@strapi/provider-upload-cloudinary": "^5.13.1",
     "@strapi/strapi": "5.13.1",
     "axios": "^1.10.0",
@@ -30,11 +27,7 @@
     "iconv-lite": "^0.6.3",
     "node-fetch": "^2.7.0",
     "pdfkit": "^0.17.2",
-    "pg": "8.8.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.0.0",
-    "styled-components": "^6.0.0"
+    "pg": "8.8.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

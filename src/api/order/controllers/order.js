@@ -61,7 +61,9 @@
 "use strict";
 
 const { createCoreController } = require("@strapi/strapi").factories;
-const { PDFService } = require("../services/pdfService");
+// const { PDFService } = require("../services/pdfService");
+const { PDFKitService } = require("../services/pdfkit-service");
+
 const sendInvoiceEmail = require("../utils/sendInvoiceEmail");
 const fs = require("fs");
 const path = require("path");
@@ -174,7 +176,9 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     console.log('📁 PDF path:', pdfPath);
     
     try {
-      await PDFService.generateAndSaveInvoice(invoiceData, pdfPath);
+      // await PDFService.generateAndSaveInvoice(invoiceData, pdfPath);
+      await PDFKitService.generateAndSaveInvoice(invoiceData, pdfPath);
+
       console.log('✅ PDF generated successfully');
 
       console.log('📧 Sending email to:', user.email);
