@@ -58,7 +58,6 @@
 
 
 // @ts-nocheck
-// @ts-nocheck
 "use strict";
 
 const { createCoreController } = require("@strapi/strapi").factories;
@@ -72,23 +71,11 @@ const pendingRequests = new Map();
 
 module.exports = createCoreController("api::order.order", ({ strapi }) => ({
   async sendInvoice(ctx) {
-      console.log('🎯 SEND INVOICE ENDPOINT HIT!');
-  console.log('📦 Request Body:', ctx.request.body);
     console.log('🎯 SEND INVOICE ENDPOINT HIT!');
     console.log('📝 Method:', ctx.method);
     console.log('🔗 URL:', ctx.url);
     console.log('📦 Request Body:', ctx.request.body);
-      // ✅ TEMPORARY: Immediate response to test if endpoint works
-  if (ctx.method === 'POST') {
-    console.log('✅ Immediate test response sent');
-    return ctx.send({ 
-      success: true, 
-      message: "Endpoint working!",
-      test: true,
-      received: ctx.request.body
-    });
-  }
-  
+    
     // ✅ Handle CORS preflight requests
     if (ctx.method === 'OPTIONS') {
       ctx.set('Access-Control-Allow-Origin', '*');
@@ -199,11 +186,21 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         fs.unlinkSync(pdfPath);
       }
 
+      // Update order status
+      await strapi.entityService.update("api::order.order", order.id, {
+        data: {
+          invoice_sent: true,
+          invoice_sent_at: new Date(),
+        },
+      });
+      console.log('✅ Order updated with invoice sent status');
+
       console.log('🎉 INVOICE PROCESS COMPLETED SUCCESSFULLY');
       return ctx.send({ 
         success: true, 
         message: "Invoice sent successfully",
-        invoiceNumber: invoiceData.invoiceNumber
+        invoiceNumber: invoiceData.invoiceNumber,
+        email: user.email
       });
 
     } catch (pdfError) {
