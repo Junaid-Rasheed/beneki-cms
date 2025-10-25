@@ -824,6 +824,7 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::order-item.order-item'
     >;
+    productId: Schema.Attribute.String;
     productName: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -836,6 +837,7 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    productVat: Schema.Attribute.Decimal;
     publishedAt: Schema.Attribute.DateTime;
     quantity: Schema.Attribute.Integer &
       Schema.Attribute.SetPluginOptions<{
@@ -1091,6 +1093,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    productId: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     quantity: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{

@@ -55,6 +55,12 @@
           "localized": true
         }
       }
+    },
+    "productId": {
+      "type": "string"
+    },
+    "productVat": {
+      "type": "decimal"
     }
   }
 }
