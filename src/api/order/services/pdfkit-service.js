@@ -228,74 +228,63 @@ class PDFKitService {
         .text("€ 2.68", vatBoxX + vatColWidth * 2, vatContentY, { align: "center" });
     }
 
-    //  // Total Box
-    //  const totalBoxX = vatBoxX + boxWidth + 8;
-    //  this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 80, borderRadius);
-    //  doc.rect(totalBoxX, topRowY, boxWidth, 18).fillAndStroke(primaryColor, primaryColor);
-
-    //  // Total Header
-    //  doc.fillColor("black")
-    //     .fontSize(10)
-    //     .font("Helvetica-Bold")
-    //     .text("TOTAL", totalBoxX + 8, topRowY + 4)
-    //     .text(order.grandTotal || "€ 141.08", totalBoxX + boxWidth - 8, topRowY + 4, { align: "right" });
-
-    //  // Total Content
-    //  const totalContentY = topRowY + 25;
-    //  doc.fontSize(8).font("Helvetica")
-    //     .text("Total VAT EXCL", totalBoxX + 8, totalContentY)
-    //     .text(order.totalExclVat || "€ 123.46", totalBoxX + boxWidth - 8, totalContentY, { align: "right" })
-
-    //     .text("VAT", totalBoxX + 8, totalContentY + 12)
-    //     .text(order.totalVat || "€ 17.62", totalBoxX + boxWidth - 8, totalContentY + 12, { align: "right" })
-
-    //     .font("Helvetica-Bold")
-    //     .text("Total VAT INCL", totalBoxX + 8, totalContentY + 24)
-    //     .text(order.grandTotal || "€ 141.08", totalBoxX + boxWidth - 8, totalContentY + 24, { align: "right" });
-    // Helper function to format currency
     const formatCurrency = (value) => {
-      if (!value && value !== 0) return "€ 0.00";
-      if (typeof value === 'string' && value.includes('€')) {
-        return value.replace('€', '€ ').replace('  ', ' ');
-      }
-      const numericValue = typeof value === 'string' ? value.replace('€', '').trim() : value;
-      return `€ ${parseFloat(numericValue).toFixed(2)}`;
-    };
+  if (!value && value !== 0) return "€ 0.00";
+  if (typeof value === 'string' && value.includes('€')) {
+    return value.replace('€', '€ ').replace('  ', ' ');
+  }
+  const numericValue = typeof value === 'string' ? value.replace('€', '').trim() : value;
+  return `€ ${parseFloat(numericValue).toFixed(2)}`;
+};
 
-    // Total Box
-    const totalBoxX = vatBoxX + boxWidth + 8;
-    this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 80, borderRadius);
+// Total Box
+const totalBoxX = vatBoxX + boxWidth + 8;
+this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 80, borderRadius);
 
-    // Total Header with background
-    doc.save();
-    doc.rect(totalBoxX, topRowY, boxWidth, 18).fill(primaryColor);
-    doc.restore();
-    this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 18, borderRadius);
+// Total Header with background
+doc.save();
+doc.rect(totalBoxX, topRowY, boxWidth, 18).fill(primaryColor);
+doc.restore();
+this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 18, borderRadius);
 
-    // Total Header text - Use consistent right padding
-    const rightPadding = 8; // Consistent padding for all right-aligned text
+// Total Header text - FIXED: Don't chain text calls with alignment
+doc.fillColor("black")
+   .fontSize(10)
+   .font("Helvetica-Bold");
 
-    doc.fillColor("black")
-      .fontSize(10)
-      .font("Helvetica-Bold")
-      .text("TOTAL", totalBoxX + 8, topRowY + 4)
-      .text(formatCurrency(order.grandTotal || "120.00"), totalBoxX + boxWidth - rightPadding, topRowY + 4, { align: "right" });
+// Header - TOTAL label and amount on separate calls
+doc.text("TOTAL", totalBoxX + 8, topRowY + 4);
+doc.text(formatCurrency(order.grandTotal || "120.00"), totalBoxX, topRowY + 4, { 
+  width: boxWidth - 8, 
+  align: "right" 
+});
 
-    // Total Content
-    const totalContentY = topRowY + 25;
-    const lineHeight = 12; // Consistent line height
+// Total Content - FIXED: Each line as separate calls
+const totalContentY = topRowY + 25;
+const lineHeight = 12;
 
-    doc.fontSize(8).font("Helvetica")
-      .text("Total VAT EXCL", totalBoxX + 8, totalContentY)
-      .text(formatCurrency(order.totalExclVat || "100.00"), totalBoxX + boxWidth - rightPadding, totalContentY, { align: "right" })
+// Line 1: Total VAT EXCL
+doc.fontSize(8).font("Helvetica");
+doc.text("Total VAT EXCL", totalBoxX + 8, totalContentY);
+doc.text(formatCurrency(order.totalExclVat || "100.00"), totalBoxX, totalContentY, { 
+  width: boxWidth - 8, 
+  align: "right" 
+});
 
-      .text("VAT", totalBoxX + 8, totalContentY + lineHeight)
-      .text(formatCurrency(order.totalVat || "20.00"), totalBoxX + boxWidth - rightPadding, totalContentY + lineHeight, { align: "right" })
+// Line 2: VAT
+doc.text("VAT", totalBoxX + 8, totalContentY + lineHeight);
+doc.text(formatCurrency(order.totalVat || "20.00"), totalBoxX, totalContentY + lineHeight, { 
+  width: boxWidth - 8, 
+  align: "right" 
+});
 
-      .font("Helvetica-Bold")
-      .text("Total VAT INCL", totalBoxX + 8, totalContentY + (lineHeight * 2))
-      .text(formatCurrency(order.grandTotal || "120.00"), totalBoxX + boxWidth - rightPadding, totalContentY + (lineHeight * 2), { align: "right" });
-
+// Line 3: Total VAT INCL
+doc.font("Helvetica-Bold");
+doc.text("Total VAT INCL", totalBoxX + 8, totalContentY + (lineHeight * 2));
+doc.text(formatCurrency(order.grandTotal || "120.00"), totalBoxX, totalContentY + (lineHeight * 2), { 
+  width: boxWidth - 8, 
+  align: "right" 
+});
     // Bottom Row: Bank Details and Legal Text
     const bottomRowY = topRowY + 90;
     const bottomBoxWidth = (525 - 8) / 2;
