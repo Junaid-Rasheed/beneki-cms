@@ -1,7 +1,7 @@
 const sgMail = require("@sendgrid/mail");
 
 module.exports = {
-  async send(ctx) {
+  async sendInvoice(ctx) {
     try {
       console.log("🚀 [sendInvoice] Incoming request to /api/invoices/send");
 
