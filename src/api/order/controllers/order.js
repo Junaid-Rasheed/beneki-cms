@@ -57,6 +57,8 @@
 // }));
 
 
+
+
 // @ts-nocheck
 "use strict";
 
@@ -72,57 +74,117 @@ const path = require("path");
 const pendingRequests = new Map();
 
 module.exports = createCoreController("api::order.order", ({ strapi }) => ({
-  async sendInvoice(ctx) {
-    console.log('🎯 SEND INVOICE ENDPOINT HIT!');
-    console.log('📝 Method:', ctx.method);
-    console.log('🔗 URL:', ctx.url);
-    console.log('📦 Request Body:', ctx.request.body);
+  // async sendInvoice(ctx) {
+  //   console.log('🎯 SEND INVOICE ENDPOINT HIT!');
+  //   console.log('📝 Method:', ctx.method);
+  //   console.log('🔗 URL:', ctx.url);
+  //   console.log('📦 Request Body:', ctx.request.body);
     
-    // ✅ Handle CORS preflight requests
-    if (ctx.method === 'OPTIONS') {
-      ctx.set('Access-Control-Allow-Origin', '*');
-      ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      ctx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      return ctx.send({}, 204);
+  //   // ✅ Handle CORS preflight requests
+  //   if (ctx.method === 'OPTIONS') {
+  //     ctx.set('Access-Control-Allow-Origin', '*');
+  //     ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  //     ctx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  //     return ctx.send({}, 204);
+  //   }
+
+  //   try {
+  //     const { orderId, userId } = ctx.request.body;
+  //     console.log('📨 Received orderId:', orderId, 'userId:', userId);
+
+  //     // ✅ Validate required fields
+  //     if (!orderId || !userId) {
+  //       console.log('❌ Missing orderId or userId');
+  //       return ctx.badRequest("Missing orderId or userId");
+  //     }
+
+  //     // ✅ Create request key to prevent duplicate processing
+  //     const requestKey = `${orderId}-${userId}`;
+  //     if (pendingRequests.has(requestKey)) {
+  //       console.log('🔄 Request already in progress, returning existing promise');
+  //       return await pendingRequests.get(requestKey);
+  //     }
+
+  //     // ✅ Create promise for this request
+  //     const requestPromise = this.processInvoiceRequest(orderId, userId, ctx);
+  //     pendingRequests.set(requestKey, requestPromise);
+
+  //     try {
+  //       const result = await requestPromise;
+  //       return result;
+  //     } finally {
+  //       // ✅ Clean up request tracking
+  //       pendingRequests.delete(requestKey);
+  //     }
+
+  //   } catch (err) {
+  //     console.error("💥 ERROR IN SEND INVOICE:");
+  //     console.error("Error details:", err);
+  //     console.error("Error stack:", err.stack);
+  //     return ctx.internalServerError("Failed to send invoice: " + err.message);
+  //   }
+  // },
+
+  async sendInvoice(ctx) {
+  console.log("🎯 SEND INVOICE ENDPOINT HIT!");
+  console.log("📦 Request Body:", ctx.request.body);
+
+  try {
+    const { orderId, invoicePdf, fileName } = ctx.request.body;
+    if (!orderId || !invoicePdf) {
+      return ctx.badRequest("Missing required fields (orderId or invoicePdf)");
     }
 
-    try {
-      const { orderId, userId } = ctx.request.body;
-      console.log('📨 Received orderId:', orderId, 'userId:', userId);
+    console.log("✅ Received base64 PDF from frontend.");
 
-      // ✅ Validate required fields
-      if (!orderId || !userId) {
-        console.log('❌ Missing orderId or userId');
-        return ctx.badRequest("Missing orderId or userId");
-      }
+    // 🔹 Fetch order info from DB (only for email & logging)
+    const order = await strapi.db.query("api::order.order").findOne({
+      where: { documentId: orderId },
+      populate: { user: true },
+    });
 
-      // ✅ Create request key to prevent duplicate processing
-      const requestKey = `${orderId}-${userId}`;
-      if (pendingRequests.has(requestKey)) {
-        console.log('🔄 Request already in progress, returning existing promise');
-        return await pendingRequests.get(requestKey);
-      }
+    if (!order) return ctx.notFound("Order not found");
 
-      // ✅ Create promise for this request
-      const requestPromise = this.processInvoiceRequest(orderId, userId, ctx);
-      pendingRequests.set(requestKey, requestPromise);
+    const user = order.user;
+    if (!user) return ctx.notFound("User not found for this order");
 
-      try {
-        const result = await requestPromise;
-        return result;
-      } finally {
-        // ✅ Clean up request tracking
-        pendingRequests.delete(requestKey);
-      }
+    const tmpDir = path.join(process.cwd(), "tmp");
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
-    } catch (err) {
-      console.error("💥 ERROR IN SEND INVOICE:");
-      console.error("Error details:", err);
-      console.error("Error stack:", err.stack);
-      return ctx.internalServerError("Failed to send invoice: " + err.message);
-    }
-  },
+    const pdfPath = path.join(tmpDir, fileName || `invoice-${orderId}.pdf`);
 
+    // 🔹 Decode and save Base64 → PDF file
+    const pdfBuffer = Buffer.from(invoicePdf, "base64");
+    fs.writeFileSync(pdfPath, pdfBuffer);
+    console.log("✅ PDF saved temporarily at:", pdfPath);
+
+    // 🔹 Send email with attached invoice
+    await sendInvoiceEmail(user.email, order, pdfPath);
+    console.log("✅ Email sent successfully to:", user.email);
+
+    // 🔹 Optional cleanup
+    fs.unlinkSync(pdfPath);
+
+    // 🔹 Update order status (optional)
+    await strapi.entityService.update("api::order.order", order.id, {
+      data: {
+        invoice_sent: true,
+        invoice_sent_at: new Date(),
+      },
+    });
+
+    return ctx.send({
+      success: true,
+      message: "Invoice email sent successfully",
+      email: user.email,
+    });
+  } catch (error) {
+    console.error("💥 Error sending invoice:", error);
+    return ctx.internalServerError("Failed to send invoice");
+  }
+},
+
+// code here 
   async processInvoiceRequest(orderId, userId, ctx) {
     console.log('🔍 Fetching order from database...');
     const order = await strapi.db.query("api::order.order").findOne({
