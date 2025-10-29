@@ -317,6 +317,16 @@ class PDFKitService {
     const primaryColor = "#4e5f4b"; // Green background for headers
     const borderRadius = 8;
 
+    // Helper function to format currency like React version
+    const formatCurrency = (value) => {
+      if (!value) return "€ 0.00";
+      if (typeof value === 'string' && value.includes('€')) {
+        return value.replace('€', '€ ').replace('  ', ' ');
+      }
+      const numericValue = typeof value === 'string' ? value.replace('€', '').trim() : value;
+      return `€ ${numericValue}`;
+    };
+
     // ===== PAGE NUMBER =====
     doc.fontSize(8)
        .fillColor("#666")
@@ -324,47 +334,54 @@ class PDFKitService {
 
     // ===== HEADER SECTION =====
     // Left Section - Company Info with Logo
-    // Note: Logo commented out - uncomment if you have the logo file
-    // doc.image(path.join(__dirname, '../../public/logo9.png'), 30, 30, { width: 180, height: 60 });
+    // Note: Uncomment and adjust path if you have the logo file
+       doc.image(path.join(__dirname, '/logo9.png'), 30, 30, { width: 180, height: 60 });
     
+    // Company address (positioned where logo would end)
     doc.fontSize(11)
        .fillColor("black")
        .font("Helvetica")
-       .text("691 rue Maurice Caullery", 30, 100)
+       .text("691 rue Maurice Coulery", 30, 100)
        .text("59500 Douai", 30, 114)
        .text("FRANCE", 30, 128)
        .text("www.beneki.net", 30, 142)
        .text("Tel. 03 74 09 81 86", 30, 156);
 
-    // Right Section - Invoice Info
+    // Right Section - Invoice Info (exact positioning like React)
     doc.font("Helvetica-Bold")
        .fontSize(14)
        .text("INVOICE", 350, 30);
 
     doc.font("Helvetica")
        .fontSize(9)
-       .text(`N° ${order.invoiceNumber}`, 350, 55)
-       .text(`Date : ${order.invoiceDate}`, 350, 67);
+       .text(`N° ${order.invoiceNumber || "ORD-0000014"}`, 350, 55)
+       .text(`Date : ${order.invoiceDate || "10/28/2025"}`, 350, 67);
 
+    // Customer Info Section
     doc.font("Helvetica-Bold")
        .text("Customer Company Name", 350, 85);
     
     doc.font("Helvetica")
-       .text(order.customerCompany || "N/A", 350, 97)
-       .text(order.customerAddress || "N/A", 350, 109)
+       .text(order.customerCompany || "daily info", 350, 97)
+       .text(order.customerAddress || "Address not provided", 350, 109)
        .text(order.customerCity || "N/A", 350, 121)
-       .text(order.customerCountry || "N/A", 350, 133);
+       .text(order.customerCountry || "France", 350, 133);
 
-    doc.text(`Client ref : ${order.clientRef || "N/A"}`, 350, 151)
-       .text(`Email : ${order.clientEmail || "N/A"}`, 350, 163)
+    // Client reference info
+    doc.text(`Client ref : ${order.clientRef || "ldsj6cawoldsf0/pagono991"}`, 350, 151)
+       .text(`Email : ${order.clientEmail || "dailyinfoiniverse@gmail.com"}`, 350, 163)
        .text(`TVA Intracom : ${order.customerVAT || "N/A"}`, 350, 175);
 
     // ===== DELIVERY ADDRESS SECTION =====
     const deliveryY = 200;
-    this.drawRoundedRect(doc, 30, deliveryY, 525, 50, borderRadius);
+    this.drawRoundedRect(doc, 30, deliveryY, 525, 40, borderRadius);
     
-    // Section Title
-    doc.rect(30, deliveryY, 525, 15).fillAndStroke(primaryColor, primaryColor);
+    // Section Title with background
+    doc.save();
+    doc.rect(30, deliveryY, 525, 15).fill(primaryColor);
+    doc.restore();
+    doc.rect(30, deliveryY, 525, 15).stroke();
+    
     doc.fillColor("black")
        .fontSize(10)
        .font("Helvetica-Bold")
@@ -374,30 +391,31 @@ class PDFKitService {
     doc.fillColor("black")
        .fontSize(9)
        .font("Helvetica")
-       .text(order.deliveryName || "N/A", 35, deliveryY + 20)
-       .text(order.deliveryAddress || "N/A", 35, deliveryY + 32)
+       .text(order.deliveryName || order.customerCompany || "daily info", 35, deliveryY + 20)
+       .text(order.deliveryAddress || "Address not provided", 35, deliveryY + 32)
        .text(order.deliveryPhone || "N/A", 35, deliveryY + 44);
 
     // ===== PRODUCTS TABLE SECTION =====
-    const tableY = deliveryY + 70;
+    const tableY = deliveryY + 60;
     this.drawRoundedRect(doc, 30, tableY, 525, 200, borderRadius);
     
-    // Table column widths (same as React version)
+    // Table column widths (exact same as React version)
     const colWidths = {
-      reference: 525 * 0.12,    // 12%
-      product: 525 * 0.32,      // 32%
-      qty: 525 * 0.10,          // 10%
-      price: 525 * 0.18,        // 18%
-      total: 525 * 0.18,        // 18%
-      vat: 525 * 0.10,          // 10%
+      reference: 63,    // 12% of 525
+      product: 168,     // 32% of 525
+      qty: 52.5,        // 10% of 525
+      price: 94.5,      // 18% of 525
+      total: 94.5,      // 18% of 525
+      vat: 52.5,        // 10% of 525
     };
 
-    // Table Header with rounded corners
-    doc.rect(30, tableY, 525, 20).fillAndStroke(primaryColor, primaryColor);
+    // Table Header with background
+    doc.save();
+    doc.rect(30, tableY, 525, 20).fill(primaryColor);
+    doc.restore();
+    this.drawRoundedRect(doc, 30, tableY, 525, 20, borderRadius);
     
-    // First header cell with left border radius
-    doc.rect(30, tableY, colWidths.reference, 20).fillAndStroke(primaryColor, primaryColor);
-    
+    // Header texts
     doc.fillColor("black")
        .fontSize(8)
        .font("Helvetica-Bold")
@@ -410,28 +428,45 @@ class PDFKitService {
 
     // Table Rows
     let currentY = tableY + 20;
-    doc.fillColor("black").fontSize(8).font("Helvetica");
+    const rowHeight = 18;
     
     if (products.length > 0) {
       products.forEach((product, index) => {
-        if (currentY > tableY + 180) return; // Prevent overflow
+        if (currentY > tableY + 180) return;
         
-        doc.rect(30, currentY, 525, 18).stroke();
-        doc.text(product.reference || "-", 34, currentY + 5)
-           .text(product.name || "-", 30 + colWidths.reference + 4, currentY + 5)
-           .text(product.qty?.toString() || "-", 30 + colWidths.reference + colWidths.product + 4, currentY + 5)
-           .text(product.unitPrice || "-", 30 + colWidths.reference + colWidths.product + colWidths.qty + 4, currentY + 5)
-           .text(product.totalExclVat || "-", 30 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + 4, currentY + 5)
-           .text(`${product.vatRate || 0}%`, 30 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + colWidths.total + 4, currentY + 5);
+        // Draw row border
+        doc.rect(30, currentY, 525, rowHeight).stroke();
         
-        currentY += 18;
+        doc.fontSize(8)
+           .font("Helvetica")
+           .text(product.reference || "HOSTING-001", 34, currentY + 5)
+           .text(product.name || "Web Hosting Service", 30 + colWidths.reference + 4, currentY + 5)
+           .text((product.qty || 1).toString(), 30 + colWidths.reference + colWidths.product + 4, currentY + 5)
+           .text(formatCurrency(product.unitPrice || "100.00"), 30 + colWidths.reference + colWidths.product + colWidths.qty + 4, currentY + 5)
+           .text(formatCurrency(product.totalExclVat || "100.00"), 30 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + 4, currentY + 5)
+           .text(`${product.vatRate || 20}%`, 30 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + colWidths.total + 4, currentY + 5);
+        
+        currentY += rowHeight;
       });
+      
+      // Fill remaining space with empty rows if needed
+      const remainingRows = Math.floor((tableY + 200 - currentY) / rowHeight);
+      for (let i = 0; i < remainingRows && i < 10; i++) {
+        doc.rect(30, currentY, 525, rowHeight).stroke();
+        doc.text("-", 34, currentY + 5)
+           .text("-", 30 + colWidths.reference + 4, currentY + 5)
+           .text("-", 30 + colWidths.reference + colWidths.product + 4, currentY + 5)
+           .text("-", 30 + colWidths.reference + colWidths.product + colWidths.qty + 4, currentY + 5)
+           .text("-", 30 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + 4, currentY + 5)
+           .text("-", 30 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + colWidths.total + 4, currentY + 5);
+        currentY += rowHeight;
+      }
     } else {
       // Fill with empty rows like React version
       for (let i = 0; i < 10; i++) {
         if (currentY > tableY + 180) break;
         
-        doc.rect(30, currentY, 525, 18).stroke();
+        doc.rect(30, currentY, 525, rowHeight).stroke();
         doc.text("-", 34, currentY + 5)
            .text("-", 30 + colWidths.reference + 4, currentY + 5)
            .text("-", 30 + colWidths.reference + colWidths.product + 4, currentY + 5)
@@ -439,7 +474,7 @@ class PDFKitService {
            .text("-", 30 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + 4, currentY + 5)
            .text("-", 30 + colWidths.reference + colWidths.product + colWidths.qty + colWidths.price + colWidths.total + 4, currentY + 5);
         
-        currentY += 18;
+        currentY += rowHeight;
       }
     }
 
@@ -452,7 +487,11 @@ class PDFKitService {
     
     // Payment Type Box
     this.drawRoundedRect(doc, 30, topRowY, boxWidth, 80, borderRadius);
-    doc.rect(30, topRowY, boxWidth, 18).fillAndStroke(primaryColor, primaryColor);
+    doc.save();
+    doc.rect(30, topRowY, boxWidth, 18).fill(primaryColor);
+    doc.restore();
+    this.drawRoundedRect(doc, 30, topRowY, boxWidth, 18, borderRadius);
+    
     doc.fillColor("black")
        .fontSize(10)
        .font("Helvetica-Bold")
@@ -462,17 +501,20 @@ class PDFKitService {
     let paymentY = topRowY + 25;
     if (paymentData.length > 0) {
       paymentData.forEach((payment, index) => {
-        doc.text(payment.paymentType || "Bank Transfer", 34, paymentY);
+        doc.text(payment.paymentType || "PAYPAL", 34, paymentY);
         paymentY += 12;
       });
     } else {
-      doc.text("Bank Transfer", 34, paymentY);
+      doc.text("PAYPAL", 34, paymentY);
     }
 
     // VAT Breakdown Box
     const vatBoxX = 30 + boxWidth + 8;
     this.drawRoundedRect(doc, vatBoxX, topRowY, boxWidth, 80, borderRadius);
-    doc.rect(vatBoxX, topRowY, boxWidth, 18).fillAndStroke(primaryColor, primaryColor);
+    doc.save();
+    doc.rect(vatBoxX, topRowY, boxWidth, 18).fill(primaryColor);
+    doc.restore();
+    this.drawRoundedRect(doc, vatBoxX, topRowY, boxWidth, 18, borderRadius);
     
     // VAT Header Row
     const vatColWidth = boxWidth / 3;
@@ -489,47 +531,45 @@ class PDFKitService {
       vatBreakdown.forEach((vat, index) => {
         doc.fontSize(8).font("Helvetica")
            .text(vat.rate || "20%", vatBoxX + 4, vatContentY)
-           .text(vat.base || "€ 74.7", vatBoxX + vatColWidth, vatContentY, { align: "center" })
-           .text(vat.total || "€ 14.94", vatBoxX + vatColWidth * 2, vatContentY, { align: "center" });
+           .text(formatCurrency(vat.base || "100.00"), vatBoxX + vatColWidth, vatContentY, { align: "center" })
+           .text(formatCurrency(vat.total || "20.00"), vatBoxX + vatColWidth * 2, vatContentY, { align: "center" });
         vatContentY += 10;
       });
     } else {
-      // Default VAT data like React version
+      // Default VAT data matching the image
       doc.fontSize(8).font("Helvetica")
          .text("20%", vatBoxX + 4, vatContentY)
-         .text("€ 74.7", vatBoxX + vatColWidth, vatContentY, { align: "center" })
-         .text("€ 14.94", vatBoxX + vatColWidth * 2, vatContentY, { align: "center" });
-      
-      vatContentY += 10;
-      doc.text("5.5%", vatBoxX + 4, vatContentY)
-         .text("€ 48.76", vatBoxX + vatColWidth, vatContentY, { align: "center" })
-         .text("€ 2.68", vatBoxX + vatColWidth * 2, vatContentY, { align: "center" });
+         .text(formatCurrency("100.00"), vatBoxX + vatColWidth, vatContentY, { align: "center" })
+         .text(formatCurrency("20.00"), vatBoxX + vatColWidth * 2, vatContentY, { align: "center" });
     }
 
     // Total Box
     const totalBoxX = vatBoxX + boxWidth + 8;
     this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 80, borderRadius);
-    doc.rect(totalBoxX, topRowY, boxWidth, 18).fillAndStroke(primaryColor, primaryColor);
+    doc.save();
+    doc.rect(totalBoxX, topRowY, boxWidth, 18).fill(primaryColor);
+    doc.restore();
+    this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 18, borderRadius);
     
     // Total Header
     doc.fillColor("black")
        .fontSize(10)
        .font("Helvetica-Bold")
        .text("TOTAL", totalBoxX + 8, topRowY + 4)
-       .text(order.grandTotal || "€ 141.08", totalBoxX + boxWidth - 8, topRowY + 4, { align: "right" });
+       .text(formatCurrency(order.grandTotal || "120.00"), totalBoxX + boxWidth - 8, topRowY + 4, { align: "right" });
 
     // Total Content
     const totalContentY = topRowY + 25;
     doc.fontSize(8).font("Helvetica")
        .text("Total VAT EXCL", totalBoxX + 8, totalContentY)
-       .text(order.totalExclVat || "€ 123.46", totalBoxX + boxWidth - 8, totalContentY, { align: "right" })
+       .text(formatCurrency(order.totalExclVat || "100.00"), totalBoxX + boxWidth - 8, totalContentY, { align: "right" })
        
        .text("VAT", totalBoxX + 8, totalContentY + 12)
-       .text(order.totalVat || "€ 17.62", totalBoxX + boxWidth - 8, totalContentY + 12, { align: "right" })
+       .text(formatCurrency(order.totalVat || "20.00"), totalBoxX + boxWidth - 8, totalContentY + 12, { align: "right" })
        
        .font("Helvetica-Bold")
        .text("Total VAT INCL", totalBoxX + 8, totalContentY + 24)
-       .text(order.grandTotal || "€ 141.08", totalBoxX + boxWidth - 8, totalContentY + 24, { align: "right" });
+       .text(formatCurrency(order.grandTotal || "120.00"), totalBoxX + boxWidth - 8, totalContentY + 24, { align: "right" });
 
     // Bottom Row: Bank Details and Legal Text
     const bottomRowY = topRowY + 90;
@@ -537,7 +577,11 @@ class PDFKitService {
 
     // Bank Details Box
     this.drawRoundedRect(doc, 30, bottomRowY, bottomBoxWidth, 60, borderRadius);
-    doc.rect(30, bottomRowY, bottomBoxWidth, 18).fillAndStroke(primaryColor, primaryColor);
+    doc.save();
+    doc.rect(30, bottomRowY, bottomBoxWidth, 18).fill(primaryColor);
+    doc.restore();
+    this.drawRoundedRect(doc, 30, bottomRowY, bottomBoxWidth, 18, borderRadius);
+    
     doc.fillColor("black")
        .fontSize(10)
        .font("Helvetica-Bold")
@@ -548,7 +592,7 @@ class PDFKitService {
     
     doc.fontSize(8).font("Helvetica")
        .text("IBAN", 34, bottomRowY + 37)
-       .text(order.bankDetails?.iban || "FR76 3000 4013 8200 0100 7237 994", 34, bottomRowY + 45)
+       .text(order.bankDetails?.iban || "FR76 3000 4000 0100 1234 5678 900", 34, bottomRowY + 45)
        .text("BIC BNPAFRPPXXX", 34, bottomRowY + 55);
 
     // Legal Text Box
@@ -567,7 +611,10 @@ class PDFKitService {
     // ===== COMPANY REGISTRATION FOOTER =====
     const companyFooterY = bottomRowY + 70;
     this.drawRoundedRect(doc, 30, companyFooterY, 525, 20, borderRadius);
-    doc.rect(30, companyFooterY, 525, 20).fillAndStroke(primaryColor, primaryColor);
+    doc.save();
+    doc.rect(30, companyFooterY, 525, 20).fill(primaryColor);
+    doc.restore();
+    this.drawRoundedRect(doc, 30, companyFooterY, 525, 20, borderRadius);
     
     doc.fillColor("black")
        .fontSize(7)
