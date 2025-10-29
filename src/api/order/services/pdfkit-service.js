@@ -229,62 +229,62 @@ class PDFKitService {
     }
 
     const formatCurrency = (value) => {
-  if (!value && value !== 0) return "€ 0.00";
-  if (typeof value === 'string' && value.includes('€')) {
-    return value.replace('€', '€ ').replace('  ', ' ');
-  }
-  const numericValue = typeof value === 'string' ? value.replace('€', '').trim() : value;
-  return `€ ${parseFloat(numericValue).toFixed(2)}`;
-};
+      if (!value && value !== 0) return "€ 0.00";
+      if (typeof value === 'string' && value.includes('€')) {
+        return value.replace('€', '€ ').replace('  ', ' ');
+      }
+      const numericValue = typeof value === 'string' ? value.replace('€', '').trim() : value;
+      return `€ ${parseFloat(numericValue).toFixed(2)}`;
+    };
 
-// Total Box
-const totalBoxX = vatBoxX + boxWidth + 8;
-this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 80, borderRadius);
+    // Total Box
+    const totalBoxX = vatBoxX + boxWidth + 8;
+    this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 80, borderRadius);
 
-// Total Header with background
-doc.save();
-doc.rect(totalBoxX, topRowY, boxWidth, 18).fill(primaryColor);
-doc.restore();
-this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 18, borderRadius);
+    // Total Header with background
+    doc.save();
+    doc.rect(totalBoxX, topRowY, boxWidth, 18).fill(primaryColor);
+    doc.restore();
+    this.drawRoundedRect(doc, totalBoxX, topRowY, boxWidth, 18, borderRadius);
 
-// Total Header text - FIXED: Don't chain text calls with alignment
-doc.fillColor("black")
-   .fontSize(10)
-   .font("Helvetica-Bold");
+    // Total Header text - FIXED: Don't chain text calls with alignment
+    doc.fillColor("black")
+      .fontSize(10)
+      .font("Helvetica-Bold");
 
-// Header - TOTAL label and amount on separate calls
-doc.text("TOTAL", totalBoxX + 8, topRowY + 4);
-doc.text(formatCurrency(order.grandTotal || "120.00"), totalBoxX, topRowY + 4, { 
-  width: boxWidth - 8, 
-  align: "right" 
-});
+    // Header - TOTAL label and amount on separate calls
+    doc.text("TOTAL", totalBoxX +2, topRowY + 4);
+    doc.text(formatCurrency(order.grandTotal || "120.00"), totalBoxX, topRowY + 4, {
+      width: boxWidth - 8,
+      align: "right"
+    });
 
-// Total Content - FIXED: Each line as separate calls
-const totalContentY = topRowY + 25;
-const lineHeight = 12;
+    // Total Content - FIXED: Each line as separate calls
+    const totalContentY = topRowY + 25;
+    const lineHeight = 12;
 
-// Line 1: Total VAT EXCL
-doc.fontSize(8).font("Helvetica");
-doc.text("Total VAT EXCL", totalBoxX + 8, totalContentY);
-doc.text(formatCurrency(order.totalExclVat || "100.00"), totalBoxX, totalContentY, { 
-  width: boxWidth - 8, 
-  align: "right" 
-});
+    // Line 1: Total VAT EXCL
+    // doc.fontSize(8).font("Helvetica");
+    // doc.text("Total VAT EXCL", totalBoxX + 8, totalContentY);
+    // doc.text(formatCurrency(order.totalExclVat || "100.00"), totalBoxX, totalContentY, {
+    //   width: boxWidth - 8,
+    //   align: "right"
+    // });
 
-// Line 2: VAT
-doc.text("VAT", totalBoxX + 8, totalContentY + lineHeight);
-doc.text(formatCurrency(order.totalVat || "20.00"), totalBoxX, totalContentY + lineHeight, { 
-  width: boxWidth - 8, 
-  align: "right" 
-});
+    // Line 2: VAT
+    doc.text("VAT", totalBoxX + 8, totalContentY + lineHeight);
+    doc.text(formatCurrency(order.totalVat || "20.00"), totalBoxX, totalContentY + lineHeight, {
+      width: boxWidth - 8,
+      align: "right"
+    });
 
-// Line 3: Total VAT INCL
-doc.font("Helvetica-Bold");
-doc.text("Total VAT INCL", totalBoxX + 8, totalContentY + (lineHeight * 2));
-doc.text(formatCurrency(order.grandTotal || "120.00"), totalBoxX, totalContentY + (lineHeight * 2), { 
-  width: boxWidth - 8, 
-  align: "right" 
-});
+    // Line 3: Total VAT INCL
+    doc.font("Helvetica-Bold");
+    doc.text("Total VAT INCL", totalBoxX + 8, totalContentY + (lineHeight * 2));
+    doc.text(formatCurrency(order.grandTotal || "120.00"), totalBoxX, totalContentY + (lineHeight * 2), {
+      width: boxWidth - 8,
+      align: "right"
+    });
     // Bottom Row: Bank Details and Legal Text
     const bottomRowY = topRowY + 90;
     const bottomBoxWidth = (525 - 8) / 2;
