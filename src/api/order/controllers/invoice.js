@@ -1,11 +1,11 @@
 "use strict";
 
-const sgMail = require("@sendgrid/mail");
+const sendInvoiceEmail = require("../utils/sendInvoiceEmail"); // import utility
 
 module.exports = {
-  async sendInvoice(ctx) {
+  async sendInvoiceEmailHandler(ctx) {
     try {
-      console.log("🚀 [sendInvoice] Incoming request to /api/invoices/send");
+      console.log("🚀 [sendInvoiceEmailHandler] Incoming request to /api/invoices/send");
 
       const { orderId, fileName, invoicePdf } = ctx.request.body;
 
@@ -14,9 +14,6 @@ module.exports = {
       }
 
       console.log("📦 Payload received:", { orderId, fileName });
-
-      // ✅ Set SendGrid API Key
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
       // 🔍 Find order from DB
       const order = await strapi.db.query("api::order.order").findOne({
@@ -33,41 +30,20 @@ module.exports = {
         return ctx.badRequest("Order does not have a customer email");
       }
 
-      console.log("📧 Sending to:", customerEmail);
+      console.log("📧 Sending invoice email to:", customerEmail);
 
-      // ✅ Build SendGrid email
-      const msg = {
-        to: customerEmail,
-        from: process.env.SENDGRID_FROM_EMAIL || "noreply@yourdomain.com", // fallback
-        subject: `Invoice for Order ${orderId}`,
-        text: "Please find your invoice attached.",
-        html: `
-          <div>
-            <h3>Thank you for your order!</h3>
-            <p>Your invoice for order <strong>${orderId}</strong> is attached.</p>
-            <p>If you have any questions, please contact our support team.</p>
-          </div>
-        `,
-        attachments: [
-          {
-            content: invoicePdf, // base64 PDF
-            filename: fileName,
-            type: "application/pdf",
-            disposition: "attachment",
-          },
-        ],
-      };
+      // ✅ Call utility to send email
+      // The utility expects: toEmail, order object, pdfPath/base64
+      // Here we are passing the base64 PDF content as a temporary file path
+      // But for simplicity, we can modify the util to accept base64 directly
+      await sendInvoiceEmail(customerEmail, { ...order, fileName }, invoicePdf);
 
-      // ✅ Send email
-      await sgMail.send(msg);
-      console.log("✅ Invoice email sent successfully to:", customerEmail);
+      console.log("✅ Invoice email sent successfully");
 
       return ctx.send({ success: true, message: "Invoice sent successfully" });
 
     } catch (error) {
-      console.error("❌ [sendInvoice] Failed to send invoice:", error);
-
-      // ✅ Proper error return
+      console.error("❌ [sendInvoiceEmailHandler] Failed to send invoice:", error);
       return ctx.internalServerError("Failed to send invoice", {
         details: error.message || error,
       });

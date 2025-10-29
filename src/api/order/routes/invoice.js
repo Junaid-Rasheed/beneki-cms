@@ -3,7 +3,7 @@ module.exports = {
     {
       method: "POST",
       path: "/invoices/send",
-      handler: "invoice.sendInvoice",
+      handler: "invoice.sendInvoiceEmailHandler",
       config: {
         auth: false,
       },
