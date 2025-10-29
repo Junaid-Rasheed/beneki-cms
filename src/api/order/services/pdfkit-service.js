@@ -335,7 +335,7 @@ class PDFKitService {
     // ===== HEADER SECTION =====
     // Left Section - Company Info with Logo
     // Note: Uncomment and adjust path if you have the logo file
-       doc.image(path.join(__dirname, '/logo9.png'), 30, 30, { width: 180, height: 60 });
+      //  doc.image(path.join(__dirname, '/logo9.png'), 30, 30, { width: 180, height: 60 });
     
     // Company address (positioned where logo would end)
     doc.fontSize(11)
