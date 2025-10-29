@@ -277,13 +277,13 @@ doc.fillColor("black")
    .fontSize(10)
    .font("Helvetica-Bold")
    .text("TOTAL", totalBoxX + 8, topRowY + 4)
-   .text(formatCurrency(order.grandTotal || "120.00"), totalBoxX + boxWidth - 8, topRowY + 4, { align: "right" });
+   .text(formatCurrency(order.grandTotal || "120.00"), totalBoxX + boxWidth - 6, topRowY + 4, { align: "right" });
 
 // Total Content
 const totalContentY = topRowY + 25;
 doc.fontSize(8).font("Helvetica")
    .text("Total VAT EXCL", totalBoxX + 8, totalContentY)
-   .text(formatCurrency(order.totalExclVat || "100.00"), totalBoxX + boxWidth - 8, totalContentY, { align: "right" })
+   .text(formatCurrency(order.totalExclVat || "100.00"), totalBoxX + boxWidth - 4, totalContentY, { align: "right" })
    
    .text("VAT", totalBoxX + 8, totalContentY + 12)
    .text(formatCurrency(order.totalVat || "20.00"), totalBoxX + boxWidth - 8, totalContentY + 12, { align: "right" })
