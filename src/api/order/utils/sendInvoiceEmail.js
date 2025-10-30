@@ -30,7 +30,6 @@
   
 // };
 
-
 "use strict";
 
 const sgMail = require("@sendgrid/mail");
@@ -39,16 +38,22 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 module.exports = async function sendInvoiceEmail(toEmail, order, pdfDataOrPath) {
   try {
-    console.log('📧 Preparing to send invoice email to:', toEmail);
+    console.log("📧 Preparing to send invoice email to:", toEmail);
+    console.log("📄 Order data:", order);
+    console.log("📦 PDF data type:", typeof pdfDataOrPath);
 
     let pdfBase64;
-    if (Buffer.isBuffer(pdfDataOrPath) || typeof pdfDataOrPath === 'string') {
-      // If it's base64 string already
+    if (Buffer.isBuffer(pdfDataOrPath)) {
+      console.log("📦 PDF is a buffer, length:", pdfDataOrPath.length);
+      pdfBase64 = pdfDataOrPath.toString("base64");
+    } else if (typeof pdfDataOrPath === "string") {
+      console.log("📦 PDF is a string, length:", pdfDataOrPath.length);
       pdfBase64 = pdfDataOrPath;
     } else {
-      // If it's a file path
+      console.log("📂 PDF is assumed to be a file path, reading file...");
       const pdfBuffer = fs.readFileSync(pdfDataOrPath);
       pdfBase64 = pdfBuffer.toString("base64");
+      console.log("✅ PDF file read successfully, size:", pdfBuffer.length);
     }
 
     const msg = {
@@ -73,12 +78,18 @@ module.exports = async function sendInvoiceEmail(toEmail, order, pdfDataOrPath) 
       ],
     };
 
-    console.log('📤 Sending email via SendGrid...');
+    console.log("📤 Email message prepared:", {
+      to: msg.to,
+      subject: msg.subject,
+      attachmentFilename: msg.attachments[0].filename,
+      attachmentSize: pdfBase64.length,
+    });
+
     await sgMail.send(msg);
-    console.log('✅ Email sent successfully to:', toEmail);
+    console.log("✅ Email sent successfully to:", toEmail);
 
   } catch (error) {
-    console.error('❌ Error sending email:', error);
+    console.error("❌ Error sending email:", error);
     throw error;
   }
 };

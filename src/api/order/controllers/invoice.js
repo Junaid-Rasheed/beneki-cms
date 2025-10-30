@@ -7,13 +7,17 @@ module.exports = {
     try {
       console.log("🚀 [sendInvoiceEmailHandler] Incoming request to /api/invoices/send");
 
+      // Log full request body
+      console.log("📥 Raw request body:", ctx.request.body);
+
       const { orderId, fileName, invoicePdf } = ctx.request.body;
 
       if (!orderId || !invoicePdf || !fileName) {
+        console.warn("⚠️ Missing required fields", { orderId, fileName, invoicePdf });
         return ctx.badRequest("Missing required fields (orderId, fileName, invoicePdf)");
       }
 
-      console.log("📦 Payload received:", { orderId, fileName });
+      console.log("📦 Parsed payload:", { orderId, fileName, invoicePdfLength: invoicePdf.length });
 
       // 🔍 Find order from DB
       const order = await strapi.db.query("api::order.order").findOne({
@@ -21,21 +25,23 @@ module.exports = {
         populate: ["user"],
       });
 
+      console.log("🔍 Fetched order from DB:", order);
+
       if (!order) {
+        console.warn("⚠️ Order not found for documentId:", orderId);
         return ctx.notFound("Order not found");
       }
 
       const customerEmail = order.user?.email;
       if (!customerEmail) {
+        console.warn("⚠️ Order has no customer email:", order);
         return ctx.badRequest("Order does not have a customer email");
       }
 
-      console.log("📧 Sending invoice email to:", customerEmail);
+      console.log("📧 Customer email:", customerEmail);
 
       // ✅ Call utility to send email
-      // The utility expects: toEmail, order object, pdfPath/base64
-      // Here we are passing the base64 PDF content as a temporary file path
-      // But for simplicity, we can modify the util to accept base64 directly
+      console.log("📤 Calling sendInvoiceEmail utility...");
       await sendInvoiceEmail(customerEmail, { ...order, fileName }, invoicePdf);
 
       console.log("✅ Invoice email sent successfully");
