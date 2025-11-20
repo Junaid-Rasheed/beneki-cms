@@ -1094,6 +1094,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
         };
       }>;
     productId: Schema.Attribute.String;
+    productTitle: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
     quantity: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
