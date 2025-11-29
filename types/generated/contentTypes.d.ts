@@ -1318,6 +1318,52 @@ export interface ApiStaticContentStaticContent
   };
 }
 
+export interface ApiStaticDashboardMenuNameStaticDashboardMenuName
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_dashboard_menu_names';
+  info: {
+    description: '';
+    displayName: 'Static-Dashboard-Menu-Name';
+    pluralName: 'static-dashboard-menu-names';
+    singularName: 'static-dashboard-menu-name';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    key: Schema.Attribute.String;
+    label: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-dashboard-menu-name.static-dashboard-menu-name'
+    >;
+    number: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
   collectionName: 'user_addresses';
   info: {
@@ -1992,6 +2038,7 @@ declare module '@strapi/strapi' {
       'api::order.order': ApiOrderOrder;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
       'api::static-content.static-content': ApiStaticContentStaticContent;
+      'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
       'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
