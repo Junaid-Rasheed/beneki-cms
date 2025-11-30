@@ -75,6 +75,15 @@
           "localized": true
         }
       }
+    },
+    "orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order.order",
+      "mappedBy": "coupon"
+    },
+    "limitPerAccount": {
+      "type": "integer"
     }
   }
 }
