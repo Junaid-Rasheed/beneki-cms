@@ -1318,6 +1318,81 @@ export interface ApiStaticContentStaticContent
   };
 }
 
+export interface ApiStaticDashboardContentStaticDashboardContent
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_dashboard_contents';
+  info: {
+    description: '';
+    displayName: 'Static-Dashboard-Content';
+    pluralName: 'static-dashboard-contents';
+    singularName: 'static-dashboard-content';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    account_details_text: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    addresses_text: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dashboard_intro: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    greeting_prefix: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    greeting_suffix: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-dashboard-content.static-dashboard-content'
+    >;
+    logout_text: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    recent_orders_text: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticDashboardMenuNameStaticDashboardMenuName
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_dashboard_menu_names';
@@ -2038,6 +2113,7 @@ declare module '@strapi/strapi' {
       'api::order.order': ApiOrderOrder;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
       'api::static-content.static-content': ApiStaticContentStaticContent;
+      'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
       'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;
