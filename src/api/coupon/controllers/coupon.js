@@ -10,7 +10,7 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
   // Custom endpoint to apply coupon
   async apply(ctx) {
     try {
-      const { code, cartTotal } = ctx.request.body;
+      const { code, cartTotal, userId } = ctx.request.body;
 
       if (!code || !cartTotal) {
         return ctx.badRequest('Code and cart total are required');
@@ -24,6 +24,7 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
         }
       });
 
+      
       if (!coupon) {
         return ctx.notFound('Coupon not found or inactive');
       }
@@ -52,6 +53,14 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
 
       const finalTotal = cartTotal - discountAmount;
 
+      const usageCount = await strapi.db
+                              .query('api::order.order')
+                              .count({
+                                where: {
+                                  user: userId,
+                                  coupon: couponId,
+                                },
+                              });
       // // Increment usage count
       // await strapi.db.query('api::coupon.coupon').update({
       //   where: { id: coupon.id },
@@ -62,7 +71,8 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
         success: true,
         discountAmount,
         finalTotal,
-        couponId,
+        coupon,
+        usageCount,
         message: `Coupon applied successfully`
       };
 

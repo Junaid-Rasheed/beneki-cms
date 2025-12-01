@@ -432,7 +432,6 @@ export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
-    orders: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -981,7 +980,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
       'oneToOne',
       'api::order-address.order-address'
     >;
-    coupon: Schema.Attribute.Relation<'manyToOne', 'api::coupon.coupon'>;
+    coupon: Schema.Attribute.Relation<'oneToOne', 'api::coupon.coupon'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
