@@ -27,7 +27,7 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
       if (!coupon) {
         return ctx.notFound('Coupon not found or inactive');
       }
-
+      const couponId= coupon.id;
       // Check expiration date
       if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
         return ctx.badRequest('Coupon expired');
@@ -52,16 +52,17 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
 
       const finalTotal = cartTotal - discountAmount;
 
-      // Increment usage count
-      await strapi.db.query('api::coupon.coupon').update({
-        where: { id: coupon.id },
-        data: { usageCount: coupon.usageCount + 1 }
-      });
+      // // Increment usage count
+      // await strapi.db.query('api::coupon.coupon').update({
+      //   where: { id: coupon.id },
+      //   data: { usageCount: coupon.usageCount + 1 }
+      // });
 
       return {
         success: true,
         discountAmount,
         finalTotal,
+        couponId,
         message: `Coupon applied successfully`
       };
 
