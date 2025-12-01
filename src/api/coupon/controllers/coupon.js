@@ -53,7 +53,7 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
 
       const finalTotal = cartTotal - discountAmount;
 
-      const usageCount = await strapi.db
+      const userUsageCount = await strapi.db
                               .query('api::order.order')
                               .count({
                                 where: {
@@ -72,7 +72,7 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
         discountAmount,
         finalTotal,
         coupon,
-        usageCount,
+        userUsageCount,
         message: `Coupon applied successfully`
       };
 
