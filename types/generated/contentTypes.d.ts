@@ -382,7 +382,7 @@ export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
     singularName: 'coupon';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   pluginOptions: {
     i18n: {
