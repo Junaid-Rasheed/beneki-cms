@@ -117,6 +117,9 @@
     },
     "vatNumber": {
       "type": "string"
+    },
+    "businessName": {
+      "type": "string"
     }
   }
 }
