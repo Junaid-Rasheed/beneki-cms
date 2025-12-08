@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "holiday_settings",
+  "info": {
+    "singularName": "holiday-setting",
+    "pluralName": "holiday-settings",
+    "displayName": "Holiday-Setting"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "country": {
+      "type": "enumeration",
+      "enum": [
+        "France",
+        "Belgium",
+        "Germany",
+        "Austria",
+        "Italia",
+        "Netherlands",
+        "Spain",
+        "Poland",
+        "Denmark",
+        "Hungary",
+        "Luxembourg",
+        "Portugal",
+        "Slovakia",
+        "Czech Republic"
+      ]
+    },
+    "date": {
+      "type": "date"
+    },
+    "title": {
+      "type": "string"
+    }
+  }
+}

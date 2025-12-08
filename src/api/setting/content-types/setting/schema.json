@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "settings",
+  "info": {
+    "singularName": "setting",
+    "pluralName": "settings",
+    "displayName": "Setting",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "country": {
+      "type": "enumeration",
+      "enum": [
+        "France",
+        "Belgium",
+        "Germany",
+        "Austria",
+        "Italia",
+        "Netherlands",
+        "Spain",
+        "Poland",
+        "Denmark",
+        "Hungary",
+        "Luxembourg",
+        "Portugal",
+        "Slovakia",
+        "Czech Republic"
+      ]
+    },
+    "cutoffTime": {
+      "type": "time"
+    },
+    "workingDays": {
+      "type": "json"
+    }
+  }
+}

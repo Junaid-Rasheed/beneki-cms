@@ -590,6 +590,54 @@ export interface ApiFooterFooter extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiHolidaySettingHolidaySetting
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'holiday_settings';
+  info: {
+    displayName: 'Holiday-Setting';
+    pluralName: 'holiday-settings';
+    singularName: 'holiday-setting';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    country: Schema.Attribute.Enumeration<
+      [
+        'France',
+        'Belgium',
+        'Germany',
+        'Austria',
+        'Italia',
+        'Netherlands',
+        'Spain',
+        'Poland',
+        'Denmark',
+        'Hungary',
+        'Luxembourg',
+        'Portugal',
+        'Slovakia',
+        'Czech Republic',
+      ]
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    date: Schema.Attribute.Date;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::holiday-setting.holiday-setting'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiHomePageHeroSectionHomePageHeroSection
   extends Struct.CollectionTypeSchema {
   collectionName: 'home_page_hero_sections';
@@ -1096,6 +1144,54 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+  };
+}
+
+export interface ApiSettingSetting extends Struct.CollectionTypeSchema {
+  collectionName: 'settings';
+  info: {
+    description: '';
+    displayName: 'Setting';
+    pluralName: 'settings';
+    singularName: 'setting';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    country: Schema.Attribute.Enumeration<
+      [
+        'France',
+        'Belgium',
+        'Germany',
+        'Austria',
+        'Italia',
+        'Netherlands',
+        'Spain',
+        'Poland',
+        'Denmark',
+        'Hungary',
+        'Luxembourg',
+        'Portugal',
+        'Slovakia',
+        'Czech Republic',
+      ]
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    cutoffTime: Schema.Attribute.Time;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::setting.setting'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    workingDays: Schema.Attribute.JSON;
   };
 }
 
@@ -2025,6 +2121,7 @@ export interface PluginUsersPermissionsUser
   attributes: {
     accountType: Schema.Attribute.Enumeration<['Individual', 'Business']>;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    businessName: Schema.Attribute.String;
     businessRegistrationCountry: Schema.Attribute.Enumeration<
       [
         'France',
@@ -2106,6 +2203,7 @@ declare module '@strapi/strapi' {
       'api::coupon.coupon': ApiCouponCoupon;
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;
       'api::footer.footer': ApiFooterFooter;
+      'api::holiday-setting.holiday-setting': ApiHolidaySettingHolidaySetting;
       'api::home-page-hero-section.home-page-hero-section': ApiHomePageHeroSectionHomePageHeroSection;
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
       'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
@@ -2113,6 +2211,7 @@ declare module '@strapi/strapi' {
       'api::order-address.order-address': ApiOrderAddressOrderAddress;
       'api::order-item.order-item': ApiOrderItemOrderItem;
       'api::order.order': ApiOrderOrder;
+      'api::setting.setting': ApiSettingSetting;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
       'api::static-content.static-content': ApiStaticContentStaticContent;
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
