@@ -1340,6 +1340,81 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiStaticAccountDetailStaticAccountDetail
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_account_details';
+  info: {
+    description: '';
+    displayName: 'Static-Account-Detail';
+    pluralName: 'static-account-details';
+    singularName: 'static-account-detail';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    confirmnewpassword: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    currentpassword: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    displayname: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    email: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    firstname: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    lastname: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-account-detail.static-account-detail'
+    >;
+    newpassword: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticContentStaticContent
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_contents';
@@ -2213,6 +2288,7 @@ declare module '@strapi/strapi' {
       'api::order.order': ApiOrderOrder;
       'api::setting.setting': ApiSettingSetting;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
+      'api::static-account-detail.static-account-detail': ApiStaticAccountDetailStaticAccountDetail;
       'api::static-content.static-content': ApiStaticContentStaticContent;
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
