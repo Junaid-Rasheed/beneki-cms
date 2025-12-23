@@ -2195,6 +2195,10 @@ export interface PluginUsersPermissionsUser
   };
   attributes: {
     accountType: Schema.Attribute.Enumeration<['Individual', 'Business']>;
+    affiliatedBy: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::users-permissions.user'
+    >;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     businessName: Schema.Attribute.String;
     businessRegistrationCountry: Schema.Attribute.Enumeration<
