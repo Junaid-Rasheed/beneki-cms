@@ -390,6 +390,10 @@ export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    assignedAffiliatedUser: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::users-permissions.user'
+    >;
     code: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
