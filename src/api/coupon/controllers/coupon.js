@@ -21,6 +21,9 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
         where: {
           code: code.toUpperCase(),
           isActive: true
+        },
+        populate: {
+          assignedAffiliatedUser: true
         }
       });
 
