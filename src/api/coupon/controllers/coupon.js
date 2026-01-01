@@ -38,9 +38,13 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
       }
 
       // Check usage limit
-      if (coupon.maxUsage && coupon.usageCount >= coupon.maxUsage) {
-        return ctx.badRequest('Coupon usage limit reached');
-      }
+      if (
+          coupon.maxUsage != null &&          // not null
+          coupon.maxUsage > 0 &&              // greater than 0 means limited
+          coupon.usageCount >= coupon.maxUsage
+        ) {
+          return ctx.badRequest('Coupon usage limit reached');
+        }
 
       // Calculate discount
       let discountAmount = 0;
