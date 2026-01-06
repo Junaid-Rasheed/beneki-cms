@@ -1,0 +1,179 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_checkouts",
+  "info": {
+    "singularName": "static-checkout",
+    "pluralName": "static-checkouts",
+    "displayName": "Static-Checkout",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "welcome": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "voucherPrompt": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "voucherAction": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "bilingTitle": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "bilingSelect": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "bilingEdit": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "bilingAddNew": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "bilingShipDifferent": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "deliveryNoneFound": {
+      "type": "string"
+    },
+    "deliveryGetStarted": {
+      "type": "string"
+    },
+    "deliveryAddButton": {
+      "type": "string"
+    },
+    "orderNotesLabel": {
+      "type": "string"
+    },
+    "orderNotesPlaceholder": {
+      "type": "string"
+    },
+    "orderTitle": {
+      "type": "string"
+    },
+    "orderQty": {
+      "type": "string"
+    },
+    "orderSubtotal": {
+      "type": "string"
+    },
+    "orderVat": {
+      "type": "string"
+    },
+    "orderTotal": {
+      "type": "string"
+    },
+    "deliveryInfoTitle": {
+      "type": "string"
+    },
+    "deliveryOrderWithin": {
+      "type": "string"
+    },
+    "deliveryReceiveOn": {
+      "type": "string"
+    },
+    "deliveryPostalCode": {
+      "type": "string"
+    },
+    "deliveryCountry": {
+      "type": "string"
+    },
+    "deliveryEstimated": {
+      "type": "string"
+    },
+    "deliveryDays": {
+      "type": "string"
+    },
+    "paymentTitle": {
+      "type": "string"
+    },
+    "paymentCreditCard": {
+      "type": "string"
+    },
+    "paymentBankCards": {
+      "type": "string"
+    },
+    "paymentBankTransfer": {
+      "type": "string"
+    },
+    "paymentPaypal": {
+      "type": "string"
+    },
+    "paymentPaypalInfo": {
+      "type": "string"
+    },
+    "paymentPaypalLimit": {
+      "type": "string"
+    },
+    "privacyText": {
+      "type": "string"
+    },
+    "privacyLink": {
+      "type": "string"
+    },
+    "termsAccept": {
+      "type": "string"
+    },
+    "termsLink": {
+      "type": "string"
+    },
+    "payButton": {
+      "type": "string"
+    }
+  }
+}

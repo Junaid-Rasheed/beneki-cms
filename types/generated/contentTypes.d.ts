@@ -1482,6 +1482,122 @@ export interface ApiStaticAddressBookStaticAddressBook
   };
 }
 
+export interface ApiStaticCheckoutStaticCheckout
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_checkouts';
+  info: {
+    description: '';
+    displayName: 'Static-Checkout';
+    pluralName: 'static-checkouts';
+    singularName: 'static-checkout';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    bilingAddNew: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    bilingEdit: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    bilingSelect: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    bilingShipDifferent: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    bilingTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deliveryAddButton: Schema.Attribute.String;
+    deliveryCountry: Schema.Attribute.String;
+    deliveryDays: Schema.Attribute.String;
+    deliveryEstimated: Schema.Attribute.String;
+    deliveryGetStarted: Schema.Attribute.String;
+    deliveryInfoTitle: Schema.Attribute.String;
+    deliveryNoneFound: Schema.Attribute.String;
+    deliveryOrderWithin: Schema.Attribute.String;
+    deliveryPostalCode: Schema.Attribute.String;
+    deliveryReceiveOn: Schema.Attribute.String;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-checkout.static-checkout'
+    >;
+    orderNotesLabel: Schema.Attribute.String;
+    orderNotesPlaceholder: Schema.Attribute.String;
+    orderQty: Schema.Attribute.String;
+    orderSubtotal: Schema.Attribute.String;
+    orderTitle: Schema.Attribute.String;
+    orderTotal: Schema.Attribute.String;
+    orderVat: Schema.Attribute.String;
+    payButton: Schema.Attribute.String;
+    paymentBankCards: Schema.Attribute.String;
+    paymentBankTransfer: Schema.Attribute.String;
+    paymentCreditCard: Schema.Attribute.String;
+    paymentPaypal: Schema.Attribute.String;
+    paymentPaypalInfo: Schema.Attribute.String;
+    paymentPaypalLimit: Schema.Attribute.String;
+    paymentTitle: Schema.Attribute.String;
+    privacyLink: Schema.Attribute.String;
+    privacyText: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    termsAccept: Schema.Attribute.String;
+    termsLink: Schema.Attribute.String;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    voucherAction: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    voucherPrompt: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    welcome: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
 export interface ApiStaticContentStaticContent
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_contents';
@@ -2361,6 +2477,7 @@ declare module '@strapi/strapi' {
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
       'api::static-account-detail.static-account-detail': ApiStaticAccountDetailStaticAccountDetail;
       'api::static-address-book.static-address-book': ApiStaticAddressBookStaticAddressBook;
+      'api::static-checkout.static-checkout': ApiStaticCheckoutStaticCheckout;
       'api::static-content.static-content': ApiStaticContentStaticContent;
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
