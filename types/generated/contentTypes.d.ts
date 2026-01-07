@@ -1482,6 +1482,84 @@ export interface ApiStaticAddressBookStaticAddressBook
   };
 }
 
+export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
+  collectionName: 'static_carts';
+  info: {
+    description: '';
+    displayName: 'Static-Cart';
+    pluralName: 'static-carts';
+    singularName: 'static-cart';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    basketActionRemoveItem: Schema.Attribute.String;
+    basketActionValidateOrder: Schema.Attribute.String;
+    basketDeliveryCountdown: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketPromoApplyButton: Schema.Attribute.String;
+    basketPromoPlaceholder: Schema.Attribute.String;
+    basketSummaryShipping: Schema.Attribute.String;
+    basketSummaryShippingFree: Schema.Attribute.String;
+    basketSummaryShippingNote: Schema.Attribute.String;
+    basketSummaryTitle: Schema.Attribute.String;
+    basketSummaryTotalLabel: Schema.Attribute.String;
+    basketSummaryVatLabel: Schema.Attribute.String;
+    basketTablePrice: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketTableProduct: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketTableQuantity: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketTableSubtotal: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-cart.static-cart'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticCheckoutStaticCheckout
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_checkouts';
@@ -2477,6 +2555,7 @@ declare module '@strapi/strapi' {
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
       'api::static-account-detail.static-account-detail': ApiStaticAccountDetailStaticAccountDetail;
       'api::static-address-book.static-address-book': ApiStaticAddressBookStaticAddressBook;
+      'api::static-cart.static-cart': ApiStaticCartStaticCart;
       'api::static-checkout.static-checkout': ApiStaticCheckoutStaticCheckout;
       'api::static-content.static-content': ApiStaticContentStaticContent;
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;

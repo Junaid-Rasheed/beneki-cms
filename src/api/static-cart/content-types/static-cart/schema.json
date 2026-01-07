@@ -1,0 +1,98 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_carts",
+  "info": {
+    "singularName": "static-cart",
+    "pluralName": "static-carts",
+    "displayName": "Static-Cart",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "basketTitle": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "basketDeliveryCountdown": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "basketTableProduct": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "basketTablePrice": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "basketTableQuantity": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "basketTableSubtotal": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "basketPromoPlaceholder": {
+      "type": "string"
+    },
+    "basketPromoApplyButton": {
+      "type": "string"
+    },
+    "basketSummaryTitle": {
+      "type": "string"
+    },
+    "basketSummaryShipping": {
+      "type": "string"
+    },
+    "basketSummaryShippingFree": {
+      "type": "string"
+    },
+    "basketSummaryShippingNote": {
+      "type": "string"
+    },
+    "basketSummaryVatLabel": {
+      "type": "string"
+    },
+    "basketSummaryTotalLabel": {
+      "type": "string"
+    },
+    "basketActionRemoveItem": {
+      "type": "string"
+    },
+    "basketActionValidateOrder": {
+      "type": "string"
+    }
+  }
+}
