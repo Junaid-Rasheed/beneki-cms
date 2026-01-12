@@ -1,0 +1,89 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_invoices",
+  "info": {
+    "singularName": "static-invoice",
+    "pluralName": "static-invoices",
+    "displayName": "Static-Invoice",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "invoiceTitle": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "pageLabel": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "deliveryAddressLabel": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "paymentTypeLabel": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "vatLabel": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "baseLabel": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "totalLabel": {
+      "type": "string"
+    },
+    "totalExclVatLabel": {
+      "type": "string"
+    },
+    "totalInclVatLabel": {
+      "type": "string"
+    },
+    "bankDetailsLabel": {
+      "type": "string"
+    },
+    "vatExemptionNotice": {
+      "type": "string"
+    },
+    "legalNotice": {
+      "type": "string"
+    },
+    "tableHeaders": {
+      "type": "json"
+    }
+  }
+}

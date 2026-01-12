@@ -1873,6 +1873,82 @@ export interface ApiStaticDashboardMenuNameStaticDashboardMenuName
   };
 }
 
+export interface ApiStaticInvoiceStaticInvoice
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_invoices';
+  info: {
+    description: '';
+    displayName: 'Static-Invoice';
+    pluralName: 'static-invoices';
+    singularName: 'static-invoice';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    bankDetailsLabel: Schema.Attribute.String;
+    baseLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deliveryAddressLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    invoiceTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    legalNotice: Schema.Attribute.String;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-invoice.static-invoice'
+    >;
+    pageLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    paymentTypeLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    tableHeaders: Schema.Attribute.JSON;
+    totalExclVatLabel: Schema.Attribute.String;
+    totalInclVatLabel: Schema.Attribute.String;
+    totalLabel: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    vatExemptionNotice: Schema.Attribute.String;
+    vatLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
 export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
   collectionName: 'user_addresses';
   info: {
@@ -2560,6 +2636,7 @@ declare module '@strapi/strapi' {
       'api::static-content.static-content': ApiStaticContentStaticContent;
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
+      'api::static-invoice.static-invoice': ApiStaticInvoiceStaticInvoice;
       'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
