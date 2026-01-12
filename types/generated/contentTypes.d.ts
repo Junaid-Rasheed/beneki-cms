@@ -1949,6 +1949,62 @@ export interface ApiStaticInvoiceStaticInvoice
   };
 }
 
+export interface ApiStaticSuccessPageStaticSuccessPage
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_success_pages';
+  info: {
+    displayName: 'Static-SuccessPage';
+    pluralName: 'static-success-pages';
+    singularName: 'static-success-page';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    buttonText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-success-page.static-success-page'
+    >;
+    orderUpdatedMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
   collectionName: 'user_addresses';
   info: {
@@ -2637,6 +2693,7 @@ declare module '@strapi/strapi' {
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
       'api::static-invoice.static-invoice': ApiStaticInvoiceStaticInvoice;
+      'api::static-success-page.static-success-page': ApiStaticSuccessPageStaticSuccessPage;
       'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
