@@ -10,7 +10,9 @@ module.exports = {
       // Log full request body
       console.log("📥 Raw request body:", ctx.request.body);
 
-      const { orderId, fileName, invoicePdf } = ctx.request.body;
+      const { orderId, fileName, invoicePdf,locale  } = ctx.request.body;
+      console.log("🌍 Locale received in Strapi:", locale);
+
 
       console.log("🔹 Extracted fields:");
       console.log("orderId:", orderId);
@@ -67,7 +69,7 @@ module.exports = {
       console.log("Order object:", { ...order, fileName });
       console.log("Invoice PDF length:", invoicePdf.length);
 
-      await sendInvoiceEmail(customerEmail, { ...order, fileName }, invoicePdf);
+      await sendInvoiceEmail(customerEmail, { ...order, fileName }, invoicePdf,locale );
 
       console.log("✅ Invoice email sent successfully");
 

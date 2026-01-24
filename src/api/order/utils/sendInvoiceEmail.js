@@ -7,7 +7,7 @@
 //   const pdfBuffer = fs.readFileSync(pdfPath);
 
 //   console.log("PDF BUFFER",pdfBuffer)
-  
+
 //   const msg = {
 //     to: toEmail,
 //     from: "elveniaschmall@gmail.com",
@@ -27,7 +27,6 @@
 //   await sgMail.send(msg);
 //   console.log("email sent success")
 
-  
 // };
 
 "use strict";
@@ -36,7 +35,13 @@ const sgMail = require("@sendgrid/mail");
 const fs = require("fs");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-module.exports = async function sendInvoiceEmail(toEmail, order, pdfDataOrPath) {
+module.exports = async function sendInvoiceEmail(
+  toEmail,
+  order,
+  pdfDataOrPath,
+  locale = "en",
+) { console.log("🌍 Locale received in sendInvoiceEmail:", locale);
+
   try {
     console.log("📧 Preparing to send invoice email to:", toEmail);
     console.log("📄 Order data:", order);
@@ -56,22 +61,53 @@ module.exports = async function sendInvoiceEmail(toEmail, order, pdfDataOrPath) 
       console.log("✅ PDF file read successfully, size:", pdfBuffer.length);
     }
 
+    const EMAIL_TRANSLATIONS = {
+      en: {
+        subject: "Your Invoice for Order",
+        title: "Thank you for your purchase!",
+        processed: "Your order has been processed successfully.",
+        invoice: "Please find your invoice attached to this email.",
+        regards: "Best regards",
+      },
+      fr: {
+        subject: "Votre facture pour la commande",
+        title: "Merci pour votre achat !",
+        processed: "Votre commande a été traitée avec succès.",
+        invoice: "Veuillez trouver votre facture en pièce jointe.",
+        regards: "Cordialement",
+      },
+    };
+
+const normalizedLocale =
+  typeof locale === "string"
+    ? locale.toLowerCase().split(/[-_]/)[0]
+    : "en";
+
+const t = EMAIL_TRANSLATIONS[normalizedLocale] || EMAIL_TRANSLATIONS.en;
+console.log("🌍 Final locale used for email:", normalizedLocale);
+
+
     const msg = {
       to: toEmail,
       from: "elveniaschmall@gmail.com",
-      subject: `Your Invoice for Order #${order.orderNumber || order.documentId}`,
+      subject: `${t.subject} #${order.orderNumber || order.documentId}`,
       text: `Thank you for your purchase! Please find your invoice attached.`,
       html: `<div>
-          <h2>Thank you for your purchase!</h2>
-          <p>Your order <strong>#${order.orderNumber || order.documentId}</strong> has been processed successfully.</p>
-          <p>Please find your invoice attached to this email.</p>
-          <br>
-          <p>Best regards,<br>BENEKI Team</p>
-        </div>`,
+  <h2>${t.title}</h2>
+  <p>
+    ${t.processed}
+    <strong>#${order.orderNumber || order.documentId}</strong>
+  </p>
+  <p>${t.invoice}</p>
+  <br />
+  <p>${t.regards},<br />BENEKI Team</p>
+</div>`,
       attachments: [
         {
           content: pdfBase64,
-          filename: order.fileName || `invoice-${order.orderNumber || order.documentId}.pdf`,
+          filename:
+            order.fileName ||
+            `invoice-${order.orderNumber || order.documentId}.pdf`,
           type: "application/pdf",
           disposition: "attachment",
         },
@@ -87,7 +123,6 @@ module.exports = async function sendInvoiceEmail(toEmail, order, pdfDataOrPath) 
 
     await sgMail.send(msg);
     console.log("✅ Email sent successfully to:", toEmail);
-
   } catch (error) {
     console.error("❌ Error sending email:", error);
     throw error;
