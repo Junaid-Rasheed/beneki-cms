@@ -177,6 +177,9 @@
     },
     "productTitle": {
       "type": "text"
+    },
+    "productOldId": {
+      "type": "string"
     }
   }
 }
