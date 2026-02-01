@@ -38,7 +38,8 @@
       "enum": [
         "credit_card",
         "bank_transfer",
-        "paypal"
+        "paypal",
+        "other"
       ],
       "pluginOptions": {
         "i18n": {
