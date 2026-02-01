@@ -1093,7 +1093,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         };
       }>;
     paymentMethod: Schema.Attribute.Enumeration<
-      ['credit_card', 'bank_transfer', 'paypal']
+      ['credit_card', 'bank_transfer', 'paypal', 'other']
     > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
