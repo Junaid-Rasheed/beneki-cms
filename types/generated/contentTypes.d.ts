@@ -1069,6 +1069,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    oldOrderId: Schema.Attribute.String;
     orderItems: Schema.Attribute.Relation<
       'oneToMany',
       'api::order-item.order-item'

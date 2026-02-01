@@ -177,6 +177,9 @@
     },
     "emailLocale": {
       "type": "string"
+    },
+    "oldOrderId": {
+      "type": "string"
     }
   }
 }
