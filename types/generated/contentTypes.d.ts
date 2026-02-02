@@ -1055,6 +1055,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         };
       }>;
     emailLocale: Schema.Attribute.String;
+    invoiceId: Schema.Attribute.BigInteger;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
     notes: Schema.Attribute.String &
@@ -1070,6 +1071,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         };
       }>;
     oldOrderId: Schema.Attribute.String;
+    orderCreatedDate: Schema.Attribute.DateTime;
     orderItems: Schema.Attribute.Relation<
       'oneToMany',
       'api::order-item.order-item'

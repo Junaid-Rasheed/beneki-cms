@@ -181,6 +181,12 @@
     },
     "oldOrderId": {
       "type": "string"
+    },
+    "orderCreatedDate": {
+      "type": "datetime"
+    },
+    "invoiceId": {
+      "type": "biginteger"
     }
   }
 }
