@@ -1878,6 +1878,75 @@ export interface ApiStaticDashboardMenuNameStaticDashboardMenuName
   };
 }
 
+export interface ApiStaticEmailTemplateStaticEmailTemplate
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_email_templates';
+  info: {
+    description: '';
+    displayName: 'Static-Email-Template';
+    pluralName: 'static-email-templates';
+    singularName: 'static-email-template';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    invoice: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    key: Schema.Attribute.Integer &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-email-template.static-email-template'
+    >;
+    processed: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    regards: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    subject: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticInvoiceStaticInvoice
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_invoices';
@@ -2697,6 +2766,7 @@ declare module '@strapi/strapi' {
       'api::static-content.static-content': ApiStaticContentStaticContent;
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
+      'api::static-email-template.static-email-template': ApiStaticEmailTemplateStaticEmailTemplate;
       'api::static-invoice.static-invoice': ApiStaticInvoiceStaticInvoice;
       'api::static-success-page.static-success-page': ApiStaticSuccessPageStaticSuccessPage;
       'api::user-address.user-address': ApiUserAddressUserAddress;
