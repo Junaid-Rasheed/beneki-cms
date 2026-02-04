@@ -1565,6 +1565,105 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiStaticCheckoutBillingAddressStaticCheckoutBillingAddress
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_checkout_billing_addresses';
+  info: {
+    description: '';
+    displayName: 'Static-Checkout-Billing-Address';
+    pluralName: 'static-checkout-billing-addresses';
+    singularName: 'static-checkout-billing-address';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    addressName: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    city: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    company: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    country: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    firstName: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    isPrimary: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    lastName: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-checkout-billing-address.static-checkout-billing-address'
+    >;
+    phone: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    postalCode: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    streetAddress: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticCheckoutStaticCheckout
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_checkouts';
@@ -2762,6 +2861,7 @@ declare module '@strapi/strapi' {
       'api::static-account-detail.static-account-detail': ApiStaticAccountDetailStaticAccountDetail;
       'api::static-address-book.static-address-book': ApiStaticAddressBookStaticAddressBook;
       'api::static-cart.static-cart': ApiStaticCartStaticCart;
+      'api::static-checkout-billing-address.static-checkout-billing-address': ApiStaticCheckoutBillingAddressStaticCheckoutBillingAddress;
       'api::static-checkout.static-checkout': ApiStaticCheckoutStaticCheckout;
       'api::static-content.static-content': ApiStaticContentStaticContent;
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
