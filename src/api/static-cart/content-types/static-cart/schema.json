@@ -93,6 +93,45 @@
     },
     "basketActionValidateOrder": {
       "type": "string"
+    },
+    "basketPromoApplied": {
+      "type": "string"
+    },
+    "basketPromoRemove": {
+      "type": "string"
+    },
+    "basketPromoErrorEmpty": {
+      "type": "string"
+    },
+    "basketPromoErrorInvalid": {
+      "type": "string"
+    },
+    "basketPromoErrorExpired": {
+      "type": "string"
+    },
+    "basketSummarySubtotalLabel": {
+      "type": "string"
+    },
+    "basketSummaryDiscountLabel": {
+      "type": "string"
+    },
+    "basketEmptyMessage": {
+      "type": "string"
+    },
+    "basketContinueShopping": {
+      "type": "string"
+    },
+    "basketDeliveryLoginMessage": {
+      "type": "string"
+    },
+    "basketDeliveryOrderWithin": {
+      "type": "string"
+    },
+    "basketDeliveryReceiveOn": {
+      "type": "string"
+    },
+    "basketDeliveryOrderNow": {
+      "type": "string"
     }
   }
 }
