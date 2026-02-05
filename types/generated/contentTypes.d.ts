@@ -2345,6 +2345,46 @@ export interface ApiStaticSuccessPageStaticSuccessPage
   };
 }
 
+export interface ApiStaticYourOrderStaticYourOrder
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_your_orders';
+  info: {
+    displayName: 'Static-Your-Order';
+    pluralName: 'static-your-orders';
+    singularName: 'static-your-order';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    allOrders: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    filterByStatus: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-your-order.static-your-order'
+    > &
+      Schema.Attribute.Private;
+    ordersTotalSuffix: Schema.Attribute.String;
+    pageSize: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    searchPlaceholder: Schema.Attribute.String;
+    tableActions: Schema.Attribute.String;
+    tableDate: Schema.Attribute.String;
+    tableOrderNo: Schema.Attribute.String;
+    tablePayment: Schema.Attribute.String;
+    tableProducts: Schema.Attribute.String;
+    tableStatus: Schema.Attribute.String;
+    tableTotal: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
   collectionName: 'user_addresses';
   info: {
@@ -3037,6 +3077,7 @@ declare module '@strapi/strapi' {
       'api::static-invoice.static-invoice': ApiStaticInvoiceStaticInvoice;
       'api::static-product-detail.static-product-detail': ApiStaticProductDetailStaticProductDetail;
       'api::static-success-page.static-success-page': ApiStaticSuccessPageStaticSuccessPage;
+      'api::static-your-order.static-your-order': ApiStaticYourOrderStaticYourOrder;
       'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

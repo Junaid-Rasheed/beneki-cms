@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_your_orders",
+  "info": {
+    "singularName": "static-your-order",
+    "pluralName": "static-your-orders",
+    "displayName": "Static-Your-Order"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "searchPlaceholder": {
+      "type": "string"
+    },
+    "filterByStatus": {
+      "type": "string"
+    },
+    "allOrders": {
+      "type": "string"
+    },
+    "pageSize": {
+      "type": "string"
+    },
+    "ordersTotalSuffix": {
+      "type": "string"
+    },
+    "tableOrderNo": {
+      "type": "string"
+    },
+    "tableDate": {
+      "type": "string"
+    },
+    "tableStatus": {
+      "type": "string"
+    },
+    "tablePayment": {
+      "type": "string"
+    },
+    "tableProducts": {
+      "type": "string"
+    },
+    "tableTotal": {
+      "type": "string"
+    },
+    "tableActions": {
+      "type": "string"
+    }
+  }
+}
