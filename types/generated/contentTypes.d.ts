@@ -2122,6 +2122,56 @@ export interface ApiStaticInvoiceStaticInvoice
   };
 }
 
+export interface ApiStaticProductDetailStaticProductDetail
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_product_details';
+  info: {
+    displayName: 'Static-Product-Detail';
+    pluralName: 'static-product-details';
+    singularName: 'static-product-detail';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    addAddressForEstimate: Schema.Attribute.String;
+    addToCart: Schema.Attribute.String;
+    basedOnPostalCode: Schema.Attribute.String;
+    baseRangeTitle: Schema.Attribute.String;
+    checkingDelivery: Schema.Attribute.String;
+    chooseOption: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deliveryTo: Schema.Attribute.String;
+    deliveryWeekdaysOnly: Schema.Attribute.String;
+    itemsLabel: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-product-detail.static-product-detail'
+    > &
+      Schema.Attribute.Private;
+    loginToSeeDelivery: Schema.Attribute.String;
+    nextBusinessDayInfo: Schema.Attribute.String;
+    noImageAvailable: Schema.Attribute.String;
+    noQuantityAvailable: Schema.Attribute.String;
+    orderNowReceiveOn: Schema.Attribute.String;
+    orderWithin: Schema.Attribute.String;
+    perItemLabel: Schema.Attribute.String;
+    preciseRangeTitle: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    quantityLabel: Schema.Attribute.String;
+    receiveOn: Schema.Attribute.String;
+    tableCountry: Schema.Attribute.String;
+    tableDeliveryTime: Schema.Attribute.String;
+    totalLabel: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticSuccessPageStaticSuccessPage
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_success_pages';
@@ -2868,6 +2918,7 @@ declare module '@strapi/strapi' {
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
       'api::static-email-template.static-email-template': ApiStaticEmailTemplateStaticEmailTemplate;
       'api::static-invoice.static-invoice': ApiStaticInvoiceStaticInvoice;
+      'api::static-product-detail.static-product-detail': ApiStaticProductDetailStaticProductDetail;
       'api::static-success-page.static-success-page': ApiStaticSuccessPageStaticSuccessPage;
       'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;

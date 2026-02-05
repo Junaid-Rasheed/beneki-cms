@@ -1,0 +1,80 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_product_details",
+  "info": {
+    "singularName": "static-product-detail",
+    "pluralName": "static-product-details",
+    "displayName": "Static-Product-Detail"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "checkingDelivery": {
+      "type": "string"
+    },
+    "orderWithin": {
+      "type": "string"
+    },
+    "receiveOn": {
+      "type": "string"
+    },
+    "orderNowReceiveOn": {
+      "type": "string"
+    },
+    "loginToSeeDelivery": {
+      "type": "string"
+    },
+    "addAddressForEstimate": {
+      "type": "string"
+    },
+    "baseRangeTitle": {
+      "type": "string"
+    },
+    "deliveryTo": {
+      "type": "string"
+    },
+    "deliveryWeekdaysOnly": {
+      "type": "string"
+    },
+    "preciseRangeTitle": {
+      "type": "string"
+    },
+    "nextBusinessDayInfo": {
+      "type": "string"
+    },
+    "basedOnPostalCode": {
+      "type": "string"
+    },
+    "tableCountry": {
+      "type": "string"
+    },
+    "tableDeliveryTime": {
+      "type": "string"
+    },
+    "noImageAvailable": {
+      "type": "string"
+    },
+    "quantityLabel": {
+      "type": "string"
+    },
+    "chooseOption": {
+      "type": "string"
+    },
+    "noQuantityAvailable": {
+      "type": "string"
+    },
+    "totalLabel": {
+      "type": "string"
+    },
+    "itemsLabel": {
+      "type": "string"
+    },
+    "perItemLabel": {
+      "type": "string"
+    },
+    "addToCart": {
+      "type": "string"
+    }
+  }
+}
