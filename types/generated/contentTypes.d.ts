@@ -2349,6 +2349,7 @@ export interface ApiStaticYourOrderStaticYourOrder
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_your_orders';
   info: {
+    description: '';
     displayName: 'Static-Your-Order';
     pluralName: 'static-your-orders';
     singularName: 'static-your-order';
@@ -2356,29 +2357,93 @@ export interface ApiStaticYourOrderStaticYourOrder
   options: {
     draftAndPublish: true;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
-    allOrders: Schema.Attribute.String;
+    allOrders: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    filterByStatus: Schema.Attribute.String;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    filterByStatus: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::static-your-order.static-your-order'
-    > &
-      Schema.Attribute.Private;
-    ordersTotalSuffix: Schema.Attribute.String;
-    pageSize: Schema.Attribute.String;
+    >;
+    ordersTotalSuffix: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    pageSize: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     publishedAt: Schema.Attribute.DateTime;
-    searchPlaceholder: Schema.Attribute.String;
-    tableActions: Schema.Attribute.String;
-    tableDate: Schema.Attribute.String;
-    tableOrderNo: Schema.Attribute.String;
-    tablePayment: Schema.Attribute.String;
-    tableProducts: Schema.Attribute.String;
-    tableStatus: Schema.Attribute.String;
-    tableTotal: Schema.Attribute.String;
+    searchPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableActions: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableDate: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableOrderNo: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tablePayment: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableProducts: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableStatus: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableTotal: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
