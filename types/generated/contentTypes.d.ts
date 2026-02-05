@@ -2126,6 +2126,7 @@ export interface ApiStaticProductDetailStaticProductDetail
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_product_details';
   info: {
+    description: '';
     displayName: 'Static-Product-Detail';
     pluralName: 'static-product-details';
     singularName: 'static-product-detail';
@@ -2133,39 +2134,155 @@ export interface ApiStaticProductDetailStaticProductDetail
   options: {
     draftAndPublish: true;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
-    addAddressForEstimate: Schema.Attribute.String;
-    addToCart: Schema.Attribute.String;
-    basedOnPostalCode: Schema.Attribute.String;
-    baseRangeTitle: Schema.Attribute.String;
-    checkingDelivery: Schema.Attribute.String;
-    chooseOption: Schema.Attribute.String;
+    addAddressForEstimate: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    additionalInformation: Schema.Attribute.String;
+    addToCart: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basedOnPostalCode: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    baseRangeTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    checkingDelivery: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    chooseOption: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    deliveryTo: Schema.Attribute.String;
-    deliveryWeekdaysOnly: Schema.Attribute.String;
-    itemsLabel: Schema.Attribute.String;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    deliveryTo: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    deliveryWeekdaysOnly: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    descriptionLabel: Schema.Attribute.String;
+    itemsLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::static-product-detail.static-product-detail'
-    > &
-      Schema.Attribute.Private;
-    loginToSeeDelivery: Schema.Attribute.String;
-    nextBusinessDayInfo: Schema.Attribute.String;
-    noImageAvailable: Schema.Attribute.String;
-    noQuantityAvailable: Schema.Attribute.String;
-    orderNowReceiveOn: Schema.Attribute.String;
-    orderWithin: Schema.Attribute.String;
-    perItemLabel: Schema.Attribute.String;
-    preciseRangeTitle: Schema.Attribute.String;
+    >;
+    loginToSeeDelivery: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    nextBusinessDayInfo: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    noImageAvailable: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    noQuantityAvailable: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderNowReceiveOn: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderWithin: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    perItemLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    preciseRangeTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     publishedAt: Schema.Attribute.DateTime;
-    quantityLabel: Schema.Attribute.String;
-    receiveOn: Schema.Attribute.String;
-    tableCountry: Schema.Attribute.String;
-    tableDeliveryTime: Schema.Attribute.String;
-    totalLabel: Schema.Attribute.String;
+    quantityLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    receiveOn: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableCountry: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableDeliveryTime: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    totalLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

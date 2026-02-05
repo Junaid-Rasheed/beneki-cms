@@ -191,6 +191,12 @@
           "localized": true
         }
       }
+    },
+    "descriptionLabel": {
+      "type": "string"
+    },
+    "additionalInformation": {
+      "type": "string"
     }
   }
 }
