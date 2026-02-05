@@ -1506,17 +1506,30 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
   attributes: {
     basketActionRemoveItem: Schema.Attribute.String;
     basketActionValidateOrder: Schema.Attribute.String;
+    basketContinueShopping: Schema.Attribute.String;
     basketDeliveryCountdown: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
+    basketDeliveryLoginMessage: Schema.Attribute.String;
+    basketDeliveryOrderNow: Schema.Attribute.String;
+    basketDeliveryOrderWithin: Schema.Attribute.String;
+    basketDeliveryReceiveOn: Schema.Attribute.String;
+    basketEmptyMessage: Schema.Attribute.String;
+    basketPromoApplied: Schema.Attribute.String;
     basketPromoApplyButton: Schema.Attribute.String;
+    basketPromoErrorEmpty: Schema.Attribute.String;
+    basketPromoErrorExpired: Schema.Attribute.String;
+    basketPromoErrorInvalid: Schema.Attribute.String;
     basketPromoPlaceholder: Schema.Attribute.String;
+    basketPromoRemove: Schema.Attribute.String;
+    basketSummaryDiscountLabel: Schema.Attribute.String;
     basketSummaryShipping: Schema.Attribute.String;
     basketSummaryShippingFree: Schema.Attribute.String;
     basketSummaryShippingNote: Schema.Attribute.String;
+    basketSummarySubtotalLabel: Schema.Attribute.String;
     basketSummaryTitle: Schema.Attribute.String;
     basketSummaryTotalLabel: Schema.Attribute.String;
     basketSummaryVatLabel: Schema.Attribute.String;
