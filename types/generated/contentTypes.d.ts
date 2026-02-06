@@ -1729,11 +1729,17 @@ export interface ApiStaticCheckoutStaticCheckout
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     deliveryAddButton: Schema.Attribute.String;
+    deliveryBaseRangeFallback: Schema.Attribute.String;
     deliveryCountry: Schema.Attribute.String;
+    deliveryDateFormat: Schema.Attribute.String;
+    deliveryDayPlural: Schema.Attribute.String;
     deliveryDays: Schema.Attribute.String;
+    deliveryDaySingular: Schema.Attribute.String;
     deliveryEstimated: Schema.Attribute.String;
     deliveryGetStarted: Schema.Attribute.String;
+    deliveryHourShort: Schema.Attribute.String;
     deliveryInfoTitle: Schema.Attribute.String;
+    deliveryMinuteShort: Schema.Attribute.String;
     deliveryNoneFound: Schema.Attribute.String;
     deliveryOrderWithin: Schema.Attribute.String;
     deliveryPostalCode: Schema.Attribute.String;
@@ -1761,6 +1767,7 @@ export interface ApiStaticCheckoutStaticCheckout
     privacyLink: Schema.Attribute.String;
     privacyText: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    redirectingToCart: Schema.Attribute.String;
     termsAccept: Schema.Attribute.String;
     termsLink: Schema.Attribute.String;
     title: Schema.Attribute.String &
@@ -2452,6 +2459,152 @@ export interface ApiStaticYourOrderStaticYourOrder
         };
       }>;
     tableTotal: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiStaticYourOrder2StaticYourOrder2
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_your_order2s';
+  info: {
+    displayName: 'Static-Your-Order2';
+    pluralName: 'static-your-order2s';
+    singularName: 'static-your-order2';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    backToOrders: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    billingAddressTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    itemBundleLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    itemQuantityLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    itemUnitPriceLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-your-order2.static-your-order2'
+    >;
+    orderAgainButton: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderDateLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderItemsTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderStatusLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderSummaryTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    paymentMethodTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    paymentStatusLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    shippingAddressTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    summaryShippingFree: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    summaryShippingLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    summarySubtotalLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    summaryTotalLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    summaryVatLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -3156,6 +3309,7 @@ declare module '@strapi/strapi' {
       'api::static-product-detail.static-product-detail': ApiStaticProductDetailStaticProductDetail;
       'api::static-success-page.static-success-page': ApiStaticSuccessPageStaticSuccessPage;
       'api::static-your-order.static-your-order': ApiStaticYourOrderStaticYourOrder;
+      'api::static-your-order2.static-your-order2': ApiStaticYourOrder2StaticYourOrder2;
       'api::user-address.user-address': ApiUserAddressUserAddress;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
