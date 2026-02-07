@@ -84,6 +84,21 @@
     },
     "tableHeaders": {
       "type": "json"
+    },
+    "dateLabel": {
+      "type": "string"
+    },
+    "customerCompanyLabel": {
+      "type": "string"
+    },
+    "clientRefLabel": {
+      "type": "string"
+    },
+    "emailLabel": {
+      "type": "string"
+    },
+    "vatIntracomLabel": {
+      "type": "string"
     }
   }
 }
