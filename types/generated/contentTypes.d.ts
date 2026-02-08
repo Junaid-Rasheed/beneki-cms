@@ -2462,6 +2462,41 @@ export interface ApiStaticInvoiceStaticInvoice
   };
 }
 
+export interface ApiStaticOrderSummaryStaticOrderSummary
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_order_summaries';
+  info: {
+    displayName: 'Static-Order-Summary';
+    pluralName: 'static-order-summaries';
+    singularName: 'static-order-summary';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-order-summary.static-order-summary'
+    > &
+      Schema.Attribute.Private;
+    orderDiscountLabel: Schema.Attribute.String;
+    orderItemEach: Schema.Attribute.String;
+    orderItemQty: Schema.Attribute.String;
+    orderSubtotalLabel: Schema.Attribute.String;
+    orderSummaryTitle: Schema.Attribute.String;
+    orderTotalLabel: Schema.Attribute.String;
+    orderVatLabel: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticProductDetailStaticProductDetail
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_product_details';
@@ -3629,6 +3664,7 @@ declare module '@strapi/strapi' {
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
       'api::static-email-template.static-email-template': ApiStaticEmailTemplateStaticEmailTemplate;
       'api::static-invoice.static-invoice': ApiStaticInvoiceStaticInvoice;
+      'api::static-order-summary.static-order-summary': ApiStaticOrderSummaryStaticOrderSummary;
       'api::static-product-detail.static-product-detail': ApiStaticProductDetailStaticProductDetail;
       'api::static-success-page.static-success-page': ApiStaticSuccessPageStaticSuccessPage;
       'api::static-your-order.static-your-order': ApiStaticYourOrderStaticYourOrder;
