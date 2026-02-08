@@ -16,103 +16,6 @@
     }
   },
   "attributes": {
-    "addressName": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "firstName": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "lastName": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "company": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "country": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "streetAddress": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "city": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "postalCode": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "phone": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "email": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "isPrimary": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "titleAddBilling": {
-      "type": "string"
-    },
-    "titleAddShipping": {
-      "type": "string"
-    },
-    "titleEdit": {
-      "type": "string"
-    },
     "addressNamePlaceholder": {
       "type": "string"
     },
@@ -138,21 +41,6 @@
       "type": "string"
     },
     "emailPlaceholder": {
-      "type": "string"
-    },
-    "primaryAddressCheckbox": {
-      "type": "string"
-    },
-    "cancelButton": {
-      "type": "string"
-    },
-    "saveButton": {
-      "type": "string"
-    },
-    "updateButton": {
-      "type": "string"
-    },
-    "savingButton": {
       "type": "string"
     }
   }
