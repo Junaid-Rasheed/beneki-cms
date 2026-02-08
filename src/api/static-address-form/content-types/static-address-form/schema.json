@@ -4,7 +4,8 @@
   "info": {
     "singularName": "static-address-form",
     "pluralName": "static-address-forms",
-    "displayName": "Static-Address-Form"
+    "displayName": "Static-Address-Form",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -166,6 +167,30 @@
           "localized": true
         }
       }
+    },
+    "selectButton": {
+      "type": "string"
+    },
+    "selectedButton": {
+      "type": "string"
+    },
+    "editButton": {
+      "type": "string"
+    },
+    "primaryBadge": {
+      "type": "string"
+    },
+    "noAddressesFound": {
+      "type": "string"
+    },
+    "addFirstAddressText": {
+      "type": "string"
+    },
+    "addAddressButton": {
+      "type": "string"
+    },
+    "addNewAddressButton": {
+      "type": "string"
     }
   }
 }
