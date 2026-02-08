@@ -1935,6 +1935,7 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    cartLabel: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
