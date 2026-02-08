@@ -103,6 +103,57 @@
           "localized": true
         }
       }
+    },
+    "titleAddBilling": {
+      "type": "string"
+    },
+    "titleAddShipping": {
+      "type": "string"
+    },
+    "titleEdit": {
+      "type": "string"
+    },
+    "addressNamePlaceholder": {
+      "type": "string"
+    },
+    "firstNamePlaceholder": {
+      "type": "string"
+    },
+    "lastNamePlaceholder": {
+      "type": "string"
+    },
+    "companyPlaceholder": {
+      "type": "string"
+    },
+    "streetPlaceholder": {
+      "type": "string"
+    },
+    "postalCodePlaceholder": {
+      "type": "string"
+    },
+    "cityPlaceholder": {
+      "type": "string"
+    },
+    "phonePlaceholder": {
+      "type": "string"
+    },
+    "emailPlaceholder": {
+      "type": "string"
+    },
+    "primaryAddressCheckbox": {
+      "type": "string"
+    },
+    "cancelButton": {
+      "type": "string"
+    },
+    "saveButton": {
+      "type": "string"
+    },
+    "updateButton": {
+      "type": "string"
+    },
+    "savingButton": {
+      "type": "string"
     }
   }
 }
