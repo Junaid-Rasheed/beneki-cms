@@ -2466,6 +2466,7 @@ export interface ApiStaticOrderSummaryStaticOrderSummary
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_order_summaries';
   info: {
+    description: '';
     displayName: 'Static-Order-Summary';
     pluralName: 'static-order-summaries';
     singularName: 'static-order-summary';
@@ -2473,23 +2474,62 @@ export interface ApiStaticOrderSummaryStaticOrderSummary
   options: {
     draftAndPublish: true;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::static-order-summary.static-order-summary'
-    > &
-      Schema.Attribute.Private;
-    orderDiscountLabel: Schema.Attribute.String;
-    orderItemEach: Schema.Attribute.String;
-    orderItemQty: Schema.Attribute.String;
-    orderSubtotalLabel: Schema.Attribute.String;
-    orderSummaryTitle: Schema.Attribute.String;
-    orderTotalLabel: Schema.Attribute.String;
-    orderVatLabel: Schema.Attribute.String;
+    >;
+    orderDiscountLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderItemEach: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderItemQty: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderSubtotalLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderSummaryTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderTotalLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderVatLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
