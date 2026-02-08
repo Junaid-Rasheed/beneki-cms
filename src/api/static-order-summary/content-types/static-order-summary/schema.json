@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_order_summaries",
+  "info": {
+    "singularName": "static-order-summary",
+    "pluralName": "static-order-summaries",
+    "displayName": "Static-Order-Summary"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "orderSummaryTitle": {
+      "type": "string"
+    },
+    "orderItemQty": {
+      "type": "string"
+    },
+    "orderItemEach": {
+      "type": "string"
+    },
+    "orderSubtotalLabel": {
+      "type": "string"
+    },
+    "orderVatLabel": {
+      "type": "string"
+    },
+    "orderDiscountLabel": {
+      "type": "string"
+    },
+    "orderTotalLabel": {
+      "type": "string"
+    }
+  }
+}

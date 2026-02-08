@@ -1491,6 +1491,7 @@ export interface ApiStaticAddressFormStaticAddressForm
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_address_forms';
   info: {
+    description: '';
     displayName: 'Static-Address-Form';
     pluralName: 'static-address-forms';
     singularName: 'static-address-form';
@@ -1504,12 +1505,15 @@ export interface ApiStaticAddressFormStaticAddressForm
     };
   };
   attributes: {
+    addAddressButton: Schema.Attribute.String;
     addBillingTitle: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
+    addFirstAddressText: Schema.Attribute.String;
+    addNewAddressButton: Schema.Attribute.String;
     addressNameLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1549,6 +1553,7 @@ export interface ApiStaticAddressFormStaticAddressForm
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    editButton: Schema.Attribute.String;
     editTitle: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1578,6 +1583,7 @@ export interface ApiStaticAddressFormStaticAddressForm
       'oneToMany',
       'api::static-address-form.static-address-form'
     >;
+    noAddressesFound: Schema.Attribute.String;
     phoneLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1590,6 +1596,7 @@ export interface ApiStaticAddressFormStaticAddressForm
           localized: true;
         };
       }>;
+    primaryBadge: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     saveButton: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
@@ -1603,6 +1610,8 @@ export interface ApiStaticAddressFormStaticAddressForm
           localized: true;
         };
       }>;
+    selectButton: Schema.Attribute.String;
+    selectedButton: Schema.Attribute.String;
     setPrimaryBilling: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
