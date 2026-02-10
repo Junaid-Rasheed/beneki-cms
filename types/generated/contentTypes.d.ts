@@ -1367,6 +1367,7 @@ export interface ApiStaticAccountDetailStaticAccountDetail
     };
   };
   attributes: {
+    btn: Schema.Attribute.String;
     confirmnewpassword: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
