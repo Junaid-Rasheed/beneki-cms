@@ -2060,6 +2060,9 @@ export interface ApiStaticCheckoutStaticCheckout
     deliveryOrderWithin: Schema.Attribute.String;
     deliveryPostalCode: Schema.Attribute.String;
     deliveryReceiveOn: Schema.Attribute.String;
+    discountAppliedTitle: Schema.Attribute.String;
+    discountCodeLabel: Schema.Attribute.String;
+    discountText: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -2101,6 +2104,9 @@ export interface ApiStaticCheckoutStaticCheckout
           localized: true;
         };
       }>;
+    voucherApplyButton: Schema.Attribute.String;
+    voucherHelpText: Schema.Attribute.String;
+    voucherInputPlaceholder: Schema.Attribute.String;
     voucherPrompt: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

@@ -195,6 +195,24 @@
     },
     "redirectingToCart": {
       "type": "string"
+    },
+    "voucherHelpText": {
+      "type": "string"
+    },
+    "discountCodeLabel": {
+      "type": "string"
+    },
+    "discountText": {
+      "type": "string"
+    },
+    "discountAppliedTitle": {
+      "type": "string"
+    },
+    "voucherApplyButton": {
+      "type": "string"
+    },
+    "voucherInputPlaceholder": {
+      "type": "string"
     }
   }
 }
