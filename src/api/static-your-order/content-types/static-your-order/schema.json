@@ -113,13 +113,8 @@
     "showingPagger": {
       "type": "string"
     },
-    "allOrders": {
-      "type": "enumeration",
-      "enum": [
-        "pending",
-        "strapi",
-        "Hello"
-      ]
+    "orderDropdown": {
+      "type": "json"
     }
   }
 }

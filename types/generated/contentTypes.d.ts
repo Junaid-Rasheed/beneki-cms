@@ -2785,7 +2785,6 @@ export interface ApiStaticYourOrderStaticYourOrder
     };
   };
   attributes: {
-    allOrders: Schema.Attribute.Enumeration<['pending', 'strapi', 'Hello']>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2801,6 +2800,7 @@ export interface ApiStaticYourOrderStaticYourOrder
       'api::static-your-order.static-your-order'
     >;
     nextBtn: Schema.Attribute.String;
+    orderDropdown: Schema.Attribute.JSON;
     ordersTotalSuffix: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
