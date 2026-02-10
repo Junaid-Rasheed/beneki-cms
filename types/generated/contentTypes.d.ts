@@ -2785,12 +2785,7 @@ export interface ApiStaticYourOrderStaticYourOrder
     };
   };
   attributes: {
-    allOrders: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
+    allOrders: Schema.Attribute.Enumeration<['pending', 'strapi', 'Hello']>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2805,6 +2800,7 @@ export interface ApiStaticYourOrderStaticYourOrder
       'oneToMany',
       'api::static-your-order.static-your-order'
     >;
+    nextBtn: Schema.Attribute.String;
     ordersTotalSuffix: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2817,6 +2813,7 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    prevBtn: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     searchPlaceholder: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
@@ -2824,6 +2821,7 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    showingPagger: Schema.Attribute.String;
     tableActions: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

@@ -32,14 +32,6 @@
         }
       }
     },
-    "allOrders": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
     "pageSize": {
       "type": "string",
       "pluginOptions": {
@@ -111,6 +103,23 @@
           "localized": true
         }
       }
+    },
+    "prevBtn": {
+      "type": "string"
+    },
+    "nextBtn": {
+      "type": "string"
+    },
+    "showingPagger": {
+      "type": "string"
+    },
+    "allOrders": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "strapi",
+        "Hello"
+      ]
     }
   }
 }
