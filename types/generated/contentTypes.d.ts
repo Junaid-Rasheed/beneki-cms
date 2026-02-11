@@ -2790,6 +2790,7 @@ export interface ApiStaticYourOrderStaticYourOrder
     ActionDownload: Schema.Attribute.String;
     ActionOrderAgain: Schema.Attribute.String;
     ActionView: Schema.Attribute.String;
+    allOrdersTitle: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
