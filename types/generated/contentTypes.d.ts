@@ -2786,6 +2786,10 @@ export interface ApiStaticYourOrderStaticYourOrder
     };
   };
   attributes: {
+    ActionCancel: Schema.Attribute.String;
+    ActionDownload: Schema.Attribute.String;
+    ActionOrderAgain: Schema.Attribute.String;
+    ActionView: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2795,6 +2799,8 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    footerOrder: Schema.Attribute.String;
+    footerShowing: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -2865,6 +2871,8 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    TotalItem: Schema.Attribute.String;
+    totalOrder: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

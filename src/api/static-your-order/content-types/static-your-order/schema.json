@@ -115,6 +115,30 @@
     },
     "orderDropdown": {
       "type": "json"
+    },
+    "ActionView": {
+      "type": "string"
+    },
+    "ActionDownload": {
+      "type": "string"
+    },
+    "ActionOrderAgain": {
+      "type": "string"
+    },
+    "ActionCancel": {
+      "type": "string"
+    },
+    "totalOrder": {
+      "type": "string"
+    },
+    "TotalItem": {
+      "type": "string"
+    },
+    "footerShowing": {
+      "type": "string"
+    },
+    "footerOrder": {
+      "type": "string"
     }
   }
 }
