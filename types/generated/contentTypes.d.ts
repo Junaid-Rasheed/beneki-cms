@@ -1455,6 +1455,9 @@ export interface ApiStaticAddressBookStaticAddressBook
           localized: true;
         };
       }>;
+    changeBillingBtn: Schema.Attribute.String;
+    changeDeliveryBtn: Schema.Attribute.String;
+    checkoutInfoText: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1470,12 +1473,19 @@ export interface ApiStaticAddressBookStaticAddressBook
           localized: true;
         };
       }>;
+    deleteBtn: Schema.Attribute.String;
+    deleteConfirmMessage: Schema.Attribute.String;
+    editBtn: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::static-address-book.static-address-book'
     >;
+    noPrimaryAddress: Schema.Attribute.String;
+    primaryBillingTitle: Schema.Attribute.String;
+    primaryDeliveryTitle: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    setPrimaryBtn: Schema.Attribute.String;
     Tagline: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

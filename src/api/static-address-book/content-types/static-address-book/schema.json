@@ -55,6 +55,36 @@
           "localized": true
         }
       }
+    },
+    "primaryBillingTitle": {
+      "type": "string"
+    },
+    "primaryDeliveryTitle": {
+      "type": "string"
+    },
+    "changeBillingBtn": {
+      "type": "string"
+    },
+    "changeDeliveryBtn": {
+      "type": "string"
+    },
+    "noPrimaryAddress": {
+      "type": "string"
+    },
+    "checkoutInfoText": {
+      "type": "string"
+    },
+    "editBtn": {
+      "type": "string"
+    },
+    "setPrimaryBtn": {
+      "type": "string"
+    },
+    "deleteBtn": {
+      "type": "string"
+    },
+    "deleteConfirmMessage": {
+      "type": "string"
     }
   }
 }
