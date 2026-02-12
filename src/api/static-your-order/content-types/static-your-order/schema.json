@@ -142,6 +142,15 @@
     },
     "allOrdersTitle": {
       "type": "string"
+    },
+    "insidetablefor": {
+      "type": "string"
+    },
+    "footerTo": {
+      "type": "string"
+    },
+    "footerOf": {
+      "type": "string"
     }
   }
 }

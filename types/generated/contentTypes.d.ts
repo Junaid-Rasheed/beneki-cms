@@ -2811,8 +2811,11 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    footerOf: Schema.Attribute.String;
     footerOrder: Schema.Attribute.String;
     footerShowing: Schema.Attribute.String;
+    footerTo: Schema.Attribute.String;
+    insidetablefor: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -2895,6 +2898,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_your_order2s';
   info: {
+    description: '';
     displayName: 'Static-Your-Order2';
     pluralName: 'static-your-order2s';
     singularName: 'static-your-order2';
@@ -3001,6 +3005,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
           localized: true;
         };
       }>;
+    summaryFreeLabel: Schema.Attribute.String;
     summaryShippingFree: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
