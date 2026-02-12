@@ -2068,6 +2068,7 @@ export interface ApiStaticCheckoutStaticCheckout
     deliveryInfoTitle: Schema.Attribute.String;
     deliveryMinuteShort: Schema.Attribute.String;
     deliveryNoneFound: Schema.Attribute.String;
+    deliveryOrderNowTemplate: Schema.Attribute.String;
     deliveryOrderWithin: Schema.Attribute.String;
     deliveryPostalCode: Schema.Attribute.String;
     deliveryReceiveOn: Schema.Attribute.String;

@@ -216,6 +216,9 @@
     },
     "voucherEmptyError": {
       "type": "string"
+    },
+    "deliveryOrderNowTemplate": {
+      "type": "string"
     }
   }
 }
