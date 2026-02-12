@@ -2116,6 +2116,7 @@ export interface ApiStaticCheckoutStaticCheckout
         };
       }>;
     voucherApplyButton: Schema.Attribute.String;
+    voucherEmptyError: Schema.Attribute.String;
     voucherHelpText: Schema.Attribute.String;
     voucherInputPlaceholder: Schema.Attribute.String;
     voucherPrompt: Schema.Attribute.String &
