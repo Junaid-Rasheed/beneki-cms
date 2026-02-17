@@ -2893,6 +2893,7 @@ export interface ApiStaticProductDetailStaticProductDetail
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    weightLabel: Schema.Attribute.String;
   };
 }
 

@@ -197,6 +197,9 @@
     },
     "additionalInformation": {
       "type": "string"
+    },
+    "weightLabel": {
+      "type": "string"
     }
   }
 }
