@@ -83,6 +83,27 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "plugin::users-permissions.user"
+    },
+    "allowedUsers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "coupons"
+    },
+    "includedProducts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::home-page-product.home-page-product",
+      "inversedBy": "coupons"
+    },
+    "excludedProducts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::home-page-product.home-page-product",
+      "inversedBy": "productCoupons"
+    },
+    "allowedEmailDomains": {
+      "type": "json"
     }
   }
 }

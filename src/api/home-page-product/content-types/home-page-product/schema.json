@@ -23,6 +23,18 @@
           "localized": true
         }
       }
+    },
+    "coupons": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::coupon.coupon",
+      "mappedBy": "includedProducts"
+    },
+    "productCoupons": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::coupon.coupon",
+      "mappedBy": "excludedProducts"
     }
   }
 }

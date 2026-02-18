@@ -448,6 +448,11 @@ export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    allowedEmailDomains: Schema.Attribute.JSON;
+    allowedUsers: Schema.Attribute.Relation<
+      'manyToMany',
+      'plugin::users-permissions.user'
+    >;
     assignedAffiliatedUser: Schema.Attribute.Relation<
       'oneToOne',
       'plugin::users-permissions.user'
@@ -473,12 +478,20 @@ export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    excludedProducts: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::home-page-product.home-page-product'
+    >;
     expiresAt: Schema.Attribute.DateTime &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
+    includedProducts: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::home-page-product.home-page-product'
+    >;
     isActive: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -846,6 +859,7 @@ export interface ApiHomePageProductHomePageProduct
     };
   };
   attributes: {
+    coupons: Schema.Attribute.Relation<'manyToMany', 'api::coupon.coupon'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -860,6 +874,10 @@ export interface ApiHomePageProductHomePageProduct
           localized: true;
         };
       }>;
+    productCoupons: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::coupon.coupon'
+    >;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -3826,6 +3844,7 @@ export interface PluginUsersPermissionsUser
     businessRegistrationNumber: Schema.Attribute.String;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    coupons: Schema.Attribute.Relation<'manyToMany', 'api::coupon.coupon'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

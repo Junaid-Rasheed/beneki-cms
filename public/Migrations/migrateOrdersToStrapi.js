@@ -97,6 +97,29 @@ async function initOrderCounter() {
   currentOrderNumber = max;
   console.log(`🔢 Starting from order number: ORD-${max.toString().padStart(5, "0")}`);
 }
+function toStrapiDate(value) {
+  if (!value) return null;
+
+  // If already a Date object
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  // Handle SQL datetime string: YYYY-MM-DD HH:mm:ss
+  if (typeof value === "string") {
+    const iso = value.replace(" ", "T") + "Z";
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  }
+
+  // Handle timestamp
+  if (typeof value === "number") {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  }
+
+  return null;
+}
 
 function getNextOrderNumber() {
   currentOrderNumber += 1;
@@ -128,7 +151,8 @@ async function migrateOrders() {
           ),
           notes: o.OrderNote || "",
           user: userId,
-          createdAt: o.CreatedDate, // create orderCreatedAt
+          orderCreatedDate: toStrapiDate(o.CreatedDate),
+          invoiceId: o.InvoiceId
         },
       };
 
