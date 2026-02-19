@@ -10,27 +10,27 @@ const API_TOKEN  =
 // Load cleaned JSON
 const raw = JSON.parse(fs.readFileSync("products.fixed.json", "utf8"));
 const products = raw.data; 
-console.log("Products", products);
 // Map products
 const mappedProducts = products.map((p) => ({
   title: p.title,
   isActive: false,
+  productId: p.ProductOldId,
   productOldId: p.ProductOldId,
   productTitle: p.productTitle
 }));
 
-console.log("mapped Products", mappedProducts);
+
 async function migrateProducts() {
   for (const p of products) {
     try {
       const res = await axios.post(
-        `${STRAPI_URL}
-        /api/sidebar-items`,
+        `${STRAPI_URL}/api/sidebar-items`,
         {
           data: {
             title: p.title,
             isActive: false,
-            productOldId: p.productOldId,
+            productId: p.ProductOldId,
+            productOldId: p.ProductOldId,
             productTitle: p.productTitle,
             isHomeProduct: false,
           },
@@ -43,7 +43,7 @@ async function migrateProducts() {
         }
       );
 
-      console.log(`✅ Created: ${p.title}`);
+      console.log(`✅ Created: ${p.title},${p.ProductOldId}`);
     } catch (err) {
       console.error(`❌ Failed: ${p.title}`, err.response?.data || err.message);
     }

@@ -173,8 +173,22 @@
     "productOldId": {
       "type": "string"
     },
+<<<<<<< HEAD
     "PD_Point": {
       "type": "blocks"
+=======
+    "coupons": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::coupon.coupon",
+      "mappedBy": "includedProducts"
+    },
+    "productCoupons": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::coupon.coupon",
+      "mappedBy": "excludedProducts"
+>>>>>>> bddf11c55205c7cdde531f8e471eb3b13472d6e3
     }
   }
 }
