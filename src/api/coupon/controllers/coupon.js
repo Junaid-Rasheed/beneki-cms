@@ -61,7 +61,7 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
       // 👤 STRICT USER VALIDATION
       // ===============================
       if (coupon.allowedUsers && coupon.allowedUsers.length > 0) {
-        const allowedUserIds = coupon.allowedUsers.map(u => u.id);
+        const allowedUserIds = coupon.allowedUsers.map(u => u.documentId);
 
         if (!allowedUserIds.includes(userId)) {
           return ctx.badRequest('This coupon is not assigned to your account');
