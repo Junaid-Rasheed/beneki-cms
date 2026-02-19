@@ -48,12 +48,7 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ],
+      "allowedTypes": ["images", "files", "videos", "audios"],
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -100,12 +95,7 @@
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ],
+      "allowedTypes": ["images", "files", "videos", "audios"],
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -173,22 +163,30 @@
     "productOldId": {
       "type": "string"
     },
-<<<<<<< HEAD
     "PD_Point": {
       "type": "blocks"
-=======
+    },
     "coupons": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::coupon.coupon",
-      "mappedBy": "includedProducts"
+      "mappedBy": "includedProducts",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "productCoupons": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::coupon.coupon",
-      "mappedBy": "excludedProducts"
->>>>>>> bddf11c55205c7cdde531f8e471eb3b13472d6e3
+      "mappedBy": "excludedProducts",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

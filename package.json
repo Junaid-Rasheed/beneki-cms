@@ -42,5 +42,8 @@
   "strapi": {
     "uuid": "b1a2dd98-7dc2-460f-aa34-9a400eac665c",
     "installId": "d14e8e36a2327cd2509a36f356908eafb3549bb7e2aa9ed2166ba5a5ec35c310"
+  },
+  "devDependencies": {
+    "baseline-browser-mapping": "^2.10.0"
   }
 }

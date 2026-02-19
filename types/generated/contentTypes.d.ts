@@ -1414,7 +1414,12 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::sidebar-item.sidebar-item'
     >;
-    coupons: Schema.Attribute.Relation<'manyToMany', 'api::coupon.coupon'>;
+    coupons: Schema.Attribute.Relation<'manyToMany', 'api::coupon.coupon'> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1489,7 +1494,12 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
     productCoupons: Schema.Attribute.Relation<
       'manyToMany',
       'api::coupon.coupon'
-    >;
+    > &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     productId: Schema.Attribute.String;
     productOldId: Schema.Attribute.String;
     productTitle: Schema.Attribute.Text;
