@@ -1460,12 +1460,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
-    PD_Points: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
+    PD_Point: Schema.Attribute.Blocks;
     PD_PriceRange: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

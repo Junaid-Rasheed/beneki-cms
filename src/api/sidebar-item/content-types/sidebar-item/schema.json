@@ -128,14 +128,6 @@
         }
       }
     },
-    "PD_Points": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
     "isHomeProduct": {
       "type": "boolean",
       "pluginOptions": {
@@ -180,6 +172,9 @@
     },
     "productOldId": {
       "type": "string"
+    },
+    "PD_Point": {
+      "type": "blocks"
     }
   }
 }
