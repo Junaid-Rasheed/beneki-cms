@@ -93,13 +93,13 @@
     "includedProducts": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "api::home-page-product.home-page-product",
+      "target": "api::sidebar-item.sidebar-item",
       "inversedBy": "coupons"
     },
     "excludedProducts": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "api::home-page-product.home-page-product",
+      "target": "api::sidebar-item.sidebar-item",
       "inversedBy": "productCoupons"
     },
     "allowedEmailDomains": {

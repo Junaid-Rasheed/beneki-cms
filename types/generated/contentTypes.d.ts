@@ -480,7 +480,7 @@ export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
       }>;
     excludedProducts: Schema.Attribute.Relation<
       'manyToMany',
-      'api::home-page-product.home-page-product'
+      'api::sidebar-item.sidebar-item'
     >;
     expiresAt: Schema.Attribute.DateTime &
       Schema.Attribute.SetPluginOptions<{
@@ -490,7 +490,7 @@ export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
       }>;
     includedProducts: Schema.Attribute.Relation<
       'manyToMany',
-      'api::home-page-product.home-page-product'
+      'api::sidebar-item.sidebar-item'
     >;
     isActive: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
@@ -1414,6 +1414,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::sidebar-item.sidebar-item'
     >;
+    coupons: Schema.Attribute.Relation<'manyToMany', 'api::coupon.coupon'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1490,6 +1491,10 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    productCoupons: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::coupon.coupon'
+    >;
     productId: Schema.Attribute.String;
     productOldId: Schema.Attribute.String;
     productTitle: Schema.Attribute.Text;
