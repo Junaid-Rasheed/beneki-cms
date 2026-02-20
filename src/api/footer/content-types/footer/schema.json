@@ -111,6 +111,12 @@
           "localized": true
         }
       }
+    },
+    "footerMustbeLogin": {
+      "type": "string"
+    },
+    "footerLoginLabel": {
+      "type": "string"
     }
   }
 }

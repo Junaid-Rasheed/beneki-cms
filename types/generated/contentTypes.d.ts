@@ -638,6 +638,8 @@ export interface ApiFooterFooter extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    footerLoginLabel: Schema.Attribute.String;
+    footerMustbeLogin: Schema.Attribute.String;
     footerRightsReserved: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
