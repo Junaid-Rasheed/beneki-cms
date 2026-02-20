@@ -10,7 +10,7 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
   // Custom endpoint to apply coupon
   async apply(ctx) {
     try {
-      const { code, cartTotal, userId, email, cartItems } = ctx.request.body;
+      const { code, cartTotal, userId,userDocumentId, email, cartItems } = ctx.request.body;
 
       if (!code || cartTotal == null) {
         return ctx.badRequest('Code and cart total are required');
@@ -60,10 +60,11 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
       // ===============================
       // 👤 STRICT USER VALIDATION
       // ===============================
+      console.log("allowedUser", coupon)
       if (coupon.allowedUsers && coupon.allowedUsers.length > 0) {
         const allowedUserIds = coupon.allowedUsers.map(u => u.documentId);
 
-        if (!allowedUserIds.includes(userId)) {
+        if (!allowedUserIds.includes(userDocumentId)) {
           return ctx.badRequest('This coupon is not assigned to your account');
         }
       }
