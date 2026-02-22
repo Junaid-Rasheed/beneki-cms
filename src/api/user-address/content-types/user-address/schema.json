@@ -137,6 +137,9 @@
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
       "inversedBy": "user_addresses"
+    },
+    "instruction": {
+      "type": "text"
     }
   }
 }

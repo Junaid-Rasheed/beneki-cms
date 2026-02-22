@@ -95,6 +95,9 @@
           "localized": true
         }
       }
+    },
+    "instruction": {
+      "type": "text"
     }
   }
 }

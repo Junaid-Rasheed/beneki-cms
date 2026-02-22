@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "collectionName": "general_settings",
+  "info": {
+    "singularName": "general-setting",
+    "pluralName": "general-settings",
+    "displayName": "GeneralSetting"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "loginInfo": {
+      "type": "text"
+    }
+  }
+}

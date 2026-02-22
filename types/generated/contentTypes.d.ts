@@ -667,6 +667,35 @@ export interface ApiFooterFooter extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiGeneralSettingGeneralSetting
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'general_settings';
+  info: {
+    displayName: 'GeneralSetting';
+    pluralName: 'general-settings';
+    singularName: 'general-setting';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::general-setting.general-setting'
+    > &
+      Schema.Attribute.Private;
+    loginInfo: Schema.Attribute.Text;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiHolidaySettingHolidaySetting
   extends Struct.CollectionTypeSchema {
   collectionName: 'holiday_settings';
@@ -1051,6 +1080,7 @@ export interface ApiOrderAddressOrderAddress
           localized: true;
         };
       }>;
+    instruction: Schema.Attribute.Text;
     lastName: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3320,6 +3350,7 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    instruction: Schema.Attribute.Text;
     isPrimary: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3919,6 +3950,7 @@ declare module '@strapi/strapi' {
       'api::coupon.coupon': ApiCouponCoupon;
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;
       'api::footer.footer': ApiFooterFooter;
+      'api::general-setting.general-setting': ApiGeneralSettingGeneralSetting;
       'api::holiday-setting.holiday-setting': ApiHolidaySettingHolidaySetting;
       'api::home-page-hero-section.home-page-hero-section': ApiHomePageHeroSectionHomePageHeroSection;
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
