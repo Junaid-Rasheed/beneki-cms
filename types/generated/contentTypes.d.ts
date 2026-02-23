@@ -671,6 +671,7 @@ export interface ApiGeneralSettingGeneralSetting
   extends Struct.CollectionTypeSchema {
   collectionName: 'general_settings';
   info: {
+    description: '';
     displayName: 'GeneralSetting';
     pluralName: 'general-settings';
     singularName: 'general-setting';
@@ -682,6 +683,7 @@ export interface ApiGeneralSettingGeneralSetting
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    liveDate: Schema.Attribute.Date;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
