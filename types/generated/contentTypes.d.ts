@@ -1469,6 +1469,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    isCollection: Schema.Attribute.Boolean;
     isHomeProduct: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

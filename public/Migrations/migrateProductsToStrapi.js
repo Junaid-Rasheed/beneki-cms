@@ -24,7 +24,7 @@ async function migrateProducts() {
   for (const p of products) {
     try {
       const res = await axios.post(
-        `${STRAPI_URL}/api/sidebar-items`,
+        `${STRAPI_URL}/api/sidebar-items?locale=fr`,
         {
           data: {
             title: p.title,

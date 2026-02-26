@@ -200,6 +200,9 @@
     },
     "isSideBarProduct": {
       "type": "boolean"
+    },
+    "isCollection": {
+      "type": "boolean"
     }
   }
 }
