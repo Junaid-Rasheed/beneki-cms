@@ -222,6 +222,9 @@
     },
     "shippingTitle": {
       "type": "string"
+    },
+    "cardHolderName": {
+      "type": "string"
     }
   }
 }
