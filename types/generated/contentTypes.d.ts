@@ -867,10 +867,12 @@ export interface ApiHomePagePartnerSectionHomePagePartnerSection
           localized: true;
         };
       }>;
+    order: Schema.Attribute.Integer;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    url: Schema.Attribute.String;
   };
 }
 
@@ -956,10 +958,12 @@ export interface ApiHomePageTrustLogoHomePageTrustLogo
       'oneToMany',
       'api::home-page-trust-logo.home-page-trust-logo'
     >;
+    order: Schema.Attribute.Integer;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    url: Schema.Attribute.String;
   };
 }
 
