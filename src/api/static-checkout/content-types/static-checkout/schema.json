@@ -219,6 +219,9 @@
     },
     "deliveryOrderNowTemplate": {
       "type": "string"
+    },
+    "shippingTitle": {
+      "type": "string"
     }
   }
 }

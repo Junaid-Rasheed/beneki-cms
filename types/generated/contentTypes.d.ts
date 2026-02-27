@@ -1448,6 +1448,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::sidebar-item.sidebar-item'
     >;
+    collection_Category_Title: Schema.Attribute.String;
     coupons: Schema.Attribute.Relation<'manyToMany', 'api::coupon.coupon'> &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2335,6 +2336,7 @@ export interface ApiStaticCheckoutStaticCheckout
     privacyText: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     redirectingToCart: Schema.Attribute.String;
+    shippingTitle: Schema.Attribute.String;
     termsAccept: Schema.Attribute.String;
     termsLink: Schema.Attribute.String;
     title: Schema.Attribute.String &
