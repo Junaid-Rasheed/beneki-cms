@@ -203,6 +203,9 @@
     },
     "isCollection": {
       "type": "boolean"
+    },
+    "collection_Category_Title": {
+      "type": "string"
     }
   }
 }
