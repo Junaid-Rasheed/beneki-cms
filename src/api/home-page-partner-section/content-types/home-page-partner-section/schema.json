@@ -47,6 +47,12 @@
           "localized": true
         }
       }
+    },
+    "order": {
+      "type": "integer"
+    },
+    "url": {
+      "type": "string"
     }
   }
 }
