@@ -3648,6 +3648,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    deliveryInstructionsLabel: Schema.Attribute.String;
     itemBundleLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3671,6 +3672,9 @@ export interface ApiStaticYourOrder2StaticYourOrder2
       'oneToMany',
       'api::static-your-order2.static-your-order2'
     >;
+    noBillingAddressText: Schema.Attribute.String;
+    noItemsText: Schema.Attribute.String;
+    noShippingAddressText: Schema.Attribute.String;
     orderAgainButton: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3689,6 +3693,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
           localized: true;
         };
       }>;
+    orderNotesTitle: Schema.Attribute.String;
     orderStatusLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3713,13 +3718,17 @@ export interface ApiStaticYourOrder2StaticYourOrder2
           localized: true;
         };
       }>;
+    paymentNotSpecifiedText: Schema.Attribute.String;
     paymentStatusLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
+    payNowButton: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    saveChangesButton: Schema.Attribute.String;
+    savingText: Schema.Attribute.String;
     shippingAddressTitle: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

@@ -170,6 +170,33 @@
     },
     "summaryFreeLabel": {
       "type": "string"
+    },
+    "noBillingAddressText": {
+      "type": "string"
+    },
+    "noShippingAddressText": {
+      "type": "string"
+    },
+    "noItemsText": {
+      "type": "string"
+    },
+    "paymentNotSpecifiedText": {
+      "type": "string"
+    },
+    "deliveryInstructionsLabel": {
+      "type": "string"
+    },
+    "orderNotesTitle": {
+      "type": "string"
+    },
+    "savingText": {
+      "type": "string"
+    },
+    "saveChangesButton": {
+      "type": "string"
+    },
+    "payNowButton": {
+      "type": "string"
     }
   }
 }
