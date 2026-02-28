@@ -2464,6 +2464,7 @@ export interface ApiStaticCheckoutStaticCheckout
     };
   };
   attributes: {
+    bankDetailMessage: Schema.Attribute.String;
     bilingAddNew: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

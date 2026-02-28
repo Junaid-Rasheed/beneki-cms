@@ -225,6 +225,9 @@
     },
     "cardHolderName": {
       "type": "string"
+    },
+    "bankDetailMessage": {
+      "type": "string"
     }
   }
 }
