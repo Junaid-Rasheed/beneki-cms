@@ -206,6 +206,9 @@
     },
     "collection_Category_Title": {
       "type": "string"
+    },
+    "isAdminProduct": {
+      "type": "boolean"
     }
   }
 }
