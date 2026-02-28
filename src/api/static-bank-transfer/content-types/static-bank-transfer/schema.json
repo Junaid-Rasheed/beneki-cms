@@ -224,7 +224,7 @@
         }
       }
     },
-    "noOrderFoundTextnoOrderFoundText": {
+    "noOrderFoundText": {
       "type": "string",
       "pluginOptions": {
         "i18n": {

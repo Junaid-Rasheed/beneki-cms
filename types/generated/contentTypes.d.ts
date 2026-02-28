@@ -2197,7 +2197,7 @@ export interface ApiStaticBankTransferStaticBankTransfer
       'oneToMany',
       'api::static-bank-transfer.static-bank-transfer'
     >;
-    noOrderFoundTextnoOrderFoundText: Schema.Attribute.String &
+    noOrderFoundText: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
