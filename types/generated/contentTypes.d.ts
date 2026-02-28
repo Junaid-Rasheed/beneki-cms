@@ -803,6 +803,10 @@ export interface ApiHomePageHeroSectionHomePageHeroSection
           localized: true;
         };
       }>;
+    product: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::sidebar-item.sidebar-item'
+    >;
     publishedAt: Schema.Attribute.DateTime;
     smallImage: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios'
@@ -1475,6 +1479,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    isAdminProduct: Schema.Attribute.Boolean;
     isCollection: Schema.Attribute.Boolean;
     isHomeProduct: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
@@ -2109,6 +2114,61 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+  };
+}
+
+export interface ApiStaticBankTransferStaticBankTransfer
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_bank_transfers';
+  info: {
+    displayName: 'Static-bank-transfer';
+    pluralName: 'static-bank-transfers';
+    singularName: 'static-bank-transfer';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    bankDetailsTitle: Schema.Attribute.String;
+    bankLabel: Schema.Attribute.String;
+    bicLabel: Schema.Attribute.String;
+    billingAddressTitle: Schema.Attribute.String;
+    continueShoppingButton: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dateLabel: Schema.Attribute.String;
+    emailLabel: Schema.Attribute.String;
+    freeShippingText: Schema.Attribute.String;
+    ibanLabel: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-bank-transfer.static-bank-transfer'
+    > &
+      Schema.Attribute.Private;
+    noOrderFoundTextnoOrderFoundText: Schema.Attribute.String;
+    orderNumberLabel: Schema.Attribute.String;
+    pageTitle: Schema.Attribute.String;
+    paymentInstruction: Schema.Attribute.String;
+    paymentMethodBankTransfer: Schema.Attribute.String;
+    paymentMethodLabel: Schema.Attribute.String;
+    paymentMethodRowLabel: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    quantityLabel: Schema.Attribute.String;
+    returnCheckoutButton: Schema.Attribute.String;
+    shippingAddressTitle: Schema.Attribute.String;
+    shippingLabel: Schema.Attribute.String;
+    statusLabel: Schema.Attribute.String;
+    subtotalLabel: Schema.Attribute.String;
+    successMessage: Schema.Attribute.String;
+    tableProduct: Schema.Attribute.String;
+    tableTotal: Schema.Attribute.String;
+    totalLabel: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    vatLabel: Schema.Attribute.String;
   };
 }
 
@@ -3979,6 +4039,7 @@ declare module '@strapi/strapi' {
       'api::static-address-form.static-address-form': ApiStaticAddressFormStaticAddressForm;
       'api::static-auth-login.static-auth-login': ApiStaticAuthLoginStaticAuthLogin;
       'api::static-auth-register.static-auth-register': ApiStaticAuthRegisterStaticAuthRegister;
+      'api::static-bank-transfer.static-bank-transfer': ApiStaticBankTransferStaticBankTransfer;
       'api::static-cart.static-cart': ApiStaticCartStaticCart;
       'api::static-checkout-billing-address.static-checkout-billing-address': ApiStaticCheckoutBillingAddressStaticCheckoutBillingAddress;
       'api::static-checkout.static-checkout': ApiStaticCheckoutStaticCheckout;

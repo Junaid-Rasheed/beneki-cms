@@ -1,0 +1,95 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_bank_transfers",
+  "info": {
+    "singularName": "static-bank-transfer",
+    "pluralName": "static-bank-transfers",
+    "displayName": "Static-bank-transfer"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "pageTitle": {
+      "type": "string"
+    },
+    "successMessage": {
+      "type": "string"
+    },
+    "orderNumberLabel": {
+      "type": "string"
+    },
+    "dateLabel": {
+      "type": "string"
+    },
+    "emailLabel": {
+      "type": "string"
+    },
+    "totalLabel": {
+      "type": "string"
+    },
+    "paymentMethodLabel": {
+      "type": "string"
+    },
+    "statusLabel": {
+      "type": "string"
+    },
+    "paymentMethodBankTransfer": {
+      "type": "string"
+    },
+    "paymentInstruction": {
+      "type": "string"
+    },
+    "bankDetailsTitle": {
+      "type": "string"
+    },
+    "bankLabel": {
+      "type": "string"
+    },
+    "ibanLabel": {
+      "type": "string"
+    },
+    "bicLabel": {
+      "type": "string"
+    },
+    "tableProduct": {
+      "type": "string"
+    },
+    "tableTotal": {
+      "type": "string"
+    },
+    "quantityLabel": {
+      "type": "string"
+    },
+    "subtotalLabel": {
+      "type": "string"
+    },
+    "shippingLabel": {
+      "type": "string"
+    },
+    "freeShippingText": {
+      "type": "string"
+    },
+    "vatLabel": {
+      "type": "string"
+    },
+    "paymentMethodRowLabel": {
+      "type": "string"
+    },
+    "billingAddressTitle": {
+      "type": "string"
+    },
+    "shippingAddressTitle": {
+      "type": "string"
+    },
+    "continueShoppingButton": {
+      "type": "string"
+    },
+    "returnCheckoutButton": {
+      "type": "string"
+    },
+    "noOrderFoundTextnoOrderFoundText": {
+      "type": "string"
+    }
+  }
+}
