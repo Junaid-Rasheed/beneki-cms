@@ -2845,6 +2845,93 @@ export interface ApiStaticEmailTemplateStaticEmailTemplate
   };
 }
 
+export interface ApiStaticForgotPasswordStaticForgotPassword
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_forgot_passwords';
+  info: {
+    description: '';
+    displayName: 'Static-forgot-password';
+    pluralName: 'static-forgot-passwords';
+    singularName: 'static-forgot-password';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    backToLoginButton: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    defaultError: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    descriptionText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    emailLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    emailPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    invalidEmailError: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-forgot-password.static-forgot-password'
+    >;
+    pageTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    submitButton: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    successMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticInvoiceStaticInvoice
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_invoices';
@@ -4375,6 +4462,7 @@ declare module '@strapi/strapi' {
       'api::static-dashboard-content.static-dashboard-content': ApiStaticDashboardContentStaticDashboardContent;
       'api::static-dashboard-menu-name.static-dashboard-menu-name': ApiStaticDashboardMenuNameStaticDashboardMenuName;
       'api::static-email-template.static-email-template': ApiStaticEmailTemplateStaticEmailTemplate;
+      'api::static-forgot-password.static-forgot-password': ApiStaticForgotPasswordStaticForgotPassword;
       'api::static-invoice.static-invoice': ApiStaticInvoiceStaticInvoice;
       'api::static-order-summary.static-order-summary': ApiStaticOrderSummaryStaticOrderSummary;
       'api::static-payment.static-payment': ApiStaticPaymentStaticPayment;
