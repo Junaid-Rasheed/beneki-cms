@@ -16,6 +16,9 @@
     },
     "liveDate": {
       "type": "date"
+    },
+    "autoplayTimer": {
+      "type": "integer"
     }
   }
 }

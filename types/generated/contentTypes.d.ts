@@ -680,6 +680,7 @@ export interface ApiGeneralSettingGeneralSetting
     draftAndPublish: true;
   };
   attributes: {
+    autoplayTimer: Schema.Attribute.Integer;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
