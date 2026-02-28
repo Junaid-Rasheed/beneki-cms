@@ -87,6 +87,11 @@
           "localized": true
         }
       }
+    },
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::sidebar-item.sidebar-item"
     }
   }
 }
