@@ -2319,6 +2319,80 @@ export interface ApiStaticBankTransferStaticBankTransfer
   };
 }
 
+export interface ApiStaticBnpSuccesseStaticBnpSuccesse
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_bnp_successes';
+  info: {
+    displayName: 'Static-BNP-Successe';
+    pluralName: 'static-bnp-successes';
+    singularName: 'static-bnp-successe';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    addressNotAvailable: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    bankTransfer: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customerNameFallback: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    deliveryAddressNotAvailable: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    individualCustomer: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-bnp-successe.static-bnp-successe'
+    >;
+    naLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    unknownProduct: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
   collectionName: 'static_carts';
   info: {
@@ -4472,6 +4546,7 @@ declare module '@strapi/strapi' {
       'api::static-auth-login.static-auth-login': ApiStaticAuthLoginStaticAuthLogin;
       'api::static-auth-register.static-auth-register': ApiStaticAuthRegisterStaticAuthRegister;
       'api::static-bank-transfer.static-bank-transfer': ApiStaticBankTransferStaticBankTransfer;
+      'api::static-bnp-successe.static-bnp-successe': ApiStaticBnpSuccesseStaticBnpSuccesse;
       'api::static-cart.static-cart': ApiStaticCartStaticCart;
       'api::static-checkout-billing-address.static-checkout-billing-address': ApiStaticCheckoutBillingAddressStaticCheckoutBillingAddress;
       'api::static-checkout.static-checkout': ApiStaticCheckoutStaticCheckout;
