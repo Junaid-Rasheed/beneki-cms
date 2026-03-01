@@ -92,6 +92,9 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::sidebar-item.sidebar-item"
+    },
+    "order": {
+      "type": "integer"
     }
   }
 }
