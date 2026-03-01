@@ -143,6 +143,24 @@
     },
     "pageTitle": {
       "type": "string"
+    },
+    "registerErrorEmailTaken": {
+      "type": "string"
+    },
+    "registerErrorGeneric": {
+      "type": "string"
+    },
+    "registerErrorIndividualFranceOnly": {
+      "type": "string"
+    },
+    "registerErrorBusinessNumberRequired": {
+      "type": "string"
+    },
+    "registerErrorCountryRequired": {
+      "type": "string"
+    },
+    "registerErrorVatRequired": {
+      "type": "string"
     }
   }
 }

@@ -2077,6 +2077,12 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
           localized: true;
         };
       }>;
+    registerErrorBusinessNumberRequired: Schema.Attribute.String;
+    registerErrorCountryRequired: Schema.Attribute.String;
+    registerErrorEmailTaken: Schema.Attribute.String;
+    registerErrorGeneric: Schema.Attribute.String;
+    registerErrorIndividualFranceOnly: Schema.Attribute.String;
+    registerErrorVatRequired: Schema.Attribute.String;
     registerIndividualFranceMessage: Schema.Attribute.String;
     registerIndividualFranceOnly: Schema.Attribute.String;
     registerLoadingText: Schema.Attribute.String &
