@@ -2025,6 +2025,7 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
       'oneToMany',
       'api::static-auth-register.static-auth-register'
     >;
+    pageTitle: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     registerAccountTypeBusiness: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{

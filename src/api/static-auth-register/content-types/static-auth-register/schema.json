@@ -140,6 +140,9 @@
     },
     "registerPrivacyLinkText": {
       "type": "string"
+    },
+    "pageTitle": {
+      "type": "string"
     }
   }
 }
