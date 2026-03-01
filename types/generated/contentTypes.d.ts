@@ -803,6 +803,7 @@ export interface ApiHomePageHeroSectionHomePageHeroSection
           localized: true;
         };
       }>;
+    order: Schema.Attribute.Integer;
     product: Schema.Attribute.Relation<
       'oneToOne',
       'api::sidebar-item.sidebar-item'
@@ -2311,6 +2312,152 @@ export interface ApiStaticBankTransferStaticBankTransfer
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     vatLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
+export interface ApiStaticBnpFailedStaticBnpFailed
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_bnp_faileds';
+  info: {
+    displayName: 'Static-BNP-failed';
+    pluralName: 'static-bnp-faileds';
+    singularName: 'static-bnp-failed';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    billingAddressTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    defaultProductName: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    freeShippingText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-bnp-failed.static-bnp-failed'
+    >;
+    naLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    noOrderText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    orderDetailsTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    paymentFailedMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    paymentMethodDefault: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    paymentMethodLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    quantityLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    returnCheckoutButton: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    shippingAddressTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    shippingLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    subtotalLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableProduct: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    tableTotal: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    transactionLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    vatLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    zeroAmount: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -4546,6 +4693,7 @@ declare module '@strapi/strapi' {
       'api::static-auth-login.static-auth-login': ApiStaticAuthLoginStaticAuthLogin;
       'api::static-auth-register.static-auth-register': ApiStaticAuthRegisterStaticAuthRegister;
       'api::static-bank-transfer.static-bank-transfer': ApiStaticBankTransferStaticBankTransfer;
+      'api::static-bnp-failed.static-bnp-failed': ApiStaticBnpFailedStaticBnpFailed;
       'api::static-bnp-successe.static-bnp-successe': ApiStaticBnpSuccesseStaticBnpSuccesse;
       'api::static-cart.static-cart': ApiStaticCartStaticCart;
       'api::static-checkout-billing-address.static-checkout-billing-address': ApiStaticCheckoutBillingAddressStaticCheckoutBillingAddress;
