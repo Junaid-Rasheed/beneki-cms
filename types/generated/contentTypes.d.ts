@@ -2125,6 +2125,116 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
   };
 }
 
+export interface ApiStaticAuthResetPasswordStaticAuthResetPassword
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_auth_reset_passwords';
+  info: {
+    displayName: 'Static-auth-reset-password';
+    pluralName: 'static-auth-reset-passwords';
+    singularName: 'static-auth-reset-password';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    backToLoginText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    confirmPasswordLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    confirmPasswordPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-auth-reset-password.static-auth-reset-password'
+    >;
+    newPasswordLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    newPasswordPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    pageDescription: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    pageTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    passwordMinLengthError: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    passwordMismatchError: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    rememberedText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    resetFailedError: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    submitButton: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    successMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticBankTransferStaticBankTransfer
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_bank_transfers';
@@ -4692,6 +4802,7 @@ declare module '@strapi/strapi' {
       'api::static-address-form.static-address-form': ApiStaticAddressFormStaticAddressForm;
       'api::static-auth-login.static-auth-login': ApiStaticAuthLoginStaticAuthLogin;
       'api::static-auth-register.static-auth-register': ApiStaticAuthRegisterStaticAuthRegister;
+      'api::static-auth-reset-password.static-auth-reset-password': ApiStaticAuthResetPasswordStaticAuthResetPassword;
       'api::static-bank-transfer.static-bank-transfer': ApiStaticBankTransferStaticBankTransfer;
       'api::static-bnp-failed.static-bnp-failed': ApiStaticBnpFailedStaticBnpFailed;
       'api::static-bnp-successe.static-bnp-successe': ApiStaticBnpSuccesseStaticBnpSuccesse;
