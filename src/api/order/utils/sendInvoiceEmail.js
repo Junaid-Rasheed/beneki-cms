@@ -165,7 +165,7 @@ module.exports = async function sendInvoiceEmail(
 
     const msg = {
       to: toEmail,
-      from: "elveniaschmall@gmail.com",
+      from: "info@beneki.net",
       subject: `${t.subject} #${order.orderNumber || order.documentId}`,
       text: `Thank you for your purchase! Please find your invoice attached.`,
       html: `<div>
