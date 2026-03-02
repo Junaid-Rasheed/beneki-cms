@@ -1,5 +1,6 @@
 const fs = require("fs");
 const axios = require("axios");
+const order = require("../../src/api/order/controllers/order");
 
 // ================= CONFIG =================
 const STRAPI_URL = "https://beneki-cms.onrender.com";
@@ -121,9 +122,9 @@ function toStrapiDate(value) {
   return null;
 }
 
-function getNextOrderNumber() {
-  currentOrderNumber += 1;
-  return `ORD-${currentOrderNumber.toString().padStart(5, "0")}`;
+function getNextOrderNumber(invoiceId) {
+  //currentOrderNumber += 1;
+  return `ORD-${invoiceId.toString().padStart(5, "0")}`;
 }
 
 // ================= MIGRATION =================
@@ -132,15 +133,19 @@ async function migrateOrders() {
 
   for (const o of orders) {
     try {
-      const orderNumber = getNextOrderNumber();
+     const orderNumber =o.InvoiceId && o.InvoiceId !== 0
+                          ? getNextOrderNumber(o.InvoiceId)
+                          : "";
+                          
+      console.log("ordernumber", orderNumber)
       const userId = await getUserIdByEmail(o.UserEmail);
-
+      console.log("userId", userId)
       const payload = {
         data: {
           orderNumber,
           oldOrderId: o.OldOrderId.toString(),
           total: o.Total,
-          subTotal: o.Total - o.VAT,
+          subTotal:(o.Total - o.VAT).toFixed(2),
           vat: o.VAT,
           paymentMethod: mapPaymentMethod(o.PaymentMethod),
           orderStatus: mapOrderStatus(o.OrderStatus),
@@ -149,12 +154,13 @@ async function migrateOrders() {
             o.TransactionId,
             o.OrderStatus
           ),
-          notes: o.OrderNote || "",
+          notes:"",
           user: userId,
           orderCreatedDate: toStrapiDate(o.CreatedDate),
           invoiceId: o.InvoiceId
         },
       };
+      console.log("Payload",payload)
 
       await axios.post(`${STRAPI_URL}/api/orders`, payload, {
         headers: HEADERS,

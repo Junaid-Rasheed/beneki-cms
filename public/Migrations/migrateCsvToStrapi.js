@@ -10,7 +10,7 @@ const records = [];
 
 // Load CSV
 fs.createReadStream("oldData.csv")
-  .pipe(csv({ separator: ";" }))
+  .pipe(csv({ separator: "," }))
   .on("data", (row) => records.push(row))
   .on("end", async () => {
     console.log(`📄 Loaded ${records.length} records from CSV`);

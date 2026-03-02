@@ -29,7 +29,7 @@ async function getOrder(oldOrderId) {
 // 2️⃣ Find Product by legacy ProductId
 async function getProduct(productOldId) {
   const res = await axios.get(
-    `${STRAPI_URL}/api/sidebar-items?filters[productOldId][$eq]=${productOldId}&pagination[limit]=1`,
+    `${STRAPI_URL}/api/sidebar-items?locale=fr&filters[productOldId][$eq]=${productOldId}&pagination[limit]=1`,
     { headers: HEADERS }
   );
 
