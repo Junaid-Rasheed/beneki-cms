@@ -31,8 +31,8 @@ module.exports = {
     // try X-Forwarded-For chain, fall back to connection ip
     const xff = (ctx.request.headers["x-forwarded-for"] || "").split(",")[0].trim();
     const ipAddress = xff || ctx.request.ip || "";
-    const { v4: uuidv4 } = require('uuid');
-    const transID= uuidv4();
+    const transID = crypto.randomUUID().replace(/-/g, '');
+    console.log("transID", transID)
 
     // From client (JS-only fields) with normalization:
     const jsEnabled = true; // this endpoint is called from JS
