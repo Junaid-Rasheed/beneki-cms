@@ -145,12 +145,12 @@ module.exports = {
 
       // 🔁 Redirect to frontend success page
       return ctx.redirect(
-        `${UiUrl}/payment-success?orderId=${orderId}`
+        `${UiUrl}payment-success?orderId=${orderId}`
       );
     } catch (error) {
       console.error("BNP Success Error:", error);
       return ctx.redirect(
-        `${UiUrl}/payment-failed`
+        `${UiUrl}payment-failed`
       );
     }
   },
@@ -172,12 +172,12 @@ module.exports = {
       });
 
       return ctx.redirect(
-        `${UiUrl}/payment-failed?orderId=${orderId}`
+        `${UiUrl}payment-failed?orderId=${orderId}`
       );
     } catch (error) {
       console.error("BNP Failure Error:", error);
       return ctx.redirect(
-        `${UiUrl}/payment-failed`
+        `${UiUrl}payment-failed`
       );
     }
   },
