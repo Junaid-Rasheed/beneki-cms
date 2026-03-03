@@ -14,5 +14,21 @@ module.exports = {
       handler: "bnpaxepta.notify",
       config: { auth: false },
     },
+     {
+      method: "POST",
+      path: "/bnpaxepta/payment-success",
+      handler: "bnpaxepta.success",
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: "POST",
+      path: "/bnpaxepta/payment-failure",
+      handler: "bnpaxepta.failure",
+      config: {
+        auth: false,
+      },
+    },
   ],
 };

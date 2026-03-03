@@ -3,6 +3,7 @@
 const iconv = require('iconv-lite');
 const crypto = require('crypto');
 const fetch = require("node-fetch");
+ const UiUrl = process.env.FRONTEND_URL;
 
 function clampColorDepth(depth) {
   // BNP allows: 1,4,8,15,16,24,32,48; if 30/36, step down to nearest lower allowed
@@ -30,6 +31,7 @@ module.exports = {
     // try X-Forwarded-For chain, fall back to connection ip
     const xff = (ctx.request.headers["x-forwarded-for"] || "").split(",")[0].trim();
     const ipAddress = xff || ctx.request.ip || "";
+   
 
     // From client (JS-only fields) with normalization:
     const jsEnabled = true; // this endpoint is called from JS
@@ -119,4 +121,64 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
+  async success(ctx) {
+    try {
+      const data = ctx.request.body;
+
+      console.log("BNP Success Response:", data);
+
+      const orderId = data.TransID; // adjust based on BNP field name
+      const transactionId = data.PayID;
+
+      // 🔐 TODO: Verify HMAC here
+      // 🔐 TODO: Validate amount & order
+
+      // ✅ Update order in DB
+      await strapi.db.query("api::order.order").update({
+        where: { orderNumber: orderId },
+        data: {
+          paymentStatus: "paid",
+          orderStatus: "processing",
+          invoiceId: transactionId,
+        },
+      });
+
+      // 🔁 Redirect to frontend success page
+      return ctx.redirect(
+        `${UiUrl}/payment-success?orderId=${orderId}`
+      );
+    } catch (error) {
+      console.error("BNP Success Error:", error);
+      return ctx.redirect(
+        `${UiUrl}/payment-failed`
+      );
+    }
+  },
+
+  async failure(ctx) {
+    try {
+      const data = ctx.request.body;
+
+      console.log("BNP Failure Response:", data);
+
+      const orderId = data.orderId;
+
+      // ❌ Update order as failed
+      await strapi.db.query("api::order.order").update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: "failed",
+        },
+      });
+
+      return ctx.redirect(
+        `${UiUrl}/payment-failed?orderId=${orderId}`
+      );
+    } catch (error) {
+      console.error("BNP Failure Error:", error);
+      return ctx.redirect(
+        `${UiUrl}/payment-failed`
+      );
+    }
+  },
 };
