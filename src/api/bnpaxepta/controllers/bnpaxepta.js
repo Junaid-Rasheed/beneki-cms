@@ -140,8 +140,9 @@ module.exports = {
 
       let nextInvoiceId = 1;
 
+    
       if (latestOrders.length > 0) {
-        nextInvoiceId = latestOrders[0].invoiceId + 1;
+        nextInvoiceId = Number(latestOrders[0].invoiceId) + 1;
       }
       const orderId = data.TransID; // adjust based on BNP field name
       const transactionId = data.PayID;
