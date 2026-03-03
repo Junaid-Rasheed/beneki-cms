@@ -139,7 +139,7 @@ module.exports = {
         data: {
           paymentStatus: "paid",
           orderStatus: "processing",
-          invoiceId: transactionId,
+          transactionId: transactionId,
         },
       });
 

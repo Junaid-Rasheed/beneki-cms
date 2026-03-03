@@ -187,6 +187,9 @@
     },
     "invoiceId": {
       "type": "biginteger"
+    },
+    "transactionId": {
+      "type": "string"
     }
   }
 }
