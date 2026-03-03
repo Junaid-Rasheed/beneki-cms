@@ -22,6 +22,12 @@ module.exports = {
         auth: false,
       },
     },
+     {
+      method: "GET",
+      path: "/bnpaxepta/payment-failure",
+      handler: "bnpaxepta.failure",
+      config: { auth: false },
+    },
     {
       method: "POST",
       path: "/bnpaxepta/payment-failure",

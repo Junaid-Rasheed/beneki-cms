@@ -157,17 +157,18 @@ module.exports = {
 
   async failure(ctx) {
     try {
-      const data = ctx.request.body;
+      const data = ctx.method === "POST" ? ctx.request.body : ctx.query;
 
       console.log("BNP Failure Response:", data);
 
-      const orderId = data.orderId;
-
+      const orderId = data.TransID; // adjust based on BNP field name
+      const transactionId = data.PayID;
       // ❌ Update order as failed
       await strapi.db.query("api::order.order").update({
-        where: { id: orderId },
+        where: { orderNumber: orderId },
         data: {
           paymentStatus: "failed",
+          transactionId: transactionId
         },
       });
 
