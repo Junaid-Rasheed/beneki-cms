@@ -3,6 +3,7 @@
 const iconv = require('iconv-lite');
 const crypto = require('crypto');
 const fetch = require("node-fetch");
+const { UID } = require('@strapi/strapi');
  const UiUrl = process.env.FRONTEND_URL;
 
 function clampColorDepth(depth) {
@@ -31,8 +32,10 @@ module.exports = {
     // try X-Forwarded-For chain, fall back to connection ip
     const xff = (ctx.request.headers["x-forwarded-for"] || "").split(",")[0].trim();
     const ipAddress = xff || ctx.request.ip || "";
-   
+    const refNr = orderId;
+    const { v4: uuidv4 } = require('uuid');
 
+    const transId = uuidv4();
     // From client (JS-only fields) with normalization:
     const jsEnabled = true; // this endpoint is called from JS
     const normalized = {
@@ -77,16 +80,13 @@ module.exports = {
       .digest("hex")
       .toUpperCase();
 
-    // Pad to 12 digits
-    let refNr = orderId.replace(/\D/g, "");
-    if (!refNr) refNr = String(Date.now()); // fallback
-    refNr = refNr.substring(0, 12);
+
     // Build parameter string with proper encoding
     const browserInfoBase64 = Buffer.from(JSON.stringify(normalized)).toString("base64");
 
     const clearParams = [
       `MerchantID=${merchantId}`,
-      `TransID=${orderId}`,
+      `TransID=${transId}`,
       `MsgVer=2.0`,
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
@@ -127,8 +127,8 @@ module.exports = {
 
       console.log("BNP Success Response:", data);
 
-      const orderId = data.TransID; // adjust based on BNP field name
-      const transactionId = data.PayID;
+      const orderId = data.refnr; // adjust based on BNP field name
+      const transactionId = data.TransID;
 
       // 🔐 TODO: Verify HMAC here
       // 🔐 TODO: Validate amount & order
@@ -161,8 +161,8 @@ module.exports = {
 
       console.log("BNP Failure Response:", data);
 
-      const orderId = data.TransID; // adjust based on BNP field name
-      const transactionId = data.PayID;
+      const orderId = data.refnr; // adjust based on BNP field name
+      const transactionId = data.TransID;
       // ❌ Update order as failed
       await strapi.db.query("api::order.order").update({
         where: { orderNumber: orderId },
