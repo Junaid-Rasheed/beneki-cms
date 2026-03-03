@@ -127,9 +127,21 @@ module.exports = {
 
       console.log("BNP Success Response:", data);
 
+        const latestOrder = await strapi.db
+                          .query("api::order.order")
+                          .findOne({
+                            select: ["invoiceId"],
+                            orderBy: { invoiceId: "desc" },
+                          });
+
+      let nextInvoiceId = 1;
+
+      if (latestOrder && latestOrder.invoiceId) {
+        nextInvoiceId = latestOrder.invoiceId + 1;
+      }
       const orderId = data.TransID; // adjust based on BNP field name
       const transactionId = data.PayID;
-
+      console.log("invoiceId:", nextInvoiceId);
       // 🔐 TODO: Verify HMAC here
       // 🔐 TODO: Validate amount & order
 
@@ -140,6 +152,7 @@ module.exports = {
           paymentStatus: "paid",
           orderStatus: "processing",
           transactionId: transactionId,
+          invoiceId: nextInvoiceId
         },
       });
 
