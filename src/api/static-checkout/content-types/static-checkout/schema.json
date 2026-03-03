@@ -230,10 +230,10 @@
       "type": "string"
     },
     "addBillingAddressWarning": {
-      "type": "text"
+      "type": "string"
     },
     "addShippingAddressWarning": {
-      "type": "text"
+      "type": "string"
     },
     "selectBillingAddressWarning": {
       "type": "string"
