@@ -3,7 +3,6 @@
 const iconv = require('iconv-lite');
 const crypto = require('crypto');
 const fetch = require("node-fetch");
-const { UID } = require('@strapi/strapi');
  const UiUrl = process.env.FRONTEND_URL;
 
 function clampColorDepth(depth) {
@@ -32,10 +31,9 @@ module.exports = {
     // try X-Forwarded-For chain, fall back to connection ip
     const xff = (ctx.request.headers["x-forwarded-for"] || "").split(",")[0].trim();
     const ipAddress = xff || ctx.request.ip || "";
-    const refNr = orderId;
     const { v4: uuidv4 } = require('uuid');
+    const transID= uuidv4();
 
-    const transId = uuidv4();
     // From client (JS-only fields) with normalization:
     const jsEnabled = true; // this endpoint is called from JS
     const normalized = {
@@ -80,13 +78,16 @@ module.exports = {
       .digest("hex")
       .toUpperCase();
 
-
+    // Pad to 12 digits
+    let refNr = orderId.replace(/\D/g, "");
+    if (!refNr) refNr = String(Date.now()); // fallback
+    refNr = refNr.substring(0, 12);
     // Build parameter string with proper encoding
     const browserInfoBase64 = Buffer.from(JSON.stringify(normalized)).toString("base64");
 
     const clearParams = [
       `MerchantID=${merchantId}`,
-      `TransID=${transId}`,
+      `TransID=${transID}`,
       `MsgVer=2.0`,
       `RefNr=${refNr}`,
       `Amount=${amountMinor}`,
@@ -107,6 +108,13 @@ module.exports = {
     const encrypted = bf.encode(clearParams, Blowfish.TYPE.UINT8_ARRAY);
     const dataHex = Buffer.from(encrypted).toString("hex").toUpperCase();
 
+    await strapi.db.query("api::order.order").update({
+        where: { orderNumber: orderId },
+        data: {
+          transactionId: transID,
+        },
+      });
+
     ctx.send({
       MerchantID: merchantId,
       Len: len,
@@ -126,8 +134,6 @@ module.exports = {
       const data = ctx.request.body;
 
       console.log("BNP Success Response:", data);
-
-      const orderId = data.refnr; // adjust based on BNP field name
       const transactionId = data.TransID;
 
       // 🔐 TODO: Verify HMAC here
@@ -135,17 +141,16 @@ module.exports = {
 
       // ✅ Update order in DB
       await strapi.db.query("api::order.order").update({
-        where: { orderNumber: orderId },
+        where: { transactionId: transactionId },
         data: {
           paymentStatus: "paid",
-          orderStatus: "processing",
-          transactionId: transactionId,
+          orderStatus: "processing"
         },
       });
 
       // 🔁 Redirect to frontend success page
       return ctx.redirect(
-        `${UiUrl}payment-success?orderId=${orderId}`
+        `${UiUrl}payment-success?orderId=${transactionId}`
       );
     } catch (error) {
       console.error("BNP Success Error:", error);
@@ -160,20 +165,18 @@ module.exports = {
       const data = ctx.method === "POST" ? ctx.request.body : ctx.query;
 
       console.log("BNP Failure Response:", data);
-
-      const orderId = data.refnr; // adjust based on BNP field name
       const transactionId = data.TransID;
       // ❌ Update order as failed
       await strapi.db.query("api::order.order").update({
-        where: { orderNumber: orderId },
+        where: { transactionId: transactionId },
         data: {
           paymentStatus: "failed",
-          transactionId: transactionId
+          
         },
       });
 
       return ctx.redirect(
-        `${UiUrl}payment-failed?orderId=${orderId}`
+        `${UiUrl}payment-failed?orderId=${transactionId}`
       );
     } catch (error) {
       console.error("BNP Failure Error:", error);
