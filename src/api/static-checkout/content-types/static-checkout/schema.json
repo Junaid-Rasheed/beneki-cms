@@ -228,6 +228,18 @@
     },
     "bankDetailMessage": {
       "type": "string"
+    },
+    "addBillingAddressWarning": {
+      "type": "text"
+    },
+    "addShippingAddressWarning": {
+      "type": "text"
+    },
+    "selectBillingAddressWarning": {
+      "type": "string"
+    },
+    "selectShippingAddressWarning": {
+      "type": "string"
     }
   }
 }
