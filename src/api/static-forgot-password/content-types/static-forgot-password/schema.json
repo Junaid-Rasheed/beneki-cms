@@ -87,6 +87,12 @@
           "localized": true
         }
       }
+    },
+    "userNotFoundError": {
+      "type": "string"
+    },
+    "sendingText": {
+      "type": "string"
     }
   }
 }
