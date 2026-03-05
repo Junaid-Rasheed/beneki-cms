@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "error_logs",
+  "info": {
+    "singularName": "error-log",
+    "pluralName": "error-logs",
+    "displayName": "ErrorLog",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "message": {
+      "type": "string"
+    },
+    "stack": {
+      "type": "text"
+    },
+    "pageUrl": {
+      "type": "string"
+    },
+    "endpoint": {
+      "type": "string"
+    },
+    "statusCode": {
+      "type": "integer"
+    },
+    "userEmail": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}
