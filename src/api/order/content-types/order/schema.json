@@ -59,7 +59,7 @@
         "refund",
         "confirmed",
         "processing",
-        "Partially Shipped",
+        "partially shipped",
         "shipped",
         "delivered",
         "cancelled"
