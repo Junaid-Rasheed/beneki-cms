@@ -151,6 +151,9 @@
     },
     "footerOf": {
       "type": "string"
+    },
+    "ActionPay": {
+      "type": "string"
     }
   }
 }
