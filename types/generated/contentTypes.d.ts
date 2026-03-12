@@ -564,6 +564,98 @@ export interface ApiCtaBannerCtaBanner extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiEmailResetTemplateEmailResetTemplate
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'email_reset_templates';
+  info: {
+    displayName: 'Email-reset-template';
+    pluralName: 'email-reset-templates';
+    singularName: 'email-reset-template';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    buttonText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::email-reset-template.email-reset-template'
+    >;
+    message: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    subject: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    thanksText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiErrorLogErrorLog extends Struct.CollectionTypeSchema {
+  collectionName: 'error_logs';
+  info: {
+    description: '';
+    displayName: 'ErrorLog';
+    pluralName: 'error-logs';
+    singularName: 'error-log';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    endpoint: Schema.Attribute.String;
+    environment: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::error-log.error-log'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.String;
+    metadata: Schema.Attribute.JSON;
+    pageUrl: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    stack: Schema.Attribute.Text;
+    statusCode: Schema.Attribute.Integer;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    userEmail: Schema.Attribute.String;
+  };
+}
+
 export interface ApiFooterFooter extends Struct.CollectionTypeSchema {
   collectionName: 'footers';
   info: {
@@ -1265,7 +1357,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         'refund',
         'confirmed',
         'processing',
-        'Partially Shipped',
+        'partially shipped',
         'shipped',
         'delivered',
         'cancelled',
@@ -1321,6 +1413,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    transactionId: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2434,6 +2527,7 @@ export interface ApiStaticBnpFailedStaticBnpFailed
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_bnp_faileds';
   info: {
+    description: '';
     displayName: 'Static-BNP-failed';
     pluralName: 'static-bnp-faileds';
     singularName: 'static-bnp-failed';
@@ -2516,6 +2610,7 @@ export interface ApiStaticBnpFailedStaticBnpFailed
           localized: true;
         };
       }>;
+    retryPaymentButton: Schema.Attribute.String;
     returnCheckoutButton: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2802,6 +2897,8 @@ export interface ApiStaticCheckoutStaticCheckout
     };
   };
   attributes: {
+    addBillingAddressWarning: Schema.Attribute.String;
+    addShippingAddressWarning: Schema.Attribute.String;
     bankDetailMessage: Schema.Attribute.String;
     bilingAddNew: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
@@ -2881,6 +2978,8 @@ export interface ApiStaticCheckoutStaticCheckout
     privacyText: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     redirectingToCart: Schema.Attribute.String;
+    selectBillingAddressWarning: Schema.Attribute.String;
+    selectShippingAddressWarning: Schema.Attribute.String;
     shippingTitle: Schema.Attribute.String;
     termsAccept: Schema.Attribute.String;
     termsLink: Schema.Attribute.String;
@@ -3253,6 +3352,7 @@ export interface ApiStaticForgotPasswordStaticForgotPassword
         };
       }>;
     publishedAt: Schema.Attribute.DateTime;
+    sendingText: Schema.Attribute.String;
     submitButton: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3268,6 +3368,7 @@ export interface ApiStaticForgotPasswordStaticForgotPassword
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    userNotFoundError: Schema.Attribute.String;
   };
 }
 
@@ -3860,6 +3961,7 @@ export interface ApiStaticYourOrderStaticYourOrder
     ActionCancel: Schema.Attribute.String;
     ActionDownload: Schema.Attribute.String;
     ActionOrderAgain: Schema.Attribute.String;
+    ActionPay: Schema.Attribute.String;
     ActionView: Schema.Attribute.String;
     allOrdersTitle: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
@@ -4783,6 +4885,8 @@ declare module '@strapi/strapi' {
       'api::cgv.cgv': ApiCgvCgv;
       'api::coupon.coupon': ApiCouponCoupon;
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;
+      'api::email-reset-template.email-reset-template': ApiEmailResetTemplateEmailResetTemplate;
+      'api::error-log.error-log': ApiErrorLogErrorLog;
       'api::footer.footer': ApiFooterFooter;
       'api::general-setting.general-setting': ApiGeneralSettingGeneralSetting;
       'api::holiday-setting.holiday-setting': ApiHolidaySettingHolidaySetting;
