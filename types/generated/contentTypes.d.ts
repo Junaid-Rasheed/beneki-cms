@@ -1539,7 +1539,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
     singularName: 'sidebar-item';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   pluginOptions: {
     i18n: {
