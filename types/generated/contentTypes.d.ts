@@ -629,7 +629,7 @@ export interface ApiErrorLogErrorLog extends Struct.CollectionTypeSchema {
     singularName: 'error-log';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     createdAt: Schema.Attribute.DateTime;
