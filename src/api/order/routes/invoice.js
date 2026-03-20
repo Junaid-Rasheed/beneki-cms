@@ -8,5 +8,13 @@ module.exports = {
         auth: false,
       },
     },
+    {
+      method: "GET",
+      path: "/invoices/getTotalSales",
+      handler: "invoice.getTotalsByDate",
+      config: {
+        auth: false,
+      },
+    },
   ],
 };
