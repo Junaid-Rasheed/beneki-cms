@@ -97,8 +97,8 @@ module.exports = {
           COALESCE(SUM(o."sub_total"), 0) as "totalAmountExcludeVAT",
           COALESCE(SUM(o."vat"), 0) as "totalVat"
         FROM orders o
-        INNER JOIN orders_user_lnk l ON o."id" = l."order_id"
-        INNER JOIN up_users u ON l."user_id" = u."id"
+        LEFT JOIN orders_user_lnk l ON o."id" = l."order_id"
+        LEFT JOIN up_users u ON l."user_id" = u."id"
       `;
 
       const params = [startDate, endDate];
@@ -106,7 +106,7 @@ module.exports = {
       // ✅ Filter by affiliated users using the link table
       if (userId) {
         query += `
-          INNER JOIN up_users_affiliated_by_lnk a 
+          LEFT JOIN up_users_affiliated_by_lnk a 
             ON u."id" = a."user_id"
           WHERE a."inv_user_id" = ?
             AND o."created_at" >= ? 
