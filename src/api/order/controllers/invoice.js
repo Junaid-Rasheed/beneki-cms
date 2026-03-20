@@ -111,13 +111,14 @@ module.exports = {
           WHERE a."inv_user_id" = ?
             AND o."created_at" >= ? 
             AND o."created_at" <= ?
+            AND payment_status= 'paid'
         `;
         // Note: order of params matters
         params.unshift(userId); // first param is userId
         params.push(startDate, endDate);
       } else {
         // No affiliated filter, just date filter
-        query += ` WHERE o."created_at" >= ? AND o."created_at" <= ?`;
+        query += ` WHERE o."created_at" >= ? AND o."created_at" <= ? AND o.payment_status= 'paid'`;
       }
 
       const result = await strapi.db.connection.raw(query, params);
