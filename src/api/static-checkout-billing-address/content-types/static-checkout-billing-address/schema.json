@@ -42,6 +42,9 @@
     },
     "emailPlaceholder": {
       "type": "string"
+    },
+    "deliveryInstructionPlaceholder": {
+      "type": "string"
     }
   }
 }

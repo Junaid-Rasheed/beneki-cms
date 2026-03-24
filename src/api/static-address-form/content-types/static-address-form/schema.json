@@ -191,6 +191,9 @@
     },
     "addNewAddressButton": {
       "type": "string"
+    },
+    "deliveryInstructionLabel": {
+      "type": "string"
     }
   }
 }

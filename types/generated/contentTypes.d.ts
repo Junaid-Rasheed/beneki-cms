@@ -1905,6 +1905,7 @@ export interface ApiStaticAddressFormStaticAddressForm
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    deliveryInstructionLabel: Schema.Attribute.String;
     editButton: Schema.Attribute.String;
     editTitle: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
@@ -2861,6 +2862,7 @@ export interface ApiStaticCheckoutBillingAddressStaticCheckoutBillingAddress
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    deliveryInstructionPlaceholder: Schema.Attribute.String;
     emailPlaceholder: Schema.Attribute.String;
     firstNamePlaceholder: Schema.Attribute.String;
     lastNamePlaceholder: Schema.Attribute.String;
