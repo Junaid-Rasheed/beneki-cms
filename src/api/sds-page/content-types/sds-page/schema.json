@@ -1,0 +1,102 @@
+{
+  "kind": "singleType",
+  "collectionName": "sds_pages",
+  "info": {
+    "singularName": "sds-page",
+    "pluralName": "sds-pages",
+    "displayName": "SDS-Page",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "pageTitle": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "headerBadge": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "intro": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "statBox1": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "statBox2": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "statBox3": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "sectionLanguagesLabel": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "filesCountSuffix": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "imagePlaceholderHint": {
+      "type": "string"
+    },
+    "footerTitle": {
+      "type": "string"
+    },
+    "footerBody": {
+      "type": "text"
+    },
+    "footerCtaLabel": {
+      "type": "string"
+    },
+    "footerCtaUrl": {
+      "type": "string"
+    },
+    "productReadyBadge": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sds_documents",
+  "info": {
+    "singularName": "sds-document",
+    "pluralName": "sds-documents",
+    "displayName": "SDS-Document",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "languageLabel": {
+      "type": "string"
+    },
+    "languageCode": {
+      "type": "string"
+    },
+    "flagImage": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "pdf": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": true
+    },
+    "sds_product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::sds-product.sds-product",
+      "inversedBy": "documents"
+    }
+  }
+}

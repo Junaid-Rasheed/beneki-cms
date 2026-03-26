@@ -1482,6 +1482,164 @@ export interface ApiPolitiquePolitique extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiSdsDocumentSdsDocument extends Struct.CollectionTypeSchema {
+  collectionName: 'sds_documents';
+  info: {
+    description: '';
+    displayName: 'SDS-Document';
+    pluralName: 'sds-documents';
+    singularName: 'sds-document';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    flagImage: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    languageCode: Schema.Attribute.String;
+    languageLabel: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::sds-document.sds-document'
+    > &
+      Schema.Attribute.Private;
+    pdf: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios', true>;
+    publishedAt: Schema.Attribute.DateTime;
+    sds_product: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::sds-product.sds-product'
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiSdsPageSdsPage extends Struct.SingleTypeSchema {
+  collectionName: 'sds_pages';
+  info: {
+    description: '';
+    displayName: 'SDS-Page';
+    pluralName: 'sds-pages';
+    singularName: 'sds-page';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    filesCountSuffix: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    footerBody: Schema.Attribute.Text;
+    footerCtaLabel: Schema.Attribute.String;
+    footerCtaUrl: Schema.Attribute.String;
+    footerTitle: Schema.Attribute.String;
+    headerBadge: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    imagePlaceholderHint: Schema.Attribute.String;
+    intro: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::sds-page.sds-page'
+    >;
+    pageTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    productReadyBadge: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    sectionLanguagesLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    statBox1: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    statBox2: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    statBox3: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiSdsProductSdsProduct extends Struct.CollectionTypeSchema {
+  collectionName: 'sds_products';
+  info: {
+    description: '';
+    displayName: 'SDS-Product';
+    pluralName: 'sds-products';
+    singularName: 'sds-product';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    documents: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::sds-document.sds-document'
+    >;
+    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::sds-product.sds-product'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String;
+    productCode: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiSettingSetting extends Struct.CollectionTypeSchema {
   collectionName: 'settings';
   info: {
@@ -4901,6 +5059,9 @@ declare module '@strapi/strapi' {
       'api::order-item.order-item': ApiOrderItemOrderItem;
       'api::order.order': ApiOrderOrder;
       'api::politique.politique': ApiPolitiquePolitique;
+      'api::sds-document.sds-document': ApiSdsDocumentSdsDocument;
+      'api::sds-page.sds-page': ApiSdsPageSdsPage;
+      'api::sds-product.sds-product': ApiSdsProductSdsProduct;
       'api::setting.setting': ApiSettingSetting;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
       'api::static-account-detail.static-account-detail': ApiStaticAccountDetailStaticAccountDetail;

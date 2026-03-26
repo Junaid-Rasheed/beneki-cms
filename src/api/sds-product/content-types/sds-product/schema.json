@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sds_products",
+  "info": {
+    "singularName": "sds-product",
+    "pluralName": "sds-products",
+    "displayName": "SDS-Product",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "productCode": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "documents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::sds-document.sds-document",
+      "mappedBy": "sds_product"
+    }
+  }
+}
