@@ -16,69 +16,32 @@
     }
   },
   "attributes": {
-    "pageTitle": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
     "headerBadge": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "string"
+    },
+    "pageTitle": {
+      "type": "string"
     },
     "intro": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "text"
     },
     "statBox1": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "string"
     },
     "statBox2": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "string"
     },
     "statBox3": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "string"
     },
     "sectionLanguagesLabel": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "string"
     },
     "filesCountSuffix": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "string"
+    },
+    "productReadyBadge": {
+      "type": "string"
     },
     "imagePlaceholderHint": {
       "type": "string"
@@ -87,15 +50,12 @@
       "type": "string"
     },
     "footerBody": {
-      "type": "text"
+      "type": "string"
     },
     "footerCtaLabel": {
       "type": "string"
     },
     "footerCtaUrl": {
-      "type": "string"
-    },
-    "productReadyBadge": {
       "type": "string"
     }
   }
