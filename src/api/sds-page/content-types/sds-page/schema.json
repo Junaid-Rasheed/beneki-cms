@@ -57,6 +57,11 @@
     },
     "footerCtaUrl": {
       "type": "string"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::sds-product.sds-product"
     }
   }
 }

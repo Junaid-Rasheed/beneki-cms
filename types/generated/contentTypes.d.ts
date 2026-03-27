@@ -1553,6 +1553,10 @@ export interface ApiSdsPageSdsPage extends Struct.SingleTypeSchema {
     >;
     pageTitle: Schema.Attribute.String;
     productReadyBadge: Schema.Attribute.String;
+    products: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::sds-product.sds-product'
+    >;
     publishedAt: Schema.Attribute.DateTime;
     sectionLanguagesLabel: Schema.Attribute.String;
     statBox1: Schema.Attribute.String;
