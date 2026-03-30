@@ -7,15 +7,14 @@ module.exports = ({ env }) => ({
         cloud_name: env("CLOUDINARY_NAME"),
         api_key: env("CLOUDINARY_KEY"),
         api_secret: env("CLOUDINARY_SECRET"),
+        resource_type: "auto",
       },
       actionOptions: {
         upload: {},
         uploadStream: {},
         delete: {},
       },
-      breakpoints: undefined,
-      enabled: true,
-      resource_type: "auto",
+      
     },
   },
 
