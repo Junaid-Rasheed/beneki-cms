@@ -36,6 +36,9 @@
       "relation": "oneToMany",
       "target": "api::sds-document.sds-document",
       "mappedBy": "sds_product"
+    },
+    "order": {
+      "type": "integer"
     }
   }
 }

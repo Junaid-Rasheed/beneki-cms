@@ -154,6 +154,9 @@
     },
     "ActionPay": {
       "type": "string"
+    },
+    "searchButton": {
+      "type": "string"
     }
   }
 }

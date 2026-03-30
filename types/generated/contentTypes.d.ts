@@ -1596,6 +1596,7 @@ export interface ApiSdsProductSdsProduct extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     name: Schema.Attribute.String;
+    order: Schema.Attribute.Integer;
     productCode: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
@@ -4123,6 +4124,7 @@ export interface ApiStaticYourOrderStaticYourOrder
       }>;
     prevBtn: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    searchButton: Schema.Attribute.String;
     searchPlaceholder: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
