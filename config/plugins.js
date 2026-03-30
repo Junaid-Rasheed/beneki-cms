@@ -13,6 +13,9 @@ module.exports = ({ env }) => ({
         uploadStream: {},
         delete: {},
       },
+      breakpoints: undefined,
+      enabled: true,
+      resource_type: "auto",
     },
   },
 
