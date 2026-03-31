@@ -19,102 +19,82 @@
     "headerBadge": {
       "type": "string",
       "pluginOptions": {
-      "i18n": {
-      "localized": true
-    }
-  }
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "pageTitle": {
       "type": "string",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }}
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "intro": {
       "type": "text",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  }
-    },
-    "statBox1": {
-      "type": "string",
-      "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  }
-    },
-    "statBox2": {
-      "type": "string",
-      "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }}
-    },
-    "statBox3": {
-      "type": "string",
-      "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }}
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "sectionLanguagesLabel": {
       "type": "string",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }}
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "filesCountSuffix": {
       "type": "string",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  }
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "productReadyBadge": {
       "type": "string",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  }
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "imagePlaceholderHint": {
       "type": "string",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  }
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "footerTitle": {
       "type": "string",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  }
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "footerBody": {
       "type": "string",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  }
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "footerCtaLabel": {
       "type": "string",
       "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  }
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "footerCtaUrl": {
       "type": "string",
