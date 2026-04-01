@@ -656,6 +656,41 @@ export interface ApiErrorLogErrorLog extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiFooterSettingFooterSetting
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'footer_settings';
+  info: {
+    description: '';
+    displayName: 'Footer-Setting';
+    pluralName: 'footer-settings';
+    singularName: 'footer-setting';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    allowedCountries: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::footer-setting.footer-setting'
+    > &
+      Schema.Attribute.Private;
+    phoneNumber: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    showPhoneNumber: Schema.Attribute.Boolean;
+    showWhatsapp: Schema.Attribute.Boolean;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    whatsappLink: Schema.Attribute.String;
+    whatsappNumber: Schema.Attribute.String;
+  };
+}
+
 export interface ApiFooterFooter extends Struct.CollectionTypeSchema {
   collectionName: 'footers';
   info: {
@@ -5065,6 +5100,7 @@ declare module '@strapi/strapi' {
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;
       'api::email-reset-template.email-reset-template': ApiEmailResetTemplateEmailResetTemplate;
       'api::error-log.error-log': ApiErrorLogErrorLog;
+      'api::footer-setting.footer-setting': ApiFooterSettingFooterSetting;
       'api::footer.footer': ApiFooterFooter;
       'api::general-setting.general-setting': ApiGeneralSettingGeneralSetting;
       'api::holiday-setting.holiday-setting': ApiHolidaySettingHolidaySetting;

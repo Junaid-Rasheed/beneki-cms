@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "footer_settings",
+  "info": {
+    "singularName": "footer-setting",
+    "pluralName": "footer-settings",
+    "displayName": "Footer-Setting",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "phoneNumber": {
+      "type": "string"
+    },
+    "showPhoneNumber": {
+      "type": "boolean"
+    },
+    "whatsappNumber": {
+      "type": "string"
+    },
+    "showWhatsapp": {
+      "type": "boolean"
+    },
+    "whatsappLink": {
+      "type": "string"
+    },
+    "allowedCountries": {
+      "type": "json"
+    }
+  }
+}
