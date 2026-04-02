@@ -19,6 +19,9 @@
     },
     "autoplayTimer": {
       "type": "integer"
+    },
+    "priceExclVATLabels": {
+      "type": "json"
     }
   }
 }

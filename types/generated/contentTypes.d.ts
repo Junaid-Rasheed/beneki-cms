@@ -819,6 +819,7 @@ export interface ApiGeneralSettingGeneralSetting
     > &
       Schema.Attribute.Private;
     loginInfo: Schema.Attribute.Text;
+    priceExclVATLabels: Schema.Attribute.JSON;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
