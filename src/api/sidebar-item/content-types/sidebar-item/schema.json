@@ -180,23 +180,23 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::coupon.coupon",
-      "mappedBy": "includedProducts",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "mappedBy": "includedProducts"
     },
     "productCoupons": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::coupon.coupon",
-      "mappedBy": "excludedProducts",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "mappedBy": "excludedProducts"
     },
     "isSideBarProduct": {
       "type": "boolean"

@@ -104,6 +104,12 @@
     },
     "allowedEmailDomains": {
       "type": "json"
+    },
+    "mustBePurchasedTogether": {
+      "type": "boolean"
+    },
+    "minAmount": {
+      "type": "integer"
     }
   }
 }

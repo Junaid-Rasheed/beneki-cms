@@ -507,6 +507,8 @@ export interface ApiCouponCoupon extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    minAmount: Schema.Attribute.Integer;
+    mustBePurchasedTogether: Schema.Attribute.Boolean;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

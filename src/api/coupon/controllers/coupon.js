@@ -91,6 +91,32 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
       }
 
       // ===============================
+      // 🧩 MUST BE PURCHASED TOGETHER CHECK
+      // ===============================
+      if (
+        coupon.mustBePurchasedTogether &&
+        coupon.includedProducts &&
+        coupon.includedProducts.length > 0
+      ) {
+
+        if (!cartItems || cartItems.length === 0) {
+          return ctx.badRequest('Cart is empty');
+        }
+
+        const cartProductIds = cartItems.map(item => item.productId);
+        const requiredProductIds = coupon.includedProducts.map(p => p.documentId);
+
+        const allProductsPresent = requiredProductIds.every(id =>
+          cartProductIds.includes(id)
+        );
+
+        if (!allProductsPresent) {
+          return ctx.badRequest(
+            'All required products must be purchased together to use this coupon'
+          );
+        }
+      }
+      // ===============================
       // 🛒 CALCULATE ELIGIBLE TOTAL
       // ===============================
       let eligibleTotal = cartTotal;
@@ -123,6 +149,19 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
             eligibleTotal += lineTotal;
           }
         }
+      }
+
+      // ===============================
+      // 💵 MINIMUM AMOUNT CHECK
+      // ===============================
+      if (
+        coupon.minAmount != null &&
+        coupon.minAmount > 0 &&
+        eligibleTotal < coupon.minAmount
+      ) {
+        return ctx.badRequest(
+          `Minimum spend of ${coupon.minAmount} required to use this coupon`
+        );
       }
 
       // ===============================
