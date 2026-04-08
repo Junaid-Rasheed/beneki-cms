@@ -131,6 +131,9 @@
       "relation": "manyToMany",
       "target": "api::coupon.coupon",
       "mappedBy": "allowedUsers"
+    },
+    "cart": {
+      "type": "json"
     }
   }
 }

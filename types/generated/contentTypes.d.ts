@@ -5038,6 +5038,7 @@ export interface PluginUsersPermissionsUser
       ]
     >;
     businessRegistrationNumber: Schema.Attribute.String;
+    cart: Schema.Attribute.JSON;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     coupons: Schema.Attribute.Relation<'manyToMany', 'api::coupon.coupon'>;
