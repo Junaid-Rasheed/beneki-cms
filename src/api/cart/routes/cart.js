@@ -2,7 +2,7 @@ module.exports = {
   routes: [
     {
       method: "GET",
-      path: "cart/me",
+      path: "/cart/me",
       handler: "cart.me",
       config: {
         policies: [],
@@ -11,7 +11,7 @@ module.exports = {
     },
     {
       method: "PUT",
-      path: "cart/me",
+      path: "/cart/me",
       handler: "cart.updateMe",
       config: {
         policies: [],
