@@ -45,6 +45,9 @@
     },
     "deliveryInstructionPlaceholder": {
       "type": "string"
+    },
+    "streetMinLengthError": {
+      "type": "string"
     }
   }
 }

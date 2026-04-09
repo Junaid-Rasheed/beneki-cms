@@ -3087,6 +3087,7 @@ export interface ApiStaticCheckoutBillingAddressStaticCheckoutBillingAddress
     phonePlaceholder: Schema.Attribute.String;
     postalCodePlaceholder: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    streetMinLengthError: Schema.Attribute.String;
     streetPlaceholder: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
