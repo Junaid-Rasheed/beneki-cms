@@ -2028,7 +2028,11 @@ export interface ApiStaticAddressBookStaticAddressBook
         };
       }>;
     deleteBtn: Schema.Attribute.String;
+    deleteConfirmCancel: Schema.Attribute.String;
+    deleteConfirmConfirm: Schema.Attribute.String;
     deleteConfirmMessage: Schema.Attribute.String;
+    deleteConfirmTitle: Schema.Attribute.String;
+    deleteConfirmWorking: Schema.Attribute.String;
     editBtn: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<

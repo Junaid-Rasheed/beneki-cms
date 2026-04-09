@@ -85,6 +85,18 @@
     },
     "deleteConfirmMessage": {
       "type": "string"
+    },
+    "deleteConfirmTitle": {
+      "type": "string"
+    },
+    "deleteConfirmCancel": {
+      "type": "string"
+    },
+    "deleteConfirmConfirm": {
+      "type": "string"
+    },
+    "deleteConfirmWorking": {
+      "type": "string"
     }
   }
 }
