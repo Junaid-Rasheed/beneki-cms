@@ -84,56 +84,59 @@ module.exports = {
   },
 
   async getTotalsByDate(ctx) {
-    try {
-      const { startDate, endDate, userId } = ctx.query;
+  try {
+    const { startDate, endDate, userId } = ctx.query;
 
-      if (!startDate || !endDate) {
-        return ctx.badRequest("startDate and endDate are required");
-      }
+    if (!startDate || !endDate) {
+      return ctx.badRequest("startDate and endDate are required");
+    }
 
-      let query = `
-        SELECT 
-          COALESCE(SUM(o."total"), 0) as "totalAmount",
-          COALESCE(SUM(o."sub_total"), 0) as "totalAmountExcludeVAT",
-          COALESCE(SUM(o."vat"), 0) as "totalVat"
-        FROM orders o
-        LEFT JOIN orders_user_lnk l ON o."id" = l."order_id"
-        LEFT JOIN up_users u ON l."user_id" = u."id"
+    let query = `
+      SELECT 
+        COALESCE(SUM(o."total"), 0) as "totalAmount",
+        COALESCE(SUM(o."sub_total"), 0) as "totalAmountExcludeVAT",
+        COALESCE(SUM(o."vat"), 0) as "totalVat"
+      FROM orders o
+      LEFT JOIN orders_user_lnk l ON o."id" = l."order_id"
+      LEFT JOIN up_users u ON l."user_id" = u."id"
+    `;
+
+    let params = [];
+
+    if (userId) {
+      query += `
+        LEFT JOIN up_users_affiliated_by_lnk a 
+          ON u."id" = a."user_id"
+        WHERE a."inv_user_id" = ?
+          AND o."created_at" >= ? 
+          AND o."created_at" <= ?
+          AND o."order_status" IN ('processing','shipped','delivered')
       `;
 
-      const params = [startDate, endDate];
+      params = [userId, startDate, endDate]; // ✅ correct order
+    } else {
+      query += `
+        WHERE o."created_at" >= ? 
+          AND o."created_at" <= ?
+          AND o."order_status" IN ('processing','shipped','delivered')
+      `;
 
-      // ✅ Filter by affiliated users using the link table
-      if (userId) {
-        query += `
-          LEFT JOIN up_users_affiliated_by_lnk a 
-            ON u."id" = a."user_id"
-          WHERE a."inv_user_id" = ?
-            AND o."created_at" >= ? 
-            AND o."created_at" <= ?
-            AND o.order_status in ('processing','shipped','delivered')
-        `;
-        // Note: order of params matters
-        params.unshift(userId); // first param is userId
-        params.push(startDate, endDate);
-      } else {
-        // No affiliated filter, just date filter
-        query += ` WHERE o."created_at" >= ? AND o."created_at" <= ? AND o.order_status in ('processing','shipped','delivered')`;
-      }
-
-      const result = await strapi.db.connection.raw(query, params);
-
-      const row = result.rows?.[0] || result[0]?.[0] || {};
-
-      return {
-        totalAmount: Number(row.totalAmount) || 0,
-        totalAmountExcludeVAT: Number(row.totalAmountExcludeVAT) || 0,
-        totalVat: Number(row.totalVat) || 0,
-      };
-
-    } catch (error) {
-      console.error("Error:", error);
-      return ctx.internalServerError("Something went wrong");
+      params = [startDate, endDate]; // ✅ correct
     }
-  },
+
+    const result = await strapi.db.connection.raw(query, params);
+
+    const row = result.rows?.[0] || result[0]?.[0] || {};
+
+    return {
+      totalAmount: Number(row.totalAmount) || 0,
+      totalAmountExcludeVAT: Number(row.totalAmountExcludeVAT) || 0,
+      totalVat: Number(row.totalVat) || 0,
+    };
+
+  } catch (error) {
+    console.error("Error:", error);
+    return ctx.internalServerError("Something went wrong");
+  }
+},
 };
