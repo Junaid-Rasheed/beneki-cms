@@ -4187,6 +4187,8 @@ export interface ApiStaticYourOrderStaticYourOrder
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    exportErrorMessage: Schema.Attribute.String;
+    exportSuccessMessage: Schema.Attribute.String;
     filterByStatus: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

@@ -157,6 +157,12 @@
     },
     "searchButton": {
       "type": "string"
+    },
+    "exportSuccessMessage": {
+      "type": "string"
+    },
+    "exportErrorMessage": {
+      "type": "string"
     }
   }
 }
