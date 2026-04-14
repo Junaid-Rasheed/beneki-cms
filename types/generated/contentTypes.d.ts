@@ -4309,6 +4309,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
           localized: true;
         };
       }>;
+    couponNameLabel: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -4331,6 +4332,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
           localized: true;
         };
       }>;
+    lineTotalExclVatLabel: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -4390,6 +4392,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
         };
       }>;
     payNowButton: Schema.Attribute.String;
+    productIdLabel: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     saveChangesButton: Schema.Attribute.String;
     savingText: Schema.Attribute.String;
@@ -4430,6 +4433,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
           localized: true;
         };
       }>;
+    unitPriceExclVatLabel: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

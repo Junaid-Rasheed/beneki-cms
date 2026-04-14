@@ -197,6 +197,18 @@
     },
     "payNowButton": {
       "type": "string"
+    },
+    "unitPriceExclVatLabel": {
+      "type": "string"
+    },
+    "lineTotalExclVatLabel": {
+      "type": "string"
+    },
+    "productIdLabel": {
+      "type": "string"
+    },
+    "couponNameLabel": {
+      "type": "string"
     }
   }
 }
