@@ -4184,9 +4184,14 @@ export interface ApiStaticYourOrderStaticYourOrder
     ActionPay: Schema.Attribute.String;
     ActionView: Schema.Attribute.String;
     allOrdersTitle: Schema.Attribute.String;
+    allPaymentsTitle: Schema.Attribute.String;
+    clientDisplayNameUnknown: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    emptyOrdersFiltered: Schema.Attribute.String;
+    emptyOrdersNone: Schema.Attribute.String;
+    emptyOrdersSearch: Schema.Attribute.String;
     exportErrorMessage: Schema.Attribute.String;
     exportSuccessMessage: Schema.Attribute.String;
     filterByStatus: Schema.Attribute.String &
@@ -4195,8 +4200,11 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    filterOrderStatusLabel: Schema.Attribute.String;
+    filterPaymentStatusLabel: Schema.Attribute.String;
     footerOf: Schema.Attribute.String;
     footerOrder: Schema.Attribute.String;
+    footerPageLabel: Schema.Attribute.String;
     footerShowing: Schema.Attribute.String;
     footerTo: Schema.Attribute.String;
     insidetablefor: Schema.Attribute.String;
@@ -4207,6 +4215,8 @@ export interface ApiStaticYourOrderStaticYourOrder
     >;
     nextBtn: Schema.Attribute.String;
     orderDropdown: Schema.Attribute.JSON;
+    ordersMatchingSearchParenthetical: Schema.Attribute.String;
+    ordersTotalInlineMatching: Schema.Attribute.String;
     ordersTotalSuffix: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -4219,8 +4229,16 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    paymentDropdown: Schema.Attribute.JSON;
     prevBtn: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    quickFilterToBeShipped: Schema.Attribute.String;
+    quickFilterUnpaid: Schema.Attribute.String;
+    quickViewHide: Schema.Attribute.String;
+    quickViewNoItems: Schema.Attribute.String;
+    quickViewOrderedProductsTitle: Schema.Attribute.String;
+    quickViewProductFallback: Schema.Attribute.String;
+    quickViewShow: Schema.Attribute.String;
     searchButton: Schema.Attribute.String;
     searchPlaceholder: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
@@ -4235,6 +4253,7 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    tableClientColumn: Schema.Attribute.String;
     tableDate: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -4272,6 +4291,7 @@ export interface ApiStaticYourOrderStaticYourOrder
         };
       }>;
     TotalItem: Schema.Attribute.String;
+    totalItemsPluralSuffix: Schema.Attribute.String;
     totalOrder: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

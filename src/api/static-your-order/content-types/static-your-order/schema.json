@@ -163,6 +163,66 @@
     },
     "exportErrorMessage": {
       "type": "string"
+    },
+    "paymentDropdown": {
+      "type": "json"
+    },
+    "quickFilterToBeShipped": {
+      "type": "string"
+    },
+    "quickFilterUnpaid": {
+      "type": "string"
+    },
+    "filterOrderStatusLabel": {
+      "type": "string"
+    },
+    "filterPaymentStatusLabel": {
+      "type": "string"
+    },
+    "allPaymentsTitle": {
+      "type": "string"
+    },
+    "tableClientColumn": {
+      "type": "string"
+    },
+    "quickViewShow": {
+      "type": "string"
+    },
+    "quickViewHide": {
+      "type": "string"
+    },
+    "quickViewOrderedProductsTitle": {
+      "type": "string"
+    },
+    "quickViewProductFallback": {
+      "type": "string"
+    },
+    "quickViewNoItems": {
+      "type": "string"
+    },
+    "clientDisplayNameUnknown": {
+      "type": "string"
+    },
+    "emptyOrdersSearch": {
+      "type": "string"
+    },
+    "emptyOrdersFiltered": {
+      "type": "string"
+    },
+    "emptyOrdersNone": {
+      "type": "string"
+    },
+    "footerPageLabel": {
+      "type": "string"
+    },
+    "ordersMatchingSearchParenthetical": {
+      "type": "string"
+    },
+    "ordersTotalInlineMatching": {
+      "type": "string"
+    },
+    "totalItemsPluralSuffix": {
+      "type": "string"
     }
   }
 }
