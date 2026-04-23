@@ -191,11 +191,11 @@
     "transactionId": {
       "type": "string"
     },
-    "accommodationsCount": {
-      "type": "string"
-    },
     "airbnbProfileUrl": {
       "type": "string"
+    },
+    "accommodationsCount": {
+      "type": "integer"
     }
   }
 }

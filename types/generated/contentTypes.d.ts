@@ -1340,7 +1340,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    accommodationsCount: Schema.Attribute.String;
+    accommodationsCount: Schema.Attribute.Integer;
     airbnbProfileUrl: Schema.Attribute.String;
     billingAddress: Schema.Attribute.Relation<
       'oneToOne',
