@@ -1,0 +1,59 @@
+{
+  "kind": "collectionType",
+  "collectionName": "static_sample_requests",
+  "info": {
+    "singularName": "static-sample-request",
+    "pluralName": "static-sample-requests",
+    "displayName": "Static-SampleRequest",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "sidebarLabel": {
+      "type": "string"
+    },
+    "pageTitle": {
+      "type": "string"
+    },
+    "pageDescription": {
+      "type": "text"
+    },
+    "accommodationsLabel": {
+      "type": "string"
+    },
+    "accommodationsPlaceholder": {
+      "type": "string"
+    },
+    "airbnbLabel": {
+      "type": "string"
+    },
+    "airbnbPlaceholder": {
+      "type": "string"
+    },
+    "submitButton": {
+      "type": "string"
+    },
+    "submittingButton": {
+      "type": "string"
+    },
+    "successMessage": {
+      "type": "string"
+    },
+    "declineAccommodationsError": {
+      "type": "string"
+    },
+    "invalidAirbnbError": {
+      "type": "string"
+    },
+    "genericError": {
+      "type": "string"
+    }
+  }
+}

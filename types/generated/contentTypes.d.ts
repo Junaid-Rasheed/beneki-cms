@@ -1340,6 +1340,8 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    accommodationsCount: Schema.Attribute.String;
+    airbnbProfileUrl: Schema.Attribute.String;
     billingAddress: Schema.Attribute.Relation<
       'oneToOne',
       'api::order-address.order-address'
@@ -4104,6 +4106,52 @@ export interface ApiStaticProductDetailStaticProductDetail
   };
 }
 
+export interface ApiStaticSampleRequestStaticSampleRequest
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'static_sample_requests';
+  info: {
+    description: '';
+    displayName: 'Static-SampleRequest';
+    pluralName: 'static-sample-requests';
+    singularName: 'static-sample-request';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    accommodationsLabel: Schema.Attribute.String;
+    accommodationsPlaceholder: Schema.Attribute.String;
+    airbnbLabel: Schema.Attribute.String;
+    airbnbPlaceholder: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    declineAccommodationsError: Schema.Attribute.String;
+    genericError: Schema.Attribute.String;
+    invalidAirbnbError: Schema.Attribute.String;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::static-sample-request.static-sample-request'
+    >;
+    pageDescription: Schema.Attribute.Text;
+    pageTitle: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    sidebarLabel: Schema.Attribute.String;
+    submitButton: Schema.Attribute.String;
+    submittingButton: Schema.Attribute.String;
+    successMessage: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiStaticSuccessPageStaticSuccessPage
   extends Struct.CollectionTypeSchema {
   collectionName: 'static_success_pages';
@@ -5180,6 +5228,7 @@ declare module '@strapi/strapi' {
       'api::static-order-summary.static-order-summary': ApiStaticOrderSummaryStaticOrderSummary;
       'api::static-payment.static-payment': ApiStaticPaymentStaticPayment;
       'api::static-product-detail.static-product-detail': ApiStaticProductDetailStaticProductDetail;
+      'api::static-sample-request.static-sample-request': ApiStaticSampleRequestStaticSampleRequest;
       'api::static-success-page.static-success-page': ApiStaticSuccessPageStaticSuccessPage;
       'api::static-your-order.static-your-order': ApiStaticYourOrderStaticYourOrder;
       'api::static-your-order2.static-your-order2': ApiStaticYourOrder2StaticYourOrder2;
