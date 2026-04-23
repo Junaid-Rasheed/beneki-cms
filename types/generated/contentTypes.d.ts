@@ -4214,6 +4214,12 @@ export interface ApiStaticYourOrderStaticYourOrder
       'api::static-your-order.static-your-order'
     >;
     nextBtn: Schema.Attribute.String;
+    orderAgainErrorMessage: Schema.Attribute.String;
+    orderAgainMultiAddedMessage: Schema.Attribute.String;
+    orderAgainNoneAvailableMessage: Schema.Attribute.String;
+    orderAgainNoneAvailableWithProductsMessage: Schema.Attribute.String;
+    orderAgainPartialUnavailableMessage: Schema.Attribute.String;
+    orderAgainSingleAddedMessage: Schema.Attribute.String;
     orderDropdown: Schema.Attribute.JSON;
     ordersMatchingSearchParenthetical: Schema.Attribute.String;
     ordersTotalInlineMatching: Schema.Attribute.String;

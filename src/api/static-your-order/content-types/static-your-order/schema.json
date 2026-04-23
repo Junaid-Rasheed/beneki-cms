@@ -223,6 +223,24 @@
     },
     "totalItemsPluralSuffix": {
       "type": "string"
+    },
+    "orderAgainSingleAddedMessage": {
+      "type": "string"
+    },
+    "orderAgainMultiAddedMessage": {
+      "type": "string"
+    },
+    "orderAgainPartialUnavailableMessage": {
+      "type": "string"
+    },
+    "orderAgainNoneAvailableMessage": {
+      "type": "string"
+    },
+    "orderAgainNoneAvailableWithProductsMessage": {
+      "type": "string"
+    },
+    "orderAgainErrorMessage": {
+      "type": "string"
     }
   }
 }
