@@ -4126,22 +4126,34 @@ export interface ApiStaticSampleRequestStaticSampleRequest
   attributes: {
     accommodationsLabel: Schema.Attribute.String;
     accommodationsPlaceholder: Schema.Attribute.String;
+    addShippingAddressButton: Schema.Attribute.String;
     airbnbLabel: Schema.Attribute.String;
     airbnbPlaceholder: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     declineAccommodationsError: Schema.Attribute.String;
+    editAddressButton: Schema.Attribute.String;
     genericError: Schema.Attribute.String;
     invalidAirbnbError: Schema.Attribute.String;
+    loadingAddresses: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::static-sample-request.static-sample-request'
     >;
+    loginRequiredMessage: Schema.Attribute.String;
+    noShippingAddresses: Schema.Attribute.String;
     pageDescription: Schema.Attribute.Text;
     pageTitle: Schema.Attribute.String;
+    primaryAddressBadge: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    selectAddressButton: Schema.Attribute.String;
+    selectedAddressButton: Schema.Attribute.String;
+    selectShippingAddressWarning: Schema.Attribute.String;
+    shippingAddressCardTitle: Schema.Attribute.String;
+    shippingSubtitle: Schema.Attribute.String;
+    shippingTitle: Schema.Attribute.String;
     sidebarLabel: Schema.Attribute.String;
     submitButton: Schema.Attribute.String;
     submittingButton: Schema.Attribute.String;
@@ -5097,11 +5109,13 @@ export interface PluginUsersPermissionsUser
     draftAndPublish: false;
   };
   attributes: {
+    accommodationsCount: Schema.Attribute.Integer;
     accountType: Schema.Attribute.Enumeration<['Individual', 'Business']>;
     affiliatedBy: Schema.Attribute.Relation<
       'oneToOne',
       'plugin::users-permissions.user'
     >;
+    airbnbProfileUrl: Schema.Attribute.String;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     businessName: Schema.Attribute.String;
     businessRegistrationCountry: Schema.Attribute.Enumeration<

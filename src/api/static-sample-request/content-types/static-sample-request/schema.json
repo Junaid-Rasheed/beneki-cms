@@ -54,6 +54,42 @@
     },
     "genericError": {
       "type": "string"
+    },
+    "loginRequiredMessage": {
+      "type": "string"
+    },
+    "shippingTitle": {
+      "type": "string"
+    },
+    "shippingSubtitle": {
+      "type": "string"
+    },
+    "loadingAddresses": {
+      "type": "string"
+    },
+    "noShippingAddresses": {
+      "type": "string"
+    },
+    "addShippingAddressButton": {
+      "type": "string"
+    },
+    "editAddressButton": {
+      "type": "string"
+    },
+    "selectAddressButton": {
+      "type": "string"
+    },
+    "selectedAddressButton": {
+      "type": "string"
+    },
+    "shippingAddressCardTitle": {
+      "type": "string"
+    },
+    "primaryAddressBadge": {
+      "type": "string"
+    },
+    "selectShippingAddressWarning": {
+      "type": "string"
     }
   }
 }

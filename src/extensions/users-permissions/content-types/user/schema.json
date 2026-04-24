@@ -134,6 +134,12 @@
     },
     "cart": {
       "type": "json"
+    },
+    "accommodationsCount": {
+      "type": "integer"
+    },
+    "airbnbProfileUrl": {
+      "type": "string"
     }
   }
 }
