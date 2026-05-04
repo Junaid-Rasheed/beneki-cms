@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "order_audit_logs",
+  "info": {
+    "singularName": "order-audit-log",
+    "pluralName": "order-audit-logs",
+    "displayName": "OrderAuditLog",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "orderId": {
+      "type": "string"
+    },
+    "orderDocumentId": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "changedAt": {
+      "type": "datetime"
+    },
+    "updatedByName": {
+      "type": "string"
+    },
+    "updatedByEmail": {
+      "type": "email"
+    },
+    "changes": {
+      "type": "json"
+    },
+    "previousData": {
+      "type": "json"
+    },
+    "nextData": {
+      "type": "json"
+    }
+  }
+}
