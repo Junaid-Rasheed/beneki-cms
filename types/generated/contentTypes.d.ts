@@ -1259,6 +1259,44 @@ export interface ApiOrderAddressOrderAddress
   };
 }
 
+export interface ApiOrderAuditLogOrderAuditLog
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'order_audit_logs';
+  info: {
+    description: '';
+    displayName: 'OrderAuditLog';
+    pluralName: 'order-audit-logs';
+    singularName: 'order-audit-log';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    action: Schema.Attribute.String;
+    changedAt: Schema.Attribute.DateTime;
+    changes: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::order-audit-log.order-audit-log'
+    > &
+      Schema.Attribute.Private;
+    nextData: Schema.Attribute.JSON;
+    orderDocumentId: Schema.Attribute.String;
+    orderId: Schema.Attribute.String;
+    previousData: Schema.Attribute.JSON;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedByEmail: Schema.Attribute.Email;
+    updatedByName: Schema.Attribute.String;
+  };
+}
+
 export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
   collectionName: 'order_items';
   info: {
@@ -5213,6 +5251,7 @@ declare module '@strapi/strapi' {
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
       'api::mentions-legale.mentions-legale': ApiMentionsLegaleMentionsLegale;
       'api::order-address.order-address': ApiOrderAddressOrderAddress;
+      'api::order-audit-log.order-audit-log': ApiOrderAuditLogOrderAuditLog;
       'api::order-item.order-item': ApiOrderItemOrderItem;
       'api::order.order': ApiOrderOrder;
       'api::politique.politique': ApiPolitiquePolitique;

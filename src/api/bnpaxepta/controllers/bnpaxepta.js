@@ -3,7 +3,7 @@
 const iconv = require('iconv-lite');
 const crypto = require('crypto');
 const fetch = require("node-fetch");
- const UiUrl = process.env.FRONTEND_URL;
+const UiUrl = process.env.FRONTEND_URL;
 
 function clampColorDepth(depth) {
   // BNP allows: 1,4,8,15,16,24,32,48; if 30/36, step down to nearest lower allowed
@@ -19,19 +19,19 @@ function clampColorDepth(depth) {
 
 module.exports = {
   async createSession(ctx) {
-    const { amount, currency, orderId,browserInfo: biClient = {}, } = ctx.request.body;
+    const { amount, currency, orderId, browserInfo: biClient = {}, } = ctx.request.body;
 
     const { Blowfish } = await import("egoroof-blowfish");
 
     const merchantId = process.env.BNP_MERCHANT_ID;
     const blowfishKey = process.env.BNP_BLOWFISH_KEY; // plain string from BNP
-    const hmacKey    = process.env.BNP_HMAC_KEY;      // plain string from BNP
+    const hmacKey = process.env.BNP_HMAC_KEY;      // plain string from BNP
 
     const acceptHeaders = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
     // try X-Forwarded-For chain, fall back to connection ip
     const xff = (ctx.request.headers["x-forwarded-for"] || "").split(",")[0].trim();
     const ipAddress = xff || ctx.request.ip || "";
-   
+
 
     // From client (JS-only fields) with normalization:
     const jsEnabled = true; // this endpoint is called from JS
@@ -53,8 +53,8 @@ module.exports = {
     // acceptHeaders, javaEnabled, javaScriptEnabled, colorDepth, screenHeight, screenWidth,
     // timeZoneOffset, language, userAgent. (ipAddress is not required in this branch)
     const requiredKeys = [
-      "acceptHeaders","javaEnabled","javaScriptEnabled","colorDepth",
-      "screenHeight","screenWidth","timeZoneOffset","language","userAgent"
+      "acceptHeaders", "javaEnabled", "javaScriptEnabled", "colorDepth",
+      "screenHeight", "screenWidth", "timeZoneOffset", "language", "userAgent"
     ];
     for (const k of requiredKeys) {
       if (
@@ -93,12 +93,12 @@ module.exports = {
       `Currency=${currency}`,
       `browserInfo=${browserInfoBase64}`,
       `URLSuccess=${process.env.URL_SUCCESS}`,
-      `URLFailure=${process.env.URL_FAILURE}`,    
+      `URLFailure=${process.env.URL_FAILURE}`,
       `URLNotify=${process.env.URL_NOTIFY}`,
       `MAC=${mac}`
     ].join("&");
 
-     strapi.log.info("Data"+ clearParams);
+    strapi.log.info("Data" + clearParams);
     // LEN = byte length of UNENCRYPTED string
     const len = Buffer.byteLength(clearParams, "utf8");
 
@@ -115,10 +115,117 @@ module.exports = {
   },
 
   async notify(ctx) {
-    // With Response=encrypt you’ll get LEN & DATA here; decrypt & verify MAC
-    const payload = ctx.request.body || ctx.query;
-    strapi.log.info("BNP Notify payload" + JSON.stringify(payload));
-    ctx.send({ ok: true });
+    try {
+      const { Blowfish } = await import("egoroof-blowfish");
+
+      const payload = ctx.request.body || ctx.query;
+
+      if (!payload?.Data) {
+        strapi.log.error("❌ Missing Data in notify");
+        return ctx.badRequest("Invalid payload");
+      }
+
+      const blowfishKey = process.env.BNP_BLOWFISH_KEY;
+      const hmacKey = process.env.BNP_HMAC_KEY;
+
+      // 🔓 STEP 1: Decrypt Data
+      const bf = new Blowfish(blowfishKey, Blowfish.MODE.ECB, Blowfish.PADDING.PKCS5);
+
+      const encryptedBytes = Buffer.from(payload.Data, "hex");
+      const decrypted = bf.decode(encryptedBytes, Blowfish.TYPE.STRING);
+
+      strapi.log.info("🔓 Decrypted notify: " + decrypted);
+
+      // 🧩 STEP 2: Convert to object
+      const parsed = {};
+      decrypted.split("&").forEach(pair => {
+        const [key, value] = pair.split("=");
+        parsed[key] = value;
+      });
+
+      console.log("📦 Parsed Notify:", parsed);
+
+      // 🔐 STEP 3: Validate MAC
+      const receivedMac = parsed.MAC;
+
+      // IMPORTANT: remove MAC before recalculating
+      const dataForMac = { ...parsed };
+      delete dataForMac.MAC;
+
+      const macString = [
+        dataForMac.PayID || "",
+        dataForMac.TransID || "",
+        dataForMac.MerchantID || "",
+        dataForMac.Amount || "",
+        dataForMac.Currency || ""
+      ].join("*");
+
+      const generatedMac = crypto
+        .createHmac("sha256", hmacKey)
+        .update(macString, "utf8")
+        .digest("hex")
+        .toUpperCase();
+
+      if (generatedMac !== receivedMac) {
+        strapi.log.error("❌ MAC validation failed");
+        return ctx.badRequest("Invalid MAC");
+      }
+
+      strapi.log.info("✅ MAC validated");
+
+      // 📌 STEP 4: Extract important fields
+      const orderId = parsed.TransID;
+      const transactionId = parsed.PayID;
+
+      // BNP success indicator (IMPORTANT)
+      const statusCode = parsed.Status;
+      // Usually:
+      // "9" = SUCCESS
+      // others = failed
+
+      let paymentStatus = "pending";
+
+      if (statusCode === "9") {
+        paymentStatus = "paid";
+      } else {
+        paymentStatus = "failed";
+      }
+
+      // 🛑 STEP 5: Idempotency check
+      const existingOrder = await strapi.db
+        .query("api::order.order")
+        .findOne({
+          where: { orderNumber: orderId },
+        });
+
+      if (!existingOrder) {
+        strapi.log.error("❌ Order not found: " + orderId);
+        return ctx.badRequest("Order not found");
+      }
+
+      if (existingOrder.paymentStatus === "paid") {
+        strapi.log.info("⚠️ Already processed: " + orderId);
+        return ctx.send("OK");
+      }
+
+      // 🧾 STEP 6: Update order
+      await strapi.db.query("api::order.order").update({
+        where: { orderNumber: orderId },
+        data: {
+          paymentStatus: paymentStatus,
+          orderStatus: paymentStatus === "paid" ? "processing" : "failed",
+          transactionId: transactionId,
+          paymentResponse: parsed,
+        },
+      });
+
+      strapi.log.info(`✅ Order ${orderId} updated to ${paymentStatus}`);
+
+      return ctx.send("OK");
+    } catch (error) {
+      strapi.log.error("❌ Notify error: " + error.message);
+      return ctx.internalServerError("Notify failed");
+    }
   },
 
   async success(ctx) {
@@ -127,27 +234,27 @@ module.exports = {
 
       console.log("BNP Success Response:", data);
 
-        const latestOrders = await strapi.db
-                            .query("api::order.order")
-                            .findMany({
-                              select: ["invoiceId"],
-                              where: {
-                                invoiceId: { $notNull: true }, // 🔥 ignore nulls
-                              },
-                              orderBy: { invoiceId: "desc" },
-                              limit: 1,
-                            });
+      const latestOrders = await strapi.db
+        .query("api::order.order")
+        .findMany({
+          select: ["invoiceId"],
+          where: {
+            invoiceId: { $notNull: true }, // 🔥 ignore nulls
+          },
+          orderBy: { invoiceId: "desc" },
+          limit: 1,
+        });
 
       let nextInvoiceId = 1;
 
-    
+
       if (latestOrders.length > 0) {
         nextInvoiceId = Number(latestOrders[0].invoiceId) + 1;
       }
       const orderId = data.TransID; // adjust based on BNP field name
       const transactionId = data.PayID;
       console.log("invoiceId:", nextInvoiceId);
-      console.log("Latestorder:",latestOrders)
+      console.log("Latestorder:", latestOrders)
       // 🔐 TODO: Verify HMAC here
       // 🔐 TODO: Validate amount & order
 
