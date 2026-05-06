@@ -116,36 +116,37 @@ module.exports = {
 
   async notify(ctx) {
     try {
+      strapi.log.info("notify method called");
       const { Blowfish } = await import("egoroof-blowfish");
 
       const payload = ctx.request.body || ctx.query;
 
       if (!payload?.Data) {
-        strapi.log.error("❌ Missing Data in notify");
+        strapi.log.error(" Missing Data in notify");
         return ctx.badRequest("Invalid payload");
       }
 
       const blowfishKey = process.env.BNP_BLOWFISH_KEY;
       const hmacKey = process.env.BNP_HMAC_KEY;
 
-      // 🔓 STEP 1: Decrypt Data
+      //  STEP 1: Decrypt Data
       const bf = new Blowfish(blowfishKey, Blowfish.MODE.ECB, Blowfish.PADDING.PKCS5);
 
       const encryptedBytes = Buffer.from(payload.Data, "hex");
       const decrypted = bf.decode(encryptedBytes, Blowfish.TYPE.STRING);
 
-      strapi.log.info("🔓 Decrypted notify: " + decrypted);
+      strapi.log.info(" Decrypted notify: " + decrypted);
 
-      // 🧩 STEP 2: Convert to object
+      //  STEP 2: Convert to object
       const parsed = {};
       decrypted.split("&").forEach(pair => {
         const [key, value] = pair.split("=");
         parsed[key] = value;
       });
 
-      console.log("📦 Parsed Notify:", parsed);
+      console.log(" Parsed Notify:", parsed);
 
-      // 🔐 STEP 3: Validate MAC
+      //  STEP 3: Validate MAC
       const receivedMac = parsed.MAC;
 
       // IMPORTANT: remove MAC before recalculating
@@ -167,13 +168,13 @@ module.exports = {
         .toUpperCase();
 
       if (generatedMac !== receivedMac) {
-        strapi.log.error("❌ MAC validation failed");
+        strapi.log.error(" MAC validation failed");
         return ctx.badRequest("Invalid MAC");
       }
 
-      strapi.log.info("✅ MAC validated");
+      strapi.log.info(" MAC validated");
 
-      // 📌 STEP 4: Extract important fields
+      // STEP 4: Extract important fields
       const orderId = parsed.TransID;
       const transactionId = parsed.PayID;
 
@@ -191,7 +192,7 @@ module.exports = {
         paymentStatus = "failed";
       }
 
-      // 🛑 STEP 5: Idempotency check
+      // STEP 5: Idempotency check
       const existingOrder = await strapi.db
         .query("api::order.order")
         .findOne({
@@ -199,16 +200,16 @@ module.exports = {
         });
 
       if (!existingOrder) {
-        strapi.log.error("❌ Order not found: " + orderId);
+        strapi.log.error("Order not found: " + orderId);
         return ctx.badRequest("Order not found");
       }
 
       if (existingOrder.paymentStatus === "paid") {
-        strapi.log.info("⚠️ Already processed: " + orderId);
+        strapi.log.info("Already processed: " + orderId);
         return ctx.send("OK");
       }
 
-      // 🧾 STEP 6: Update order
+      //  STEP 6: Update order
       await strapi.db.query("api::order.order").update({
         where: { orderNumber: orderId },
         data: {
@@ -219,11 +220,11 @@ module.exports = {
         },
       });
 
-      strapi.log.info(`✅ Order ${orderId} updated to ${paymentStatus}`);
+      strapi.log.info(`Order ${orderId} updated to ${paymentStatus}`);
 
       return ctx.send("OK");
     } catch (error) {
-      strapi.log.error("❌ Notify error: " + error.message);
+      strapi.log.error("Notify error: " + error.message);
       return ctx.internalServerError("Notify failed");
     }
   },
