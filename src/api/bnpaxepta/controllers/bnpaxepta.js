@@ -180,8 +180,7 @@ module.exports = {
 
       // 📝 Build update object dynamically
       const updateData = {
-        transactionId,
-        paymentResponse: parsed,
+        transactionId
       };
 
       // ✅ Payment success
