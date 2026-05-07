@@ -3,6 +3,7 @@
 const iconv = require('iconv-lite');
 const crypto = require('crypto');
 const fetch = require("node-fetch");
+const { getLocaleFromOrder, getEmailTemplate, sendFailedPaymentEmail } = require('../../../utils/emailHelpers');
 const UiUrl = process.env.FRONTEND_URL;
 
 function clampColorDepth(depth) {
@@ -196,6 +197,41 @@ module.exports = {
       if (parsed.Status === "FAILED") {
         updateData.paymentStatus = "failed";
         updateData.orderStatus = "pending";
+
+        const isFailedTimeout =
+          parsed.Status === "FAILED" &&
+          parsed.Description &&
+          parsed.Description.toLowerCase().includes("timeout");
+
+        if (isFailedTimeout) {
+          const order = await strapi.db
+            .query("api::order.order")
+            .findOne({
+              where: { orderNumber: parsed.TransID },
+              populate: ["billingAddress", "deliveryAddress"],
+            });
+
+          if (order) {
+            const locale = getLocaleFromOrder(order);
+
+            const template = await getEmailTemplate(strapi, locale);
+
+            const email =
+              order.deliveryAddress?.email ||
+              order.billingAddress?.email;
+
+            await sendFailedPaymentEmail(
+              strapi,
+              email,
+              template,
+              order
+            );
+
+            strapi.log.info(
+              "📧 Timeout email sent for order " + order.orderNumber
+            );
+          }
+        }
       }
 
       // 🔄 Update order

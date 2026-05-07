@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "email_templates",
+  "info": {
+    "singularName": "email-template",
+    "pluralName": "email-templates",
+    "displayName": "EmailTemplate",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "subject": {
+      "type": "string"
+    },
+    "message": {
+      "type": "text"
+    },
+    "buttonText": {
+      "type": "string"
+    },
+    "closingText": {
+      "type": "string"
+    },
+    "module": {
+      "type": "enumeration",
+      "enum": [
+        "failedPayment"
+      ]
+    },
+    "buttonUrl": {
+      "type": "string"
+    }
+  }
+}

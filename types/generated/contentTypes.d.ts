@@ -622,6 +622,45 @@ export interface ApiEmailResetTemplateEmailResetTemplate
   };
 }
 
+export interface ApiEmailTemplateEmailTemplate
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'email_templates';
+  info: {
+    description: '';
+    displayName: 'EmailTemplate';
+    pluralName: 'email-templates';
+    singularName: 'email-template';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    buttonText: Schema.Attribute.String;
+    buttonUrl: Schema.Attribute.String;
+    closingText: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::email-template.email-template'
+    >;
+    message: Schema.Attribute.Text;
+    module: Schema.Attribute.Enumeration<['failedPayment']>;
+    publishedAt: Schema.Attribute.DateTime;
+    subject: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiErrorLogErrorLog extends Struct.CollectionTypeSchema {
   collectionName: 'error_logs';
   info: {
@@ -5240,6 +5279,7 @@ declare module '@strapi/strapi' {
       'api::coupon.coupon': ApiCouponCoupon;
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;
       'api::email-reset-template.email-reset-template': ApiEmailResetTemplateEmailResetTemplate;
+      'api::email-template.email-template': ApiEmailTemplateEmailTemplate;
       'api::error-log.error-log': ApiErrorLogErrorLog;
       'api::footer-setting.footer-setting': ApiFooterSettingFooterSetting;
       'api::footer.footer': ApiFooterFooter;
