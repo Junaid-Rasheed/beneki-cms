@@ -40,9 +40,28 @@ function getLocaleFromOrder(order) {
   const country =
     order?.deliveryAddress?.country ||
     order?.billingAddress?.country ||
-    "en";
+    "";
 
-  return country.toLowerCase();
+  const normalizedCountry = country.trim().toLowerCase();
+
+  // Map country names to locales
+  const countryLocaleMap = {
+    france: "fr",
+    germany: "de",
+    spain: "es",
+    italy: "it",
+    netherlands: "nl",
+    portugal: "pt",
+    austria: "de",
+    switzerland: "de",
+    luxembourg: "fr",
+    unitedkingdom: "en",
+    "united kingdom": "en",
+    uk: "en",
+    ireland: "en"
+  };
+
+  return countryLocaleMap[normalizedCountry] || "en";
 }
 
 module.exports = {

@@ -213,12 +213,20 @@ module.exports = {
 
           if (order) {
             const locale = getLocaleFromOrder(order);
-
+            strapi.log.info(
+              "locale for this order " + locale
+            );
             const template = await getEmailTemplate(strapi, locale);
-
+            strapi.log.info(
+              "email template for this order " + template
+            );
             const email =
               order.deliveryAddress?.email ||
               order.billingAddress?.email;
+            
+            strapi.log.info(
+              "email" + email
+            );
 
             await sendFailedPaymentEmail(
               strapi,
