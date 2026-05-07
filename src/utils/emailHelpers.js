@@ -9,16 +9,15 @@ async function sendFailedPaymentEmail(strapi, email, template, order) {
 
   const buttonText = template.buttonText || "View Order";
   const closingText = template.closingText || "";
-
+    //   <br/>
+    //    <a href="${template.buttonUrl}/${order.orderNumber}">
+    //      ${buttonText}
+    //    </a>
   await strapi.plugin("email").service("email").send({
     to: email,
     subject,
     html: `
       <p>${message}</p>
-      <br/>
-      <a href="${template.buttonUrl}/${order.orderNumber}">
-        ${buttonText}
-      </a>
       <br/><br/>
       <p>${closingText}</p>
     `,
