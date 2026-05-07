@@ -115,10 +115,110 @@ module.exports = {
   },
 
   async notify(ctx) {
-    // With Response=encrypt you’ll get LEN & DATA here; decrypt & verify MAC
-    const payload = ctx.request.body || ctx.query;
-    strapi.log.info("BNP Notify payload" + JSON.stringify(payload));
-    ctx.send({ ok: true });
+    try {
+      const { Blowfish } = await import("egoroof-blowfish");
+
+      const payload = ctx.request.body || ctx.query;
+
+      strapi.log.info(
+        "BNP Notify payload: " + JSON.stringify(payload)
+      );
+
+      if (!payload?.Data) {
+        strapi.log.error("❌ Missing Data");
+        return ctx.badRequest("Missing Data");
+      }
+
+      const blowfishKey = process.env.BNP_BLOWFISH_KEY;
+
+      // 🔓 Decrypt BNP response
+      const bf = new Blowfish(
+        blowfishKey,
+        Blowfish.MODE.ECB,
+        Blowfish.PADDING.PKCS5
+      );
+
+      const encryptedBytes = Buffer.from(payload.Data, "hex");
+
+      const decryptedBytes = bf.decode(
+        encryptedBytes,
+        Blowfish.TYPE.UINT8_ARRAY
+      );
+
+      const decryptedBuffer = Buffer.from(decryptedBytes);
+
+      const decrypted = iconv
+        .decode(decryptedBuffer, "latin1")
+        .replace(/\0/g, "")
+        .trim();
+
+      strapi.log.info("🔓 Decrypted notify: " + decrypted);
+
+      // 🧩 Parse response
+      const parsed = {};
+
+      decrypted.split("&").forEach((part) => {
+        const index = part.indexOf("=");
+
+        if (index === -1) return;
+
+        const key = part.substring(0, index);
+        const value = part.substring(index + 1);
+
+        parsed[key] = value;
+      });
+
+      console.log("📦 Parsed Notify:", parsed);
+
+      const orderId = parsed.TransID;
+      const transactionId = parsed.PayID;
+
+      if (!orderId) {
+        strapi.log.error("❌ Missing orderId");
+        return ctx.badRequest("Missing orderId");
+      }
+
+      // 📝 Build update object dynamically
+      const updateData = {
+        transactionId,
+        paymentResponse: parsed,
+      };
+
+      // ✅ Payment success
+      if (
+        parsed.Status === "SUCCESS" ||
+        parsed.Status === "OK"
+      ) {
+        updateData.paymentStatus = "paid";
+        updateData.orderStatus = "processing";
+      }
+
+      // ❌ Payment failed
+      if (parsed.Status === "FAILED") {
+        updateData.paymentStatus = "failed";
+        updateData.orderStatus = "pending";
+      }
+
+      // 🔄 Update order
+      await strapi.db.query("api::order.order").update({
+        where: {
+          orderNumber: orderId,
+        },
+        data: updateData,
+      });
+
+      strapi.log.info(
+        `✅ Notify processed for order ${orderId}`
+      );
+
+      return ctx.send("OK");
+    } catch (error) {
+      strapi.log.error(
+        "❌ Notify error: " + error.message
+      );
+
+      return ctx.internalServerError("Notify failed");
+    }
   },
 
   async success(ctx) {
