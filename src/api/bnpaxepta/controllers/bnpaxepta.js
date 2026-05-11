@@ -180,21 +180,14 @@ module.exports = {
       }
 
       // 📝 Build update object dynamically
-      const updateData = {
-        transactionId
-      };
-
-      // ✅ Payment success
-      if (
-        parsed.Status === "SUCCESS" ||
-        parsed.Status === "OK"
-      ) {
-        updateData.paymentStatus = "paid";
-        updateData.orderStatus = "processing";
-      }
+      
 
       // ❌ Payment failed
       if (parsed.Status === "FAILED") {
+
+        const updateData = {
+        transactionId
+        };
         updateData.paymentStatus = "failed";
         updateData.orderStatus = "pending";
 
@@ -240,20 +233,21 @@ module.exports = {
             );
           }
         }
+        // 🔄 Update order
+        await strapi.db.query("api::order.order").update({
+          where: {
+            orderNumber: orderId,
+          },
+          data: updateData,
+        });
+
+        strapi.log.info(
+          `✅ Notify processed for order ${orderId}`
+        );
+
       }
 
-      // 🔄 Update order
-      await strapi.db.query("api::order.order").update({
-        where: {
-          orderNumber: orderId,
-        },
-        data: updateData,
-      });
-
-      strapi.log.info(
-        `✅ Notify processed for order ${orderId}`
-      );
-
+      
       return ctx.send("OK");
     } catch (error) {
       strapi.log.error(
