@@ -1879,6 +1879,8 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::sidebar-item.sidebar-item'
     >;
+    maximumVariation: Schema.Attribute.Integer;
+    maximumWeight: Schema.Attribute.Integer;
     numberOfBoxes: Schema.Attribute.Decimal &
       Schema.Attribute.Private &
       Schema.Attribute.SetPluginOptions<{

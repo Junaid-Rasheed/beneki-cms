@@ -209,6 +209,12 @@
     },
     "isAdminProduct": {
       "type": "boolean"
+    },
+    "maximumVariation": {
+      "type": "integer"
+    },
+    "maximumWeight": {
+      "type": "integer"
     }
   }
 }
