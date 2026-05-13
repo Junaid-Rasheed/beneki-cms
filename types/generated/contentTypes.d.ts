@@ -1447,6 +1447,8 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
       }>;
     emailLocale: Schema.Attribute.String;
     invoiceId: Schema.Attribute.BigInteger;
+    isDpdLabelPrinted: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
     notes: Schema.Attribute.String &

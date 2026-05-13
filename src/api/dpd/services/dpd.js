@@ -91,7 +91,7 @@ module.exports = {
         digicode2: data.receiver.digicode2 || "",
         intercomid: data.receiver.intercomid || "",
         vinfo1: data.receiver.deliveryInstruction || "",
-        vinfo2: data.receiver.vinfo2 || "",
+        vinfo2: data.receiver.deliveryInstruction2 || "",
       },
       shippingdate: new Date().toLocaleDateString("fr-FR").replace(/\//g, "."),
 
