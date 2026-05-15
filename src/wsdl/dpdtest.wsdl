@@ -5583,10 +5583,10 @@
   </wsdl:binding>
   <wsdl:service name="EPrintWebservice">
     <wsdl:port name="EPrintWebserviceSoap" binding="tns:EPrintWebserviceSoap">
-      <soap:address location="https://e-station.cargonet.software/dpd-eprintwebservice/eprintwebservice.asmx" />
+      <soap:address location="https://e-station-testenv.cargonet.software/eprintwebservice/eprintwebservice.asmx" />
     </wsdl:port>
     <wsdl:port name="EPrintWebserviceSoap12" binding="tns:EPrintWebserviceSoap12">
-      <soap12:address location="https://e-station.cargonet.software/dpd-eprintwebservice/eprintwebservice.asmx" />
+      <soap12:address location="https://e-station-testenv.cargonet.software/eprintwebservice/eprintwebservice.asmx" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
