@@ -1356,6 +1356,7 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    discount: Schema.Attribute.Decimal;
     lineTotal: Schema.Attribute.Decimal &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
