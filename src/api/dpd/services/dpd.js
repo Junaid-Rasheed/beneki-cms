@@ -12,20 +12,12 @@ const WSDL_PATH = path.join(__dirname, "../../../wsdl/dpd.wsdl");
 module.exports = {
   async generateShipment(data) {
     console.log("before creating client");
+
     const client = await soap.createClientAsync(WSDL_PATH, {
       disableCache: true,
     });
-    console.log("after creating client");
 
-    console.log("SOAP description saved");
-    //console.log(client.describe());
-    // SOAP HEADER AUTH
-    // const soapHeader = {
-    //   UserCredentials: {
-    //     userid: process.env.DPD_USER,
-    //     password: process.env.DPD_PASSWORD,
-    //   },
-    // };
+    console.log("after creating client");
 
     const soapHeader = {
       UserCredentials: {
@@ -36,260 +28,24 @@ module.exports = {
         },
       },
     };
+
     client.addSoapHeader(soapHeader);
 
-    /*
-      Expected payload from frontend:
+    const allLabels = [];
 
-      {
-        receiver: {...},
-        shipper: {...},
-        parcels: [
-          {
-            weight: "2.5",
-            reference: "BOX-1"
-          },
-          {
-            weight: "1.2",
-            reference: "BOX-2"
-          }
-        ]
+    // Helper: chunk array into groups of 5
+    const chunkArray = (array, size) => {
+      const result = [];
+
+      for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
       }
-    */
-    //console.log("data", data)
-    console.log("data", JSON.stringify(data, null, 2));
-    const request = {
-      customer_countrycode: Number(process.env.DPD_COUNTRY_CODE),
 
-      customer_centernumber: Number(process.env.DPD_CENTER_NUMBER),
-
-      customer_number: Number(process.env.DPD_CUSTOMER_NUMBER),
-
-      shipperaddress: {
-        name: data.shipper.name,
-        countryPrefix: data.shipper.countryPrefix,
-        zipCode: data.shipper.zipCode,
-        city: data.shipper.city,
-        street: data.shipper.street,
-        phoneNumber: data.shipper.phoneNumber,
-      },
-
-      receiveraddress: {
-        name: data.receivercompanyName || data.receiver.name,
-        countryPrefix: data.receiver.countryPrefix,
-        zipCode: data.receiver.zipCode,
-        city: data.receiver.city,
-        street: data.receiver.street,
-        phoneNumber: data.receiver.phoneNumber,
-      },
-      receiverinfo: {
-        contact: data.receiver.name || "",
-        name2: data.receiver.name2 || "",
-        name3: data.receiver.name3 || "",
-        name4: data.receiver.name4 || "",
-        digicode1: data.receiver.digicode1 || "",
-        digicode2: data.receiver.digicode2 || "",
-        intercomid: data.receiver.intercomid || "",
-        vinfo1: data.receiver.deliveryInstruction || "",
-        vinfo2: data.receiver.deliveryInstruction2 || "",
-      },
-      shippingdate: new Date().toLocaleDateString("fr-FR").replace(/\//g, "."),
-
-      services: {
-        consolidation: {
-          type: "CombinedDelivery",
-        },
-      },
-
-      ...(Array.isArray(data?.slaves?.SlaveRequest) &&
-      data.slaves.SlaveRequest.length === 1
-        ? {
-            weight: data.slaves.SlaveRequest[0].weight || "",
-            referencenumber: data.slaves.SlaveRequest[0].referencenumber || "",
-            reference2: data.slaves.SlaveRequest[0].reference2 || "",
-            reference3: data.slaves.SlaveRequest[0].reference3 || "",
-            reference4: data.slaves.SlaveRequest[0].reference4 || "",
-          }
-        : {}),
-
-      ...(Array.isArray(data?.slaves?.SlaveRequest) &&
-      data.slaves.SlaveRequest.length > 1
-        ? {
-            slaves: data.slaves,
-          }
-        : {}),
+      return result;
     };
-    //   // ADD THIS - shipperinfo object
-    //   shipperinfo: {
-    //     contact: data.shipper.contact || "",
-    //     name2: data.shipper.name2 || "",
-    //     name3: data.shipper.name3 || "",
-    //     name4: data.shipper.name4 || "",
-    //     digicode1: data.shipper.digicode1 || "",
-    //     digicode2: data.shipper.digicode2 || "",
-    //     intercomid: data.shipper.intercomid || "",
-    //     vinfo1: data.shipper.vinfo1 || "",
-    //     vinfo2: data.shipper.vinfo2 || "",
-    //   },
 
-    //   // ADD THIS - receiverinfo object
-    //   receiverinfo: {
-    //     contact: data.receiver.contact || "",
-    //     name2: data.receiver.name2 || "",
-    //     name3: data.receiver.name3 || "",
-    //     name4: data.receiver.name4 || "",
-    //     digicode1: data.receiver.digicode1 || "",
-    //     digicode2: data.receiver.digicode2 || "",
-    //     intercomid: data.receiver.intercomid || "",
-    //     vinfo1: data.receiver.vinfo1 || "",
-    //     vinfo2: data.receiver.vinfo2 || "",
-    //   },
-
-    //   // ADD THIS - retourAddress object (usually same as shipper)
-    //   retourAddress: {
-    //     name: data.shipper.name,
-    //     countryPrefix: data.shipper.countryPrefix,
-    //     zipCode: data.shipper.zipCode,
-    //     city: data.shipper.city,
-    //     street: data.shipper.street,
-    //     phoneNumber: data.shipper.phoneNumber || "",
-    //     faxNumber: data.shipper.faxNumber || "",
-    //     geoX: data.shipper.geoX || "",
-    //     geoY: data.shipper.geoY || "",
-    //   },
-
-    //   shippingdate: new Date()
-    //     .toLocaleDateString("fr-FR")
-    //     .replace(/\//g, "."),
-
-    //   services: {
-    //     consolidation: {
-    //       type: "CombinedDelivery",
-    //     },
-    //   },
-
-    //   //slaves: data.slaves
-    //   slaves: {
-    //     SlaveRequest: data.slaves  // If data.slaves is already an array of slave objects
-    //   }
-    // };
-    console.log("shipment Request:", JSON.stringify(request, null, 2));
-    // CREATE MULTI SHIPMENT
-    const hasSlaves =
-      Array.isArray(request?.slaves?.SlaveRequest) &&
-      request.slaves.SlaveRequest.length > 1;
-
-    const response = hasSlaves
-      ? await client.CreateMultiShipmentBcAsync({ request })
-      : await client.CreateShipmentBcAsync({ request });
-
-    /*
-      IMPORTANT:
-
-      CreateMultiShipmentBc
-      returns shipment numbers only.
-
-      To get labels we must call GetLabelBc
-      for each shipment.
-    */
-    console.log("Multishipment response", JSON.stringify(response, null, 2));
-    const labels = [];
-    if (hasSlaves) {
-      const multiShipment = response?.[0]?.CreateMultiShipmentBcResult;
-
-      if (!multiShipment) {
-        throw new Error("No shipment returned from DPD");
-      }
-
-      // Handle different possible structures of shipments
-      let shipments = [];
-
-      if (multiShipment.shipments) {
-        if (Array.isArray(multiShipment.shipments)) {
-          shipments = multiShipment.shipments;
-        } else if (multiShipment.shipments.ShipmentBc) {
-          shipments = multiShipment.shipments.ShipmentBc;
-          if (!Array.isArray(shipments)) {
-            shipments = [shipments];
-          }
-        }
-      }
-
-      if (!shipments.length) {
-        throw new Error("No shipments found in response");
-      }
-
-      for (const shipment of shipments) {
-        const barcodeId = shipment?.Shipment?.BarcodeId;
-
-        if (!barcodeId) continue;
-
-        // CORRECTED: Proper request structure based on WSDL
-        const labelRequest = {
-          request: {
-            customer: {
-              countrycode: Number(process.env.DPD_COUNTRY_CODE),
-              centernumber: Number(process.env.DPD_CENTER_NUMBER),
-              number: Number(process.env.DPD_CUSTOMER_NUMBER),
-            },
-            shipmentNumber: barcodeId,
-            labelType: {
-              type: "PDF_A6", // NOTE: lowercase 'type', not 'Type'
-            },
-            // Optional fields (include if needed)
-            // refnrasbarcode: false,
-            // injectionHub: "",
-            // bic3data: { mode: "OnlyStdLabels" },
-            // referenceInBarcode: { type: "Referencenumber" },
-            // overrideShipperLabelAddress: null
-          },
-        };
-
-        // CORRECTED: Pass labelRequest directly, not wrapped in another object
-        const labelResponse = await client.GetLabelBcAsync(labelRequest);
-        const result = labelResponse?.[0]?.GetLabelBcResult;
-
-        if (!result?.labels) {
-          console.warn(`No labels returned for barcode ${barcodeId}`);
-          continue;
-        }
-
-        // Handle different possible label structures based on WSDL
-        let shipmentLabels = [];
-        if (result.labels.Label) {
-          // Handle Label[] array
-          shipmentLabels = Array.isArray(result.labels.Label)
-            ? result.labels.Label
-            : [result.labels.Label];
-        } else if (Array.isArray(result.labels)) {
-          shipmentLabels = result.labels;
-        }
-
-        shipmentLabels.forEach((label, index) => {
-          // The label content is in the 'label' property (lowercase)
-          const labelData = label.label || label.Label;
-          if (labelData) {
-            labels.push({
-              name: `label-${barcodeId}${shipmentLabels.length > 1 ? `-${index + 1}` : ""}.pdf`,
-              buffer: Buffer.from(labelData, "base64"),
-            });
-          }
-        });
-      }
-    } else {
-      const singleShipment = response?.[0]?.CreateShipmentBcResult?.ShipmentBc;
-
-      if (!singleShipment || !singleShipment.length) {
-        throw new Error("No shipment returned from DPD");
-      }
-
-      const shipment = singleShipment[0];
-      const barcodeId = shipment?.Shipment?.BarcodeId;
-
-      if (!barcodeId) {
-        throw new Error("No barcode returned from DPD");
-      }
-
+    // Helper: fetch labels for shipment
+    const fetchLabels = async (barcodeId) => {
       const labelRequest = {
         request: {
           customer: {
@@ -309,7 +65,8 @@ module.exports = {
       const result = labelResponse?.[0]?.GetLabelBcResult;
 
       if (!result?.labels) {
-        throw new Error(`No labels returned for barcode ${barcodeId}`);
+        console.warn(`No labels returned for barcode ${barcodeId}`);
+        return [];
       }
 
       let shipmentLabels = [];
@@ -322,26 +79,185 @@ module.exports = {
         shipmentLabels = result.labels;
       }
 
-      shipmentLabels.forEach((label, index) => {
-        const labelData = label.label || label.Label;
+      return shipmentLabels
+        .map((label, index) => {
+          const labelData = label.label || label.Label;
 
-        if (labelData) {
-          labels.push({
+          if (!labelData) return null;
+
+          return {
             name: `label-${barcodeId}${
               shipmentLabels.length > 1 ? `-${index + 1}` : ""
             }.pdf`,
             buffer: Buffer.from(labelData, "base64"),
-          });
-        }
-      });
+          };
+        })
+        .filter(Boolean);
+    };
+
+    const slaves = data?.slaves?.SlaveRequest || [];
+
+    const hasMultipleSlaves = slaves.length > 1;
+
+    // SINGLE SHIPMENT
+    if (!hasMultipleSlaves) {
+      const request = {
+        customer_countrycode: Number(process.env.DPD_COUNTRY_CODE),
+
+        customer_centernumber: Number(process.env.DPD_CENTER_NUMBER),
+
+        customer_number: Number(process.env.DPD_CUSTOMER_NUMBER),
+
+        shipperaddress: {
+          name: data.shipper.name,
+          countryPrefix: data.shipper.countryPrefix,
+          zipCode: data.shipper.zipCode,
+          city: data.shipper.city,
+          street: data.shipper.street,
+          phoneNumber: data.shipper.phoneNumber,
+        },
+
+        receiveraddress: {
+          name: data.receivercompanyName || data.receiver.name,
+          countryPrefix: data.receiver.countryPrefix,
+          zipCode: data.receiver.zipCode,
+          city: data.receiver.city,
+          street: data.receiver.street,
+          phoneNumber: data.receiver.phoneNumber,
+        },
+
+        receiverinfo: {
+          contact: data.receiver.name || "",
+        },
+
+        shippingdate: new Date()
+          .toLocaleDateString("fr-FR")
+          .replace(/\//g, "."),
+
+        weight: slaves?.[0]?.weight || "",
+        referencenumber: slaves?.[0]?.referencenumber || "",
+      };
+
+      const response = await client.CreateShipmentBcAsync({ request });
+
+      const shipment = response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
+
+      const barcodeId = shipment?.Shipment?.BarcodeId;
+
+      if (!barcodeId) {
+        throw new Error("No barcode returned from DPD");
+      }
+
+      const labels = await fetchLabels(barcodeId);
+
+      allLabels.push(...labels);
     }
 
-    if (!labels.length) {
+    // MULTI SHIPMENT WITH CHUNKS OF 5
+    else {
+      const slaveChunks = chunkArray(slaves, 5);
+
+      console.log(`Total chunks: ${slaveChunks.length}`);
+
+      for (const chunk of slaveChunks) {
+        console.log(`Creating shipment batch with ${chunk.length} parcels`);
+
+        const request = {
+          customer_countrycode: Number(process.env.DPD_COUNTRY_CODE),
+
+          customer_centernumber: Number(process.env.DPD_CENTER_NUMBER),
+
+          customer_number: Number(process.env.DPD_CUSTOMER_NUMBER),
+
+          shipperaddress: {
+            name: data.shipper.name,
+            countryPrefix: data.shipper.countryPrefix,
+            zipCode: data.shipper.zipCode,
+            city: data.shipper.city,
+            street: data.shipper.street,
+            phoneNumber: data.shipper.phoneNumber,
+          },
+
+          receiveraddress: {
+            name: data.receivercompanyName || data.receiver.name,
+            countryPrefix: data.receiver.countryPrefix,
+            zipCode: data.receiver.zipCode,
+            city: data.receiver.city,
+            street: data.receiver.street,
+            phoneNumber: data.receiver.phoneNumber,
+          },
+
+          receiverinfo: {
+            contact: data.receiver.name || "",
+            name2: data.receiver.name2 || "",
+            name3: data.receiver.name3 || "",
+            name4: data.receiver.name4 || "",
+            digicode1: data.receiver.digicode1 || "",
+            digicode2: data.receiver.digicode2 || "",
+            intercomid: data.receiver.intercomid || "",
+            vinfo1: data.receiver.deliveryInstruction || "",
+            vinfo2: data.receiver.deliveryInstruction2 || "",
+          },
+
+          shippingdate: new Date()
+            .toLocaleDateString("fr-FR")
+            .replace(/\//g, "."),
+
+          services: {
+            consolidation: {
+              type: "CombinedDelivery",
+            },
+          },
+
+          slaves: {
+            SlaveRequest: chunk,
+          },
+        };
+
+        console.log(
+          "Chunk shipment request:",
+          JSON.stringify(request, null, 2),
+        );
+
+        const response = await client.CreateMultiShipmentBcAsync({
+          request,
+        });
+
+        const multiShipment = response?.[0]?.CreateMultiShipmentBcResult;
+
+        if (!multiShipment) {
+          console.warn("No shipment returned for chunk");
+          continue;
+        }
+
+        let shipments = [];
+
+        if (multiShipment.shipments?.ShipmentBc) {
+          shipments = Array.isArray(multiShipment.shipments.ShipmentBc)
+            ? multiShipment.shipments.ShipmentBc
+            : [multiShipment.shipments.ShipmentBc];
+        }
+
+        for (const shipment of shipments) {
+          const barcodeId = shipment?.Shipment?.BarcodeId;
+
+          if (!barcodeId) continue;
+
+          const labels = await fetchLabels(barcodeId);
+
+          allLabels.push(...labels);
+        }
+      }
+    }
+
+    if (!allLabels.length) {
       throw new Error("No labels generated");
     }
-    const mergedPdfBuffer = await this.mergePDFs(labels);
 
-    // Create ZIP with the single merged PDF
+    // Merge ALL PDFs into ONE
+    const mergedPdfBuffer = await this.mergePDFs(allLabels);
+
+    // Return ZIP with single merged PDF
     return await this.createZip([
       {
         name: `labels-${Date.now()}.pdf`,
