@@ -118,7 +118,7 @@ module.exports = {
         },
 
         receiveraddress: {
-          name: data.receivercompanyName || data.receiver.name,
+          name: data.receiver.companyName || data.receiver.name,
           countryPrefix: data.receiver.countryPrefix,
           zipCode: data.receiver.zipCode,
           city: data.receiver.city,
