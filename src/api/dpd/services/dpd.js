@@ -162,6 +162,86 @@ module.exports = {
       for (const chunk of slaveChunks) {
         console.log(`Creating shipment batch with ${chunk.length} parcels`);
 
+        // =========================
+        // SINGLE SHIPMENT FOR 1 ITEM CHUNK
+        // =========================
+        if (chunk.length === 1) {
+          const singleSlave = chunk[0];
+
+          const request = {
+            customer_countrycode: Number(process.env.DPD_COUNTRY_CODE),
+
+            customer_centernumber: Number(process.env.DPD_CENTER_NUMBER),
+
+            customer_number: Number(process.env.DPD_CUSTOMER_NUMBER),
+
+            shipperaddress: {
+              name: data.shipper.name,
+              countryPrefix: data.shipper.countryPrefix,
+              zipCode: data.shipper.zipCode,
+              city: data.shipper.city,
+              street: data.shipper.street,
+              phoneNumber: data.shipper.phoneNumber,
+            },
+
+            receiveraddress: {
+              name: data.receiver.companyName || data.receiver.name,
+              countryPrefix: data.receiver.countryPrefix,
+              zipCode: data.receiver.zipCode,
+              city: data.receiver.city,
+              street: data.receiver.street,
+              phoneNumber: data.receiver.phoneNumber,
+            },
+
+            receiverinfo: {
+              contact: data.receiver.name || "",
+              name2: data.receiver.name2 || "",
+              name3: data.receiver.name3 || "",
+              name4: data.receiver.name4 || "",
+              digicode1: data.receiver.digicode1 || "",
+              digicode2: data.receiver.digicode2 || "",
+              intercomid: data.receiver.intercomid || "",
+              vinfo1: data.receiver.deliveryInstruction || "",
+              vinfo2: data.receiver.deliveryInstruction2 || "",
+            },
+
+            shippingdate: new Date()
+              .toLocaleDateString("fr-FR")
+              .replace(/\//g, "."),
+
+            weight: singleSlave.weight || "",
+            referencenumber: singleSlave.referencenumber || "",
+          };
+
+          console.log(
+            "Single shipment request:",
+            JSON.stringify(request, null, 2),
+          );
+
+          const response = await client.CreateShipmentBcAsync({
+            request,
+          });
+
+          const shipment =
+            response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
+
+          const barcodeId = shipment?.Shipment?.BarcodeId;
+
+          if (!barcodeId) {
+            console.warn("No barcode returned for single shipment");
+            continue;
+          }
+
+          const labels = await fetchLabels(barcodeId);
+
+          allLabels.push(...labels);
+
+          continue;
+        }
+
+        // =========================
+        // MULTI SHIPMENT
+        // =========================
         const request = {
           customer_countrycode: Number(process.env.DPD_COUNTRY_CODE),
 
