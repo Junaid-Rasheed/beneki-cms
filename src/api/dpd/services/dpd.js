@@ -285,7 +285,7 @@ module.exports = {
 
           services: {
             consolidation: {
-              type: "CombinedDelivery",
+              type: "CombinedInvoicing",
             },
           },
 
