@@ -302,7 +302,7 @@ module.exports = {
         const response = await client.CreateMultiShipmentBcAsync({
           request,
         });
-
+        console.log("response", response)
         const multiShipment = response?.[0]?.CreateMultiShipmentBcResult;
 
         if (!multiShipment) {
