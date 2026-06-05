@@ -217,12 +217,7 @@ module.exports = {
               .toLocaleDateString("fr-FR")
               .replace(/\//g, "."),
 
-            services: {
-              contact: {
-                email: data.receiver.email || "",
-                type: "AutomaticMail",
-              },
-            },
+            
             weight: singleSlave.weight || "",
             referencenumber: singleSlave.referencenumber || "",
           };
