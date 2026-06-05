@@ -134,6 +134,13 @@ module.exports = {
           .toLocaleDateString("fr-FR")
           .replace(/\//g, "."),
 
+        services: {
+          contact: {
+            email: data.receiver.email || "",
+            type: "AutomaticMail",
+          },
+        },
+
         weight: slaves?.[0]?.weight || "",
         referencenumber: slaves?.[0]?.referencenumber || "",
       };
@@ -159,7 +166,8 @@ module.exports = {
 
       console.log(`Total chunks: ${slaveChunks.length}`);
 
-      for (const chunk of slaveChunks) {
+      for (let chunkIndex = 0; chunkIndex < slaveChunks.length; chunkIndex++) {
+        const chunk = slaveChunks[chunkIndex];
         console.log(`Creating shipment batch with ${chunk.length} parcels`);
 
         // =========================
@@ -209,6 +217,12 @@ module.exports = {
               .toLocaleDateString("fr-FR")
               .replace(/\//g, "."),
 
+            services: {
+              contact: {
+                email: data.receiver.email || "",
+                type: "AutomaticMail",
+              },
+            },
             weight: singleSlave.weight || "",
             referencenumber: singleSlave.referencenumber || "",
           };
@@ -287,6 +301,12 @@ module.exports = {
             consolidation: {
               type: "CombinedInvoicing",
             },
+            ...(chunkIndex === 0 && {
+              contact: {
+                email: data.receiver.email || "",
+                type: "AutomaticMail",
+              },
+            }),
           },
 
           slaves: {
@@ -302,7 +322,7 @@ module.exports = {
         const response = await client.CreateMultiShipmentBcAsync({
           request,
         });
-        console.log("response", response)
+        console.log("response", response);
         const multiShipment = response?.[0]?.CreateMultiShipmentBcResult;
 
         if (!multiShipment) {
