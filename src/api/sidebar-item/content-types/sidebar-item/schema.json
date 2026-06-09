@@ -215,6 +215,9 @@
     },
     "maximumWeight": {
       "type": "integer"
+    },
+    "isFoodProduct": {
+      "type": "boolean"
     }
   }
 }

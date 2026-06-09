@@ -865,6 +865,7 @@ export interface ApiGeneralSettingGeneralSetting
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    vatPerCountry: Schema.Attribute.JSON;
   };
 }
 
@@ -1870,6 +1871,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
       }>;
     isAdminProduct: Schema.Attribute.Boolean;
     isCollection: Schema.Attribute.Boolean;
+    isFoodProduct: Schema.Attribute.Boolean;
     isHomeProduct: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
