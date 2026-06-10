@@ -98,6 +98,9 @@
     },
     "instruction": {
       "type": "text"
+    },
+    "vatNumber": {
+      "type": "string"
     }
   }
 }

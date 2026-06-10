@@ -1296,6 +1296,7 @@ export interface ApiOrderAddressOrderAddress
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    vatNumber: Schema.Attribute.String;
   };
 }
 
