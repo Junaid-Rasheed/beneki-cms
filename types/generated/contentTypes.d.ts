@@ -2295,6 +2295,11 @@ export interface ApiStaticAddressFormStaticAddressForm
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    vatNumberInvalid: Schema.Attribute.String;
+    vatNumberRequired: Schema.Attribute.String;
+    vatNumberServiceUnavailable: Schema.Attribute.String;
+    vatNumberValid: Schema.Attribute.String;
+    vatNumberValidating: Schema.Attribute.String;
   };
 }
 
@@ -2509,6 +2514,7 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
           localized: true;
         };
       }>;
+    registerVatInvalid: Schema.Attribute.String;
     registerVatNumberLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2516,6 +2522,9 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
         };
       }>;
     registerVatRequired: Schema.Attribute.String;
+    registerVatUnavailable: Schema.Attribute.String;
+    registerVatValid: Schema.Attribute.String;
+    registerVatValidating: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -4734,6 +4743,7 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
       'manyToOne',
       'plugin::users-permissions.user'
     >;
+    vatNumber: Schema.Attribute.String;
   };
 }
 

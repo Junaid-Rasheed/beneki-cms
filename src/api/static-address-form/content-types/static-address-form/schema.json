@@ -194,6 +194,21 @@
     },
     "deliveryInstructionLabel": {
       "type": "string"
+    },
+    "vatNumberRequired": {
+      "type": "string"
+    },
+    "vatNumberInvalid": {
+      "type": "string"
+    },
+    "vatNumberValidating": {
+      "type": "string"
+    },
+    "vatNumberValid": {
+      "type": "string"
+    },
+    "vatNumberServiceUnavailable": {
+      "type": "string"
     }
   }
 }

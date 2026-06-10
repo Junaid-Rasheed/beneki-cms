@@ -161,6 +161,18 @@
     },
     "registerErrorVatRequired": {
       "type": "string"
+    },
+    "registerVatInvalid": {
+      "type": "string"
+    },
+    "registerVatValidating": {
+      "type": "string"
+    },
+    "registerVatValid": {
+      "type": "string"
+    },
+    "registerVatUnavailable": {
+      "type": "string"
     }
   }
 }
