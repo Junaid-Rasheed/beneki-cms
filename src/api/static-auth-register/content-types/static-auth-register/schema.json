@@ -173,6 +173,12 @@
     },
     "registerVatUnavailable": {
       "type": "string"
+    },
+    "registerVatInvalidFormat": {
+      "type": "string"
+    },
+    "registerVatBusy": {
+      "type": "string"
     }
   }
 }

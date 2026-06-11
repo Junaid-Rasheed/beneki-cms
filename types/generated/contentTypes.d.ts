@@ -2297,7 +2297,10 @@ export interface ApiStaticAddressFormStaticAddressForm
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     vatNumberInvalid: Schema.Attribute.String;
+    vatNumberInvalidFormat: Schema.Attribute.String;
+    vatNumberLabel: Schema.Attribute.String;
     vatNumberRequired: Schema.Attribute.String;
+    vatNumberServiceBusy: Schema.Attribute.String;
     vatNumberServiceUnavailable: Schema.Attribute.String;
     vatNumberValid: Schema.Attribute.String;
     vatNumberValidating: Schema.Attribute.String;
@@ -2515,7 +2518,9 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
           localized: true;
         };
       }>;
+    registerVatBusy: Schema.Attribute.String;
     registerVatInvalid: Schema.Attribute.String;
+    registerVatInvalidFormat: Schema.Attribute.String;
     registerVatNumberLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

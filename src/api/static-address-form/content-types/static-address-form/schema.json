@@ -209,6 +209,15 @@
     },
     "vatNumberServiceUnavailable": {
       "type": "string"
+    },
+    "vatNumberLabel": {
+      "type": "string"
+    },
+    "vatNumberInvalidFormat": {
+      "type": "string"
+    },
+    "vatNumberServiceBusy": {
+      "type": "string"
     }
   }
 }
