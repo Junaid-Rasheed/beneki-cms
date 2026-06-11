@@ -101,6 +101,10 @@
     },
     "vatNumber": {
       "type": "string"
+    },
+    "isValidVatNumber": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

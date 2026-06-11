@@ -1263,6 +1263,8 @@ export interface ApiOrderAddressOrderAddress
         };
       }>;
     instruction: Schema.Attribute.Text;
+    isValidVatNumber: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     lastName: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -4706,6 +4708,8 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    isValidVatNumber: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -5252,6 +5256,8 @@ export interface PluginUsersPermissionsUser
         minLength: 6;
       }>;
     firstName: Schema.Attribute.String;
+    isValidVatNumber: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
