@@ -1454,6 +1454,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     invoiceId: Schema.Attribute.BigInteger;
     isDpdLabelPrinted: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
+    isOssVatOrder: Schema.Attribute.Boolean;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
     notes: Schema.Attribute.String &

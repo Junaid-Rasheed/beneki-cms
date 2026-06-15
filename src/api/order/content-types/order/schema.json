@@ -200,6 +200,9 @@
     "isDpdLabelPrinted": {
       "type": "boolean",
       "default": false
+    },
+    "isOssVatOrder": {
+      "type": "boolean"
     }
   }
 }
