@@ -1501,7 +1501,9 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
-    paymentStatus: Schema.Attribute.Enumeration<['pending', 'paid', 'failed']> &
+    paymentStatus: Schema.Attribute.Enumeration<
+      ['pending', 'paid', 'failed', 'refund']
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
