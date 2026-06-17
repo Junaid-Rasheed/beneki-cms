@@ -154,7 +154,7 @@ module.exports = {
         documentId: data.orderId, // or data.orderId if that's your documentId
         populate: {
           shipment_trackings: true,
-          order_items: {
+          orderItems: {
             populate: {
               shipment_trackings: true,
             },
@@ -189,7 +189,7 @@ module.exports = {
 
       // Since this is a SINGLE shipment,
       // connect the same tracking to all order items
-      for (const item of order.order_items || []) {
+      for (const item of order.orderItems || []) {
         await strapi.documents("api::order-item.order-item").update({
           documentId: item.documentId,
           data: {
@@ -291,7 +291,7 @@ module.exports = {
             documentId: data.orderId, // or data.orderId if that's your documentId
             populate: {
               shipment_trackings: true,
-              order_items: {
+              orderItems: {
                 populate: {
                   shipment_trackings: true,
                 },
@@ -326,7 +326,7 @@ module.exports = {
 
           // Since this is a SINGLE shipment,
           // connect the same tracking to all order items
-          for (const item of order.order_items || []) {
+          for (const item of order.orderItems || []) {
             await strapi.documents("api::order-item.order-item").update({
               documentId: item.documentId,
               data: {
