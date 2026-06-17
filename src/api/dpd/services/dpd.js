@@ -50,7 +50,7 @@ module.exports = {
 
       return result;
     };
-    
+
     // Helper: fetch labels for shipment
     const fetchLabels = async (barcodeId) => {
       const labelRequest = {
@@ -496,19 +496,23 @@ module.exports = {
           }
 
           const orderItemMap = new Map();
-
-          for (const item of order.orderItems) {
+          const orderItems = Array.isArray(order?.orderItems)
+            ? order.orderItems
+            : [];
+          for (const item of orderItems) {
             orderItemMap.set(String(item.productId), item);
           }
-          if (!orderItemMap) {
-            strapi.log.warn(
-              `No order item found for reference number ${slave.referencenumber}`,
-            );
+          if (orderItems.length === 0) {
+            strapi.log.warn(`No order items found for order ${data.orderId}`);
             continue;
           }
-          const tokens = await extractTokens(slave.referencenumber);
+          console.log(
+            "order_items:",
+            JSON.stringify(order?.order_items, null, 2),
+          );
+          const tokens = extractTokens(slave.referencenumber);
 
-          const matchedItems = order.order_items.filter((item) =>
+          const matchedItems = orderItems.filter((item) =>
             tokens.includes(String(item.productId)),
           );
 
@@ -576,5 +580,4 @@ module.exports = {
 
     return zip.toBuffer();
   },
-  
 };
