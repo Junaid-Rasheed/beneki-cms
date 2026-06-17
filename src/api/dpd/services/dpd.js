@@ -18,13 +18,12 @@ function extractTokens(referenceNumber) {
 }
 module.exports = {
   async generateShipment(data) {
-    console.log("before creating client");
-
+    
     const client = await soap.createClientAsync(WSDL_PATH, {
       disableCache: true,
     });
 
-    console.log("after creating client");
+    
 
     const soapHeader = {
       UserCredentials: {
@@ -153,7 +152,7 @@ module.exports = {
       };
 
       const response = await client.CreateShipmentBcAsync({ request });
-      console.log("single shipment response", response);
+      
       const shipment = response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
 
       // Fetch order with order items
@@ -207,9 +206,7 @@ module.exports = {
         });
       }
 
-      console.log(
-        `Tracking ${tracking.barCode} linked to order ${order.documentId}`,
-      );
+     
       const barcodeId = shipment?.Shipment?.BarcodeId;
 
       if (!barcodeId) {
@@ -225,11 +222,11 @@ module.exports = {
     else {
       const slaveChunks = chunkArray(slaves, 5);
 
-      console.log(`Total chunks: ${slaveChunks.length}`);
+      
 
       for (let chunkIndex = 0; chunkIndex < slaveChunks.length; chunkIndex++) {
         const chunk = slaveChunks[chunkIndex];
-        console.log(`Creating shipment batch with ${chunk.length} parcels`);
+       
 
         // =========================
         // SINGLE SHIPMENT FOR 1 ITEM CHUNK
@@ -282,15 +279,12 @@ module.exports = {
             referencenumber: singleSlave.referencenumber || "",
           };
 
-          console.log(
-            "Single shipment request:",
-            JSON.stringify(request, null, 2),
-          );
+          
 
           const response = await client.CreateShipmentBcAsync({
             request,
           });
-          console.log("single shipment response", response);
+         
           const shipment =
             response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
 
@@ -344,9 +338,7 @@ module.exports = {
             });
           }
 
-          console.log(
-            `Tracking ${tracking.barCode} linked to order ${order.documentId}`,
-          );
+          
           const barcodeId = shipment?.Shipment?.BarcodeId;
 
           if (!barcodeId) {
@@ -422,15 +414,11 @@ module.exports = {
           },
         };
 
-        console.log(
-          "Chunk shipment request:",
-          JSON.stringify(request, null, 2),
-        );
-
+        
         const response = await client.CreateMultiShipmentBcAsync({
           request,
         });
-        console.log("multishipment response", response);
+        
         const multiShipment = response?.[0]?.CreateMultiShipmentBcResult;
 
         if (!multiShipment) {
@@ -508,7 +496,7 @@ module.exports = {
           }
 
           const tokens = extractTokens(slave.referencenumber);
-          console.log("tokens", tokens);
+
           const matchedItems = orderItems.filter((item) =>
             tokens.some((token) =>
               token
@@ -516,7 +504,7 @@ module.exports = {
                 .endsWith(String(item.productId).toUpperCase()),
             ),
           );
-          console.log("matching items", matchedItems);
+ 
           for (const item of matchedItems) {
             await strapi.documents("api::order-item.order-item").update({
               documentId: item.documentId,

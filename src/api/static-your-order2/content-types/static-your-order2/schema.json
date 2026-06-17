@@ -209,6 +209,9 @@
     },
     "couponNameLabel": {
       "type": "string"
+    },
+    "itemTrackingLabel": {
+      "type": "string"
     }
   }
 }

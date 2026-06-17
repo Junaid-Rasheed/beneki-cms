@@ -4555,6 +4555,7 @@ export interface ApiStaticYourOrder2StaticYourOrder2
           localized: true;
         };
       }>;
+    itemTrackingLabel: Schema.Attribute.String;
     itemUnitPriceLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
