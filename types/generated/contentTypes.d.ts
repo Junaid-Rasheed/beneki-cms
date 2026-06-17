@@ -1849,7 +1849,7 @@ export interface ApiShipmentTrackingShipmentTracking
     singularName: 'shipment-tracking';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     barCode: Schema.Attribute.String;

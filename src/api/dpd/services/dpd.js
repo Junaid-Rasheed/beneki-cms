@@ -488,29 +488,33 @@ module.exports = {
             continue;
           }
 
-          // Find matching order item by product id contained in reference number
-          const orderItem = order.orderItems.find((item) => {
-            const productId = item.productId;
+          const orderItemMap = new Map();
 
-            return (
-              productId && slave.referencenumber.includes(String(productId))
-            );
-          });
-          if (!orderItem) {
+          for (const item of order.orderItems) {
+            orderItemMap.set(String(item.productId), item);
+          }
+          if (!orderItemMap) {
             strapi.log.warn(
               `No order item found for reference number ${slave.referencenumber}`,
             );
             continue;
           }
+          const tokens = await extractTokens(slave.referencenumber);
 
-          await strapi.documents("api::order-item.order-item").update({
-            documentId: orderItem.documentId,
-            data: {
-              shipment_trackings: {
-                connect: [tracking.documentId],
+          const matchedItems = order.order_items.filter((item) =>
+            tokens.includes(String(item.productId)),
+          );
+
+          for (const item of matchedItems) {
+            await strapi.documents("api::order-item.order-item").update({
+              documentId: item.documentId,
+              data: {
+                shipment_trackings: {
+                  connect: [tracking.documentId],
+                },
               },
-            },
-          });
+            });
+          }
 
           const barcodeId = shipment?.Shipment?.BarcodeId;
 
@@ -564,5 +568,13 @@ module.exports = {
     });
 
     return zip.toBuffer();
+  },
+  async extractTokens(referenceNumber) {
+    if (!referenceNumber) return [];
+
+    return referenceNumber
+      .split(/\s+/) // split by spaces
+      .map((t) => t.trim())
+      .filter(Boolean);
   },
 };
