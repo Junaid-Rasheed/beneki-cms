@@ -490,7 +490,7 @@ module.exports = {
 
           // Find matching order item by product id contained in reference number
           const orderItem = order.orderItems.find((item) => {
-            const productId = item.product?.id;
+            const productId = item.productId;
 
             return (
               productId && slave.referencenumber.includes(String(productId))
