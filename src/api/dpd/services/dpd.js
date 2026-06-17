@@ -8,7 +8,14 @@ const { PDFDocument } = require("pdf-lib");
 const path = require("path");
 
 const WSDL_PATH = path.join(__dirname, "../../../wsdl/dpd.wsdl");
+function extractTokens(referenceNumber) {
+  if (!referenceNumber) return [];
 
+  return referenceNumber
+    .split(/\s+/) // split by spaces
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
 module.exports = {
   async generateShipment(data) {
     console.log("before creating client");
@@ -43,7 +50,7 @@ module.exports = {
 
       return result;
     };
-
+    
     // Helper: fetch labels for shipment
     const fetchLabels = async (barcodeId) => {
       const labelRequest = {
@@ -569,12 +576,5 @@ module.exports = {
 
     return zip.toBuffer();
   },
-  async extractTokens(referenceNumber) {
-    if (!referenceNumber) return [];
-
-    return referenceNumber
-      .split(/\s+/) // split by spaces
-      .map((t) => t.trim())
-      .filter(Boolean);
-  },
+  
 };
