@@ -506,16 +506,13 @@ module.exports = {
             strapi.log.warn(`No order items found for order ${data.orderId}`);
             continue;
           }
-          console.log(
-            "orderItems:",
-            JSON.stringify(order?.orderItems, null, 2),
-          );
-          const tokens = extractTokens(slave.referencenumber);
 
+          const tokens = extractTokens(slave.referencenumber);
+          console.log('tokens', tokens)
           const matchedItems = orderItems.filter((item) =>
             tokens.includes(String(item.productId)),
           );
-
+          console.log('matching items', matchedItems)
           for (const item of matchedItems) {
             await strapi.documents("api::order-item.order-item").update({
               documentId: item.documentId,
