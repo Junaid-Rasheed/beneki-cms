@@ -1,0 +1,23 @@
+{
+  "kind": "collectionType",
+  "collectionName": "shipment_trackings",
+  "info": {
+    "singularName": "shipment-tracking",
+    "pluralName": "shipment-trackings",
+    "displayName": "ShipmentTracking"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "barCodeId": {
+      "type": "string"
+    },
+    "barCode": {
+      "type": "string"
+    },
+    "barCodeSource": {
+      "type": "integer"
+    }
+  }
+}

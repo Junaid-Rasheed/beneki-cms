@@ -204,6 +204,11 @@
     },
     "isOssVatOrder": {
       "type": "boolean"
+    },
+    "shipment_trackings": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::shipment-tracking.shipment-tracking"
     }
   }
 }

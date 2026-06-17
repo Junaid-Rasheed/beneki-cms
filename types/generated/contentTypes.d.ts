@@ -1393,6 +1393,10 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    shipment_trackings: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shipment-tracking.shipment-tracking'
+    >;
     unitPrice: Schema.Attribute.Decimal &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1518,6 +1522,10 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    shipment_trackings: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shipment-tracking.shipment-tracking'
+    >;
     shippingAddress: Schema.Attribute.Relation<
       'oneToOne',
       'api::order-address.order-address'
@@ -1829,6 +1837,37 @@ export interface ApiSettingSetting extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     workingDays: Schema.Attribute.JSON;
+  };
+}
+
+export interface ApiShipmentTrackingShipmentTracking
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'shipment_trackings';
+  info: {
+    displayName: 'ShipmentTracking';
+    pluralName: 'shipment-trackings';
+    singularName: 'shipment-tracking';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    barCode: Schema.Attribute.String;
+    barCodeId: Schema.Attribute.String;
+    barCodeSource: Schema.Attribute.Integer;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::shipment-tracking.shipment-tracking'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -5332,6 +5371,7 @@ declare module '@strapi/strapi' {
       'api::sds-page.sds-page': ApiSdsPageSdsPage;
       'api::sds-product.sds-product': ApiSdsProductSdsProduct;
       'api::setting.setting': ApiSettingSetting;
+      'api::shipment-tracking.shipment-tracking': ApiShipmentTrackingShipmentTracking;
       'api::sidebar-item.sidebar-item': ApiSidebarItemSidebarItem;
       'api::static-account-detail.static-account-detail': ApiStaticAccountDetailStaticAccountDetail;
       'api::static-address-book.static-address-book': ApiStaticAddressBookStaticAddressBook;

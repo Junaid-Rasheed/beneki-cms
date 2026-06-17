@@ -64,6 +64,11 @@
     },
     "discount": {
       "type": "decimal"
+    },
+    "shipment_trackings": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::shipment-tracking.shipment-tracking"
     }
   }
 }

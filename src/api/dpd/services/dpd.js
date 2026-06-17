@@ -146,9 +146,63 @@ module.exports = {
       };
 
       const response = await client.CreateShipmentBcAsync({ request });
-
+      console.log("single shipment response", response);
       const shipment = response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
 
+      // Fetch order with order items
+      const order = await strapi.documents("api::order.order").findOne({
+        documentId: data.orderId, // or data.orderId if that's your documentId
+        populate: {
+          shipment_trackings: true,
+          order_items: {
+            populate: {
+              shipment_trackings: true,
+            },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new Error(`Order not found: ${data.documentId}`);
+      }
+
+      // Create shipment tracking record
+      const tracking = await strapi
+        .documents("api::shipment-tracking.shipment-tracking")
+        .create({
+          data: {
+            barCodeId: shipment.Shipment.BarcodeId,
+            barCode: shipment.Shipment.BarCode,
+            barCodeSource: shipment.Shipment.BarcodeSource,
+          },
+        });
+
+      // Attach tracking to order
+      await strapi.documents("api::order.order").update({
+        documentId: order.documentId,
+        data: {
+          shipment_trackings: {
+            connect: [tracking.documentId],
+          },
+        },
+      });
+
+      // Since this is a SINGLE shipment,
+      // connect the same tracking to all order items
+      for (const item of order.order_items || []) {
+        await strapi.documents("api::order-item.order-item").update({
+          documentId: item.documentId,
+          data: {
+            shipment_trackings: {
+              connect: [tracking.documentId],
+            },
+          },
+        });
+      }
+
+      console.log(
+        `Tracking ${tracking.barCode} linked to order ${order.documentId}`,
+      );
       const barcodeId = shipment?.Shipment?.BarcodeId;
 
       if (!barcodeId) {
@@ -217,7 +271,6 @@ module.exports = {
               .toLocaleDateString("fr-FR")
               .replace(/\//g, "."),
 
-            
             weight: singleSlave.weight || "",
             referencenumber: singleSlave.referencenumber || "",
           };
@@ -230,10 +283,63 @@ module.exports = {
           const response = await client.CreateShipmentBcAsync({
             request,
           });
-
+          console.log("single shipment response", response);
           const shipment =
             response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
 
+          const order = await strapi.documents("api::order.order").findOne({
+            documentId: data.orderId, // or data.orderId if that's your documentId
+            populate: {
+              shipment_trackings: true,
+              order_items: {
+                populate: {
+                  shipment_trackings: true,
+                },
+              },
+            },
+          });
+
+          if (!order) {
+            throw new Error(`Order not found: ${data.documentId}`);
+          }
+
+          // Create shipment tracking record
+          const tracking = await strapi
+            .documents("api::shipment-tracking.shipment-tracking")
+            .create({
+              data: {
+                barCodeId: shipment.Shipment.BarcodeId,
+                barCode: shipment.Shipment.BarCode,
+                barCodeSource: shipment.Shipment.BarcodeSource,
+              },
+            });
+
+          // Attach tracking to order
+          await strapi.documents("api::order.order").update({
+            documentId: order.documentId,
+            data: {
+              shipment_trackings: {
+                connect: [tracking.documentId],
+              },
+            },
+          });
+
+          // Since this is a SINGLE shipment,
+          // connect the same tracking to all order items
+          for (const item of order.order_items || []) {
+            await strapi.documents("api::order-item.order-item").update({
+              documentId: item.documentId,
+              data: {
+                shipment_trackings: {
+                  connect: [tracking.documentId],
+                },
+              },
+            });
+          }
+
+          console.log(
+            `Tracking ${tracking.barCode} linked to order ${order.documentId}`,
+          );
           const barcodeId = shipment?.Shipment?.BarcodeId;
 
           if (!barcodeId) {
@@ -317,7 +423,7 @@ module.exports = {
         const response = await client.CreateMultiShipmentBcAsync({
           request,
         });
-        console.log("response", response);
+        console.log("multishipment response", response);
         const multiShipment = response?.[0]?.CreateMultiShipmentBcResult;
 
         if (!multiShipment) {
@@ -333,7 +439,79 @@ module.exports = {
             : [multiShipment.shipments.ShipmentBc];
         }
 
+        const order = await strapi.documents("api::order.order").findOne({
+          documentId: data.orderId,
+          populate: {
+            order_items: true,
+          },
+        });
+
+        const masterShipment = multiShipment.mastershipment;
+
+        if (masterShipment?.Shipment) {
+          const tracking = await strapi
+            .documents("api::shipment-tracking.shipment-tracking")
+            .create({
+              data: {
+                barCodeId: masterShipment.Shipment.BarcodeId,
+                barCode: masterShipment.Shipment.BarCode,
+                barCodeSource: masterShipment.Shipment.BarcodeSource,
+              },
+            });
+
+          await strapi.documents("api::order.order").update({
+            documentId: order.documentId,
+            data: {
+              shipment_trackings: {
+                connect: [tracking.documentId],
+              },
+            },
+          });
+        }
         for (const shipment of shipments) {
+          const tracking = await strapi
+            .documents("api::shipment-tracking.shipment-tracking")
+            .create({
+              data: {
+                barCodeId: shipment.Shipment.BarcodeId,
+                barCode: shipment.Shipment.BarCode,
+                barCodeSource: shipment.Shipment.BarcodeSource,
+              },
+            });
+
+          // Find the slave corresponding to this shipment
+          // Assuming DPD preserves order
+          const shipmentIndex = shipments.indexOf(shipment);
+          const slave = chunk[shipmentIndex];
+
+          if (!slave?.referencenumber) {
+            continue;
+          }
+
+          // Find matching order item by product id contained in reference number
+          const orderItem = order.order_items.find((item) => {
+            const productId = item.product?.id;
+
+            return (
+              productId && slave.referencenumber.includes(String(productId))
+            );
+          });
+          if (!orderItem) {
+            strapi.log.warn(
+              `No order item found for reference number ${slave.referencenumber}`,
+            );
+            continue;
+          }
+
+          await strapi.documents("api::order-item.order-item").update({
+            documentId: orderItem.documentId,
+            data: {
+              shipment_trackings: {
+                connect: [tracking.documentId],
+              },
+            },
+          });
+
           const barcodeId = shipment?.Shipment?.BarcodeId;
 
           if (!barcodeId) continue;
