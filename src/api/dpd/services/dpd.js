@@ -507,8 +507,8 @@ module.exports = {
             continue;
           }
           console.log(
-            "order_items:",
-            JSON.stringify(order?.order_items, null, 2),
+            "orderItems:",
+            JSON.stringify(order?.orderItems, null, 2),
           );
           const tokens = extractTokens(slave.referencenumber);
 
