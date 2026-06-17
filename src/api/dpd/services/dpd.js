@@ -442,7 +442,7 @@ module.exports = {
         const order = await strapi.documents("api::order.order").findOne({
           documentId: data.orderId,
           populate: {
-            order_items: true,
+            orderItems: true,
           },
         });
 
@@ -489,7 +489,7 @@ module.exports = {
           }
 
           // Find matching order item by product id contained in reference number
-          const orderItem = order.order_items.find((item) => {
+          const orderItem = order.orderItems.find((item) => {
             const productId = item.product?.id;
 
             return (
