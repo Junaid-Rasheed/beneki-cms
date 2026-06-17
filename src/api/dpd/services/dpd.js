@@ -508,11 +508,15 @@ module.exports = {
           }
 
           const tokens = extractTokens(slave.referencenumber);
-          console.log('tokens', tokens)
+          console.log("tokens", tokens);
           const matchedItems = orderItems.filter((item) =>
-            tokens.includes(String(item.productId)),
+            tokens.some((token) =>
+              token
+                .toUpperCase()
+                .endsWith(String(item.productId).toUpperCase()),
+            ),
           );
-          console.log('matching items', matchedItems)
+          console.log("matching items", matchedItems);
           for (const item of matchedItems) {
             await strapi.documents("api::order-item.order-item").update({
               documentId: item.documentId,
