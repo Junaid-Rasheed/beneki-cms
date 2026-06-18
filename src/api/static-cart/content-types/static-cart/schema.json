@@ -135,6 +135,12 @@
     },
     "cartLabel": {
       "type": "string"
+    },
+    "basketActionEmptyCart": {
+      "type": "string"
+    },
+    "basketEmptyCartMessage": {
+      "type": "string"
     }
   }
 }

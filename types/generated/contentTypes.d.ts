@@ -3125,6 +3125,7 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    basketActionEmptyCart: Schema.Attribute.String;
     basketActionRemoveItem: Schema.Attribute.String;
     basketActionValidateOrder: Schema.Attribute.String;
     basketContinueShopping: Schema.Attribute.String;
@@ -3138,6 +3139,7 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
     basketDeliveryOrderNow: Schema.Attribute.String;
     basketDeliveryOrderWithin: Schema.Attribute.String;
     basketDeliveryReceiveOn: Schema.Attribute.String;
+    basketEmptyCartMessage: Schema.Attribute.String;
     basketEmptyMessage: Schema.Attribute.String;
     basketPromoApplied: Schema.Attribute.String;
     basketPromoApplyButton: Schema.Attribute.String;
