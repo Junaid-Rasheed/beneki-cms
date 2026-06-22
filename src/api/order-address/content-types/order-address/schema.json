@@ -105,6 +105,9 @@
     "isValidVatNumber": {
       "type": "boolean",
       "default": false
+    },
+    "addressName": {
+      "type": "string"
     }
   }
 }

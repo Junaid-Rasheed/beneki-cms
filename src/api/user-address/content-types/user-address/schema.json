@@ -148,6 +148,9 @@
     "isValidVatNumber": {
       "type": "boolean",
       "default": false
+    },
+    "appartment": {
+      "type": "string"
     }
   }
 }

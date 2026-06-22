@@ -48,6 +48,9 @@
     },
     "streetMinLengthError": {
       "type": "string"
+    },
+    "extraAddressPlaceholder": {
+      "type": "string"
     }
   }
 }

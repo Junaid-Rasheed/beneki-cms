@@ -1223,6 +1223,7 @@ export interface ApiOrderAddressOrderAddress
     };
   };
   attributes: {
+    addressName: Schema.Attribute.String;
     appartment: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2267,6 +2268,7 @@ export interface ApiStaticAddressFormStaticAddressForm
           localized: true;
         };
       }>;
+    extraAddressLabel: Schema.Attribute.String;
     firstNameLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2311,6 +2313,8 @@ export interface ApiStaticAddressFormStaticAddressForm
           localized: true;
         };
       }>;
+    searchAddressLabel: Schema.Attribute.String;
+    searchAddressPlaceholder: Schema.Attribute.String;
     selectButton: Schema.Attribute.String;
     selectedButton: Schema.Attribute.String;
     setPrimaryBilling: Schema.Attribute.String &
@@ -3228,6 +3232,7 @@ export interface ApiStaticCheckoutBillingAddressStaticCheckoutBillingAddress
       Schema.Attribute.Private;
     deliveryInstructionPlaceholder: Schema.Attribute.String;
     emailPlaceholder: Schema.Attribute.String;
+    extraAddressPlaceholder: Schema.Attribute.String;
     firstNamePlaceholder: Schema.Attribute.String;
     lastNamePlaceholder: Schema.Attribute.String;
     locale: Schema.Attribute.String;
@@ -4695,6 +4700,7 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    appartment: Schema.Attribute.String;
     city: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
