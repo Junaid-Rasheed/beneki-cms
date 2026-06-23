@@ -6,11 +6,11 @@ const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
 const UiUrl = process.env.FRONTEND_URL;
 async function getAccessToken() {
   const credentials = Buffer.from(
-    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
+    `${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`
   ).toString("base64");
 
   const { data } = await axios.post(
-    `${process.env.PAYPAL_API}/v1/oauth2/token`,
+    `${PAYPAL_API}/v1/oauth2/token`,
     "grant_type=client_credentials",
     {
       headers: {
