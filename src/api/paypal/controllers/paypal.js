@@ -1,38 +1,24 @@
 const fetch = require("node-fetch");
-
+const axios = require("axios");
 const PAYPAL_API = "https://api-m.paypal.com";
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
 const UiUrl = process.env.FRONTEND_URL;
 async function getAccessToken() {
-  console.log("PAYPAL_CLIENT_ID", PAYPAL_CLIENT_ID);
-  console.log("PAYPAL_SECRET", PAYPAL_SECRET);
   const credentials = Buffer.from(
-    `${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`,
+    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
   ).toString("base64");
 
-  const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: "grant_type=client_credentials",
-  });
-  const text = await res.text();
-
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}: ${text}`);
-  }
- console.log("token response text", text);
-  const data = JSON.parse(text);
-  console.log("token response", res);
-  //const data = await res.json();
-  console.log("token response json", data);
-  if (!res.ok) {
-    console.error("Failed to get PayPal token:", data);
-    throw new Error("PayPal token fetch failed");
-  }
+  const { data } = await axios.post(
+    `${process.env.PAYPAL_API}/v1/oauth2/token`,
+    "grant_type=client_credentials",
+    {
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
 
   return data.access_token;
 }
