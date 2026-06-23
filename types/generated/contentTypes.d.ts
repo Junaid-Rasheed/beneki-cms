@@ -2287,6 +2287,7 @@ export interface ApiStaticAddressFormStaticAddressForm
       'api::static-address-form.static-address-form'
     >;
     noAddressesFound: Schema.Attribute.String;
+    noMatchingSavedAddresses: Schema.Attribute.String;
     phoneLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2315,6 +2316,9 @@ export interface ApiStaticAddressFormStaticAddressForm
       }>;
     searchAddressLabel: Schema.Attribute.String;
     searchAddressPlaceholder: Schema.Attribute.String;
+    searchSavedAddressesPlaceholder: Schema.Attribute.String;
+    searchSavedBillingAddresses: Schema.Attribute.String;
+    searchSavedShippingAddresses: Schema.Attribute.String;
     selectButton: Schema.Attribute.String;
     selectedButton: Schema.Attribute.String;
     setPrimaryBilling: Schema.Attribute.String &

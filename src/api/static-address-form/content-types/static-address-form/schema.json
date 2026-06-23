@@ -227,6 +227,18 @@
     },
     "extraAddressLabel": {
       "type": "string"
+    },
+    "searchSavedBillingAddresses": {
+      "type": "string"
+    },
+    "searchSavedShippingAddresses": {
+      "type": "string"
+    },
+    "searchSavedAddressesPlaceholder": {
+      "type": "string"
+    },
+    "noMatchingSavedAddresses": {
+      "type": "string"
     }
   }
 }
