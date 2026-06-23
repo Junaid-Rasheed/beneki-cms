@@ -5,6 +5,8 @@ const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
 const UiUrl = process.env.FRONTEND_URL;
 async function getAccessToken() {
+  console.log("PAYPAL_CLIENT_ID", PAYPAL_CLIENT_ID);
+  console.log("PAYPAL_SECRET", PAYPAL_SECRET);
   const credentials = Buffer.from(
     `${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`,
   ).toString("base64");
@@ -20,6 +22,7 @@ async function getAccessToken() {
   });
   console.log("token response", res);
   const data = await res.json();
+  console.log("token response json", data);
   if (!res.ok) {
     console.error("Failed to get PayPal token:", data);
     throw new Error("PayPal token fetch failed");
