@@ -5,17 +5,20 @@ const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
 const UiUrl = process.env.FRONTEND_URL;
 async function getAccessToken() {
-  const credentials = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString("base64");
+  const credentials = Buffer.from(
+    `${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`,
+  ).toString("base64");
 
   const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${credentials}`,
       "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
     },
     body: "grant_type=client_credentials",
   });
-
+  console.log("token response", res);
   const data = await res.json();
   if (!res.ok) {
     console.error("Failed to get PayPal token:", data);
@@ -35,7 +38,7 @@ module.exports = {
 
     try {
       const accessToken = await getAccessToken();
-      console.log('access token', accessToken);
+      console.log("access token", accessToken);
       const response = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
         method: "POST",
         headers: {
@@ -58,7 +61,7 @@ module.exports = {
           ],
         }),
       });
-      console.log('paypal response', accessToken)
+      console.log("paypal response", accessToken);
       const data = await response.json();
       console.log("PayPal order create response:", data); // ADD THIS
 
@@ -67,7 +70,9 @@ module.exports = {
         return ctx.internalServerError("Failed to create PayPal order");
       }
 
-      const approvalUrl = data.links?.find((link) => link.rel === "approve")?.href;
+      const approvalUrl = data.links?.find(
+        (link) => link.rel === "approve",
+      )?.href;
 
       if (!approvalUrl) {
         console.error("Approval URL not found in PayPal response");
@@ -75,7 +80,6 @@ module.exports = {
       }
 
       return { id: data.id, approvalUrl };
-
     } catch (err) {
       console.error("PayPal createOrder error:", err);
       return ctx.internalServerError("PayPal order creation failed");
@@ -86,13 +90,16 @@ module.exports = {
     const { token } = ctx.query; // PayPal will send this on return URL
     const accessToken = await getAccessToken();
 
-    const response = await fetch(`${PAYPAL_API}/v2/checkout/orders/${token}/capture`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${PAYPAL_API}/v2/checkout/orders/${token}/capture`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     const data = await response.json();
     return data;
