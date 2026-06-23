@@ -16,12 +16,18 @@ async function getAccessToken() {
     headers: {
       Authorization: `Basic ${credentials}`,
       "Content-Type": "application/x-www-form-urlencoded",
-      Accept: "application/json",
     },
     body: "grant_type=client_credentials",
   });
+  const text = await res.text();
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
+ console.log("token response text", text);
+  const data = JSON.parse(text);
   console.log("token response", res);
-  const data = await res.json();
+  //const data = await res.json();
   console.log("token response json", data);
   if (!res.ok) {
     console.error("Failed to get PayPal token:", data);
