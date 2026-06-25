@@ -240,6 +240,9 @@
     },
     "selectShippingAddressWarning": {
       "type": "string"
+    },
+    "outOfStockCheckoutBlockedMessage": {
+      "type": "string"
     }
   }
 }

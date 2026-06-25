@@ -3150,6 +3150,7 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
     basketDeliveryReceiveOn: Schema.Attribute.String;
     basketEmptyCartMessage: Schema.Attribute.String;
     basketEmptyMessage: Schema.Attribute.String;
+    basketOutOfStockBlockedMessage: Schema.Attribute.String;
     basketPromoApplied: Schema.Attribute.String;
     basketPromoApplyButton: Schema.Attribute.String;
     basketPromoErrorEmpty: Schema.Attribute.String;
@@ -3343,6 +3344,7 @@ export interface ApiStaticCheckoutStaticCheckout
     orderTitle: Schema.Attribute.String;
     orderTotal: Schema.Attribute.String;
     orderVat: Schema.Attribute.String;
+    outOfStockCheckoutBlockedMessage: Schema.Attribute.String;
     payButton: Schema.Attribute.String;
     paymentBankCards: Schema.Attribute.String;
     paymentBankTransfer: Schema.Attribute.String;
