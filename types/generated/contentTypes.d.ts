@@ -4211,6 +4211,7 @@ export interface ApiStaticProductDetailStaticProductDetail
           localized: true;
         };
       }>;
+    outOfStockLabel: Schema.Attribute.String;
     perItemLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

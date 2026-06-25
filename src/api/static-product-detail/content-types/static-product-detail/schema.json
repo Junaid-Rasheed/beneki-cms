@@ -200,6 +200,9 @@
     },
     "weightLabel": {
       "type": "string"
+    },
+    "outOfStockLabel": {
+      "type": "string"
     }
   }
 }
