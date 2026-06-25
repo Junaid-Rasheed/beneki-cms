@@ -218,6 +218,9 @@
     },
     "isFoodProduct": {
       "type": "boolean"
+    },
+    "isOutOfStock": {
+      "type": "boolean"
     }
   }
 }
