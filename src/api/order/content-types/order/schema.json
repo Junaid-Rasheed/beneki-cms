@@ -209,6 +209,9 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::shipment-tracking.shipment-tracking"
+    },
+    "isOutOfStock": {
+      "type": "boolean"
     }
   }
 }
