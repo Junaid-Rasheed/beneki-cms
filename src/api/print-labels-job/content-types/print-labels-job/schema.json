@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "print_labels_jobs",
+  "info": {
+    "singularName": "print-labels-job",
+    "pluralName": "print-labels-jobs",
+    "displayName": "printLabelJob",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "orderNumber": {
+      "type": "string"
+    },
+    "labelStatus": {
+      "type": "enumeration",
+      "enum": [
+        "Pending",
+        "Printing",
+        "Printed",
+        "Failed"
+      ]
+    },
+    "attempts": {
+      "type": "integer"
+    },
+    "printer": {
+      "type": "string"
+    },
+    "error": {
+      "type": "text"
+    },
+    "printedAt": {
+      "type": "datetime"
+    },
+    "zpl": {
+      "type": "json"
+    }
+  }
+}

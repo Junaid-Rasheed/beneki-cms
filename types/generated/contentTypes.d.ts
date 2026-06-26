@@ -1618,6 +1618,44 @@ export interface ApiPolitiquePolitique extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPrintLabelsJobPrintLabelsJob
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'print_labels_jobs';
+  info: {
+    description: '';
+    displayName: 'printLabelJob';
+    pluralName: 'print-labels-jobs';
+    singularName: 'print-labels-job';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    attempts: Schema.Attribute.Integer;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    error: Schema.Attribute.Text;
+    labelStatus: Schema.Attribute.Enumeration<
+      ['Pending', 'Printing', 'Printed', 'Failed']
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::print-labels-job.print-labels-job'
+    > &
+      Schema.Attribute.Private;
+    orderNumber: Schema.Attribute.String;
+    printedAt: Schema.Attribute.DateTime;
+    printer: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    zpl: Schema.Attribute.JSON;
+  };
+}
+
 export interface ApiSdsDocumentSdsDocument extends Struct.CollectionTypeSchema {
   collectionName: 'sds_documents';
   info: {
@@ -5384,6 +5422,7 @@ declare module '@strapi/strapi' {
       'api::order-item.order-item': ApiOrderItemOrderItem;
       'api::order.order': ApiOrderOrder;
       'api::politique.politique': ApiPolitiquePolitique;
+      'api::print-labels-job.print-labels-job': ApiPrintLabelsJobPrintLabelsJob;
       'api::sds-document.sds-document': ApiSdsDocumentSdsDocument;
       'api::sds-page.sds-page': ApiSdsPageSdsPage;
       'api::sds-product.sds-product': ApiSdsProductSdsProduct;
