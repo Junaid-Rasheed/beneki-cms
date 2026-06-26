@@ -2,24 +2,28 @@
 
 const soap = require("soap");
 const AdmZip = require("adm-zip");
+const { PassThrough } = require("stream");
+const { PDFDocument } = require("pdf-lib");
+
 const path = require("path");
 
 const WSDL_PATH = path.join(__dirname, "../../../wsdl/dpd.wsdl");
-
 function extractTokens(referenceNumber) {
   if (!referenceNumber) return [];
 
   return referenceNumber
-    .split(/\s+/)
+    .split(/\s+/) // split by spaces
     .map((t) => t.trim())
     .filter(Boolean);
 }
-
 module.exports = {
   async generateShipment(data) {
+    
     const client = await soap.createClientAsync(WSDL_PATH, {
       disableCache: true,
     });
+
+    
 
     const soapHeader = {
       UserCredentials: {
@@ -35,15 +39,18 @@ module.exports = {
 
     const allLabels = [];
 
+    // Helper: chunk array into groups of 5
     const chunkArray = (array, size) => {
       const result = [];
+
       for (let i = 0; i < array.length; i += size) {
         result.push(array.slice(i, i + size));
       }
+
       return result;
     };
 
-    // ✅ FIXED: ZPL LABEL FETCH (NO PDF)
+    // Helper: fetch labels for shipment
     const fetchLabels = async (barcodeId) => {
       const labelRequest = {
         request: {
@@ -54,12 +61,13 @@ module.exports = {
           },
           shipmentNumber: barcodeId,
           labelType: {
-            type: "ZPL_A6",
+            type: "PDF_A6",
           },
         },
       };
 
       const labelResponse = await client.GetLabelBcAsync(labelRequest);
+
       const result = labelResponse?.[0]?.GetLabelBcResult;
 
       if (!result?.labels) {
@@ -80,17 +88,21 @@ module.exports = {
       return shipmentLabels
         .map((label, index) => {
           const labelData = label.label || label.Label;
+
           if (!labelData) return null;
 
           return {
-            name: `label-${barcodeId}${shipmentLabels.length > 1 ? `-${index + 1}` : ""}.zpl`,
-            buffer: Buffer.from(labelData, "utf-8"), // ✅ ZPL is TEXT, not base64 PDF
+            name: `label-${barcodeId}${
+              shipmentLabels.length > 1 ? `-${index + 1}` : ""
+            }.pdf`,
+            buffer: Buffer.from(labelData, "base64"),
           };
         })
         .filter(Boolean);
     };
 
     const slaves = data?.slaves?.SlaveRequest || [];
+
     const hasMultipleSlaves = slaves.length > 1;
 
     // SINGLE SHIPMENT
@@ -515,36 +527,47 @@ module.exports = {
       }
     }
 
-    // =========================
-    // FINAL VALIDATION
-    // =========================
     if (!allLabels.length) {
       throw new Error("No labels generated");
     }
 
-    // =========================
-    // OPTIONAL: SAVE TO STRAPI (ZPL STORAGE)
-    // =========================
-    await strapi.documents("api::print-labels-job.print-labels-job").create({
-      data: {
-        orderNumber: data.orderId,
-        zpl: allLabels.map(l => l.buffer.toString("utf-8")), // ✅ store raw ZPL
-        status: "Pending",
-        attempts: 0,
-      },
-    });
+    // Merge ALL PDFs into ONE
+    const mergedPdfBuffer = await this.mergePDFs(allLabels);
 
-    // =========================
-    // CREATE ZIP (ZPL FILES)
-    // =========================
+    // Return ZIP with single merged PDF
+    return await this.createZip([
+      {
+        name: `labels-${Date.now()}.pdf`,
+        buffer: mergedPdfBuffer,
+      },
+    ]);
+  },
+
+  async mergePDFs(pdfFiles) {
+    // Create a new PDF document
+    const mergedPdf = await PDFDocument.create();
+
+    // Loop through each PDF file
+    for (const file of pdfFiles) {
+      // Load the PDF document
+      const pdfDoc = await PDFDocument.load(file.buffer);
+
+      // Copy all pages from the loaded PDF to the merged PDF
+      const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+      pages.forEach((page) => mergedPdf.addPage(page));
+    }
+
+    // Save the merged PDF
+    return await mergedPdf.save();
+  },
+  async createZip(files) {
     const zip = new AdmZip();
 
-    allLabels.forEach((file) => {
+    files.forEach((file) => {
       zip.addFile(file.name, file.buffer);
     });
 
-    const zipBuffer = zip.toBuffer();
-
-    return zipBuffer;
+    return zip.toBuffer();
   },
 };
+
