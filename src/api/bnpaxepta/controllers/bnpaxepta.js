@@ -248,8 +248,8 @@ module.exports = {
       
       updateData.paymentStatus = "paid";
       updateData.orderStatus = "processing";
-      updateData.transactionId: transactionId,
-      updateData.invoiceId: nextInvoiceId
+      updateData.transactionId= transactionId,
+      updateData.invoiceId= nextInvoiceId
     }
 
     await strapi.db.query("api::order.order").update({
