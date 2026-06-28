@@ -198,7 +198,8 @@ module.exports = {
     // =========================
     // 🚨 CORE RULE (IMPORTANT)
     // =========================
-    strapi.log.info(`✅ Status for ${orderId}`, status);
+
+    strapi.log.info(`✅ Status for ${orderId}: ${status}`);
 
     if (FAILED_STATUSES.includes(status)) {
       // ❌ DO NOT overwrite paid orders
