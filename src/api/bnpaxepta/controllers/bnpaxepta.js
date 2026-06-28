@@ -177,6 +177,7 @@ module.exports = {
     const transactionId = parsed.PayID;
     const status = parsed.Status;
 
+
     if (!orderId) {
       return ctx.badRequest("Missing orderId");
     }
@@ -197,6 +198,7 @@ module.exports = {
     // =========================
     // 🚨 CORE RULE (IMPORTANT)
     // =========================
+    strapi.log.info(`✅ Status for ${orderId}`, status);
 
     if (FAILED_STATUSES.includes(status)) {
       // ❌ DO NOT overwrite paid orders
@@ -224,9 +226,30 @@ module.exports = {
       }
 
     } else if (SUCCESS_STATUSES.includes(status)) {
-      // ✅ ALWAYS allow retry from failed → paid
+      const latestOrders = await strapi.db
+        .query("api::order.order")
+        .findMany({
+          select: ["invoiceId"],
+          where: {
+            invoiceId: { $notNull: true }, // 🔥 ignore nulls
+          },
+          orderBy: { invoiceId: "desc" },
+          limit: 1,
+        });
+
+      let nextInvoiceId = 1;
+
+
+      if (latestOrders.length > 0) {
+        nextInvoiceId = Number(latestOrders[0].invoiceId) + 1;
+      }
+      console.log("invoiceId:", nextInvoiceId);
+      console.log("Latestorder:", latestOrders)
+      
       updateData.paymentStatus = "paid";
       updateData.orderStatus = "processing";
+      updateData.transactionId: transactionId,
+      updateData.invoiceId: nextInvoiceId
     }
 
     await strapi.db.query("api::order.order").update({
