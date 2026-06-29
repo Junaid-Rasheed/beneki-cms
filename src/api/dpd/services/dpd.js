@@ -526,19 +526,19 @@ module.exports = {
       .query("api::print-labels-job.print-labels-job")
       .findOne({
         where: {
-          orderNumber: data.orderId,
+          orderNumber: data.orderNumber,
         },
       });
 
     if (existing) {
-      throw new Error(`Order ${data.orderId} already exists`);
+      throw new Error(`Order ${data.orderNumber} already exists`);
     }
     // =========================
     // OPTIONAL: SAVE TO STRAPI (ZPL STORAGE)
     // =========================
     await strapi.documents("api::print-labels-job.print-labels-job").create({
       data: {
-        orderNumber: data.orderId,
+        orderNumber: data.orderNumber,
         zpl: allLabels.map(l => l.buffer.toString("utf-8")), // ✅ store raw ZPL
         labelStatus: "Pending",
         attempts: 0,
