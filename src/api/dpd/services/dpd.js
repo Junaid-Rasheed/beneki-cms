@@ -1,4 +1,4 @@
-New Code"use strict";
+"use strict";
 
 const soap = require("soap");
 const AdmZip = require("adm-zip");
