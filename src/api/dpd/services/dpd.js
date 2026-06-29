@@ -1,29 +1,25 @@
-"use strict";
+New Code"use strict";
 
 const soap = require("soap");
 const AdmZip = require("adm-zip");
-const { PassThrough } = require("stream");
-const { PDFDocument } = require("pdf-lib");
-
 const path = require("path");
 
 const WSDL_PATH = path.join(__dirname, "../../../wsdl/dpd.wsdl");
+
 function extractTokens(referenceNumber) {
   if (!referenceNumber) return [];
 
   return referenceNumber
-    .split(/\s+/) // split by spaces
+    .split(/\s+/)
     .map((t) => t.trim())
     .filter(Boolean);
 }
+
 module.exports = {
   async generateShipment(data) {
-    
     const client = await soap.createClientAsync(WSDL_PATH, {
       disableCache: true,
     });
-
-    
 
     const soapHeader = {
       UserCredentials: {
@@ -39,18 +35,15 @@ module.exports = {
 
     const allLabels = [];
 
-    // Helper: chunk array into groups of 5
     const chunkArray = (array, size) => {
       const result = [];
-
       for (let i = 0; i < array.length; i += size) {
         result.push(array.slice(i, i + size));
       }
-
       return result;
     };
 
-    // Helper: fetch labels for shipment
+    // ✅ FIXED: ZPL LABEL FETCH (NO PDF)
     const fetchLabels = async (barcodeId) => {
       const labelRequest = {
         request: {
@@ -61,13 +54,12 @@ module.exports = {
           },
           shipmentNumber: barcodeId,
           labelType: {
-            type: "PDF_A6",
+            type: "ZPL_A6",
           },
         },
       };
 
       const labelResponse = await client.GetLabelBcAsync(labelRequest);
-
       const result = labelResponse?.[0]?.GetLabelBcResult;
 
       if (!result?.labels) {
@@ -88,21 +80,17 @@ module.exports = {
       return shipmentLabels
         .map((label, index) => {
           const labelData = label.label || label.Label;
-
           if (!labelData) return null;
 
           return {
-            name: `label-${barcodeId}${
-              shipmentLabels.length > 1 ? `-${index + 1}` : ""
-            }.pdf`,
-            buffer: Buffer.from(labelData, "base64"),
+            name: `label-${barcodeId}${shipmentLabels.length > 1 ? `-${index + 1}` : ""}.zpl`,
+            buffer: Buffer.from(labelData, "utf-8"), // ✅ ZPL is TEXT, not base64 PDF
           };
         })
         .filter(Boolean);
     };
 
     const slaves = data?.slaves?.SlaveRequest || [];
-
     const hasMultipleSlaves = slaves.length > 1;
 
     // SINGLE SHIPMENT
@@ -527,47 +515,48 @@ module.exports = {
       }
     }
 
+    // =========================
+    // FINAL VALIDATION
+    // =========================
     if (!allLabels.length) {
       throw new Error("No labels generated");
     }
 
-    // Merge ALL PDFs into ONE
-    const mergedPdfBuffer = await this.mergePDFs(allLabels);
+    const existing = await strapi.db
+      .query("api::print-labels-job.print-labels-job")
+      .findOne({
+        where: {
+          orderId: data.orderId,
+        },
+      });
 
-    // Return ZIP with single merged PDF
-    return await this.createZip([
-      {
-        name: `labels-${Date.now()}.pdf`,
-        buffer: mergedPdfBuffer,
-      },
-    ]);
-  },
-
-  async mergePDFs(pdfFiles) {
-    // Create a new PDF document
-    const mergedPdf = await PDFDocument.create();
-
-    // Loop through each PDF file
-    for (const file of pdfFiles) {
-      // Load the PDF document
-      const pdfDoc = await PDFDocument.load(file.buffer);
-
-      // Copy all pages from the loaded PDF to the merged PDF
-      const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
-      pages.forEach((page) => mergedPdf.addPage(page));
+    if (existing) {
+      throw new Error(`Order ${data.orderId} already exists`);
     }
-
-    // Save the merged PDF
-    return await mergedPdf.save();
-  },
-  async createZip(files) {
-    const zip = new AdmZip();
-
-    files.forEach((file) => {
-      zip.addFile(file.name, file.buffer);
+    // =========================
+    // OPTIONAL: SAVE TO STRAPI (ZPL STORAGE)
+    // =========================
+    await strapi.documents("api::print-labels-job.print-labels-job").create({
+      data: {
+        orderNumber: data.orderId,
+        zpl: allLabels.map(l => l.buffer.toString("utf-8")), // ✅ store raw ZPL
+        labelStatus: "Pending",
+        attempts: 0,
+      },
     });
 
-    return zip.toBuffer();
+    // =========================
+    // CREATE ZIP (ZPL FILES)
+    // =========================
+    // const zip = new AdmZip();
+
+    // allLabels.forEach((file) => {
+    //   zip.addFile(file.name, file.buffer);
+    // });
+
+    // const zipBuffer = zip.toBuffer();
+
+    // return zipBuffer;
+     return true;
   },
 };
-

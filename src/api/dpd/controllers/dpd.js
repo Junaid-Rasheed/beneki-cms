@@ -7,23 +7,20 @@ module.exports = {
     try {
       const body = ctx.request.body;
 
-      const zipBuffer = await dpdService.generateShipment(body);
+      await dpdService.generateShipment(body);
 
-      ctx.set("Content-Type", "application/zip");
-
-      ctx.set(
-        "Content-Disposition",
-        `attachment; filename=dpd-labels.zip`
-      );
-
-      ctx.body = zipBuffer;
+      ctx.status = 200;
+      ctx.body = {
+        success: true,
+        message: "Labels generated successfully",
+      };
     } catch (error) {
       console.error(error);
 
       ctx.status = 500;
-
       ctx.body = {
-        error: error.message,
+        success: false,
+        message: error.message || "Failed to generate labels",
       };
     }
   },
