@@ -526,7 +526,7 @@ module.exports = {
       .query("api::print-labels-job.print-labels-job")
       .findOne({
         where: {
-          orderId: data.orderId,
+          orderNumber: data.orderId,
         },
       });
 
