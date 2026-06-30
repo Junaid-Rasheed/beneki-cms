@@ -241,6 +241,12 @@
     },
     "orderAgainErrorMessage": {
       "type": "string"
+    },
+    "searchFullHistoryLabel": {
+      "type": "string"
+    },
+    "searchRecentOnlyHint": {
+      "type": "string"
     }
   }
 }

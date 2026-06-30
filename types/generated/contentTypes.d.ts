@@ -1628,7 +1628,7 @@ export interface ApiPrintLabelsJobPrintLabelsJob
     singularName: 'print-labels-job';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     attempts: Schema.Attribute.Integer;
@@ -4502,12 +4502,14 @@ export interface ApiStaticYourOrderStaticYourOrder
     quickViewProductFallback: Schema.Attribute.String;
     quickViewShow: Schema.Attribute.String;
     searchButton: Schema.Attribute.String;
+    searchFullHistoryLabel: Schema.Attribute.String;
     searchPlaceholder: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
+    searchRecentOnlyHint: Schema.Attribute.String;
     showingPagger: Schema.Attribute.String;
     tableActions: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
