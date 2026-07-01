@@ -8,6 +8,9 @@ const {
   getEmailTemplate,
   sendFailedPaymentEmail,
 } = require("../../../utils/emailHelpers");
+const {
+  generateMultiLabelByOrderId,
+} = require("../../../helpers/labelGenerator");
 const UiUrl = process.env.FRONTEND_URL;
 const SUCCESS_STATUSES = ["OK", "SUCCESS", "AUTHORIZED", "APPROVED"];
 const FAILED_STATUSES = ["FAILED", "DECLINED", "ERROR", "CANCELLED", "TIMEOUT"];
@@ -257,8 +260,10 @@ module.exports = {
       where: { orderNumber: orderId },
       data: updateData,
     });
-
     strapi.log.info(`✅ Notify processed for ${orderId}`);
+    await generateMultiLabelByOrderId(orderId);
+  
+    strapi.log.info(`✅ label generated for ${orderId}`);
 
     return ctx.send("OK");
   } catch (error) {
