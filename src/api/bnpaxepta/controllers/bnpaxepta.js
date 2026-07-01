@@ -258,11 +258,11 @@ module.exports = {
         data: updateData,
       });
       strapi.log.info(`✅ Notify processed for ${orderId}`);
-      if (SUCCESS_STATUSES.includes(status)) {
-        await generateMultiLabelByOrderId(orderId);
+      // if (SUCCESS_STATUSES.includes(status)) {
+      //   await generateMultiLabelByOrderId(orderId);
 
-        strapi.log.info(`✅ label generated for ${orderId}`);
-      }
+      //   strapi.log.info(`✅ label generated for ${orderId}`);
+      // }
 
       return ctx.send("OK");
     } catch (error) {
