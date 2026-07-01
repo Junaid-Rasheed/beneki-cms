@@ -1,4 +1,5 @@
 const { generateShipment } = require("../api/dpd/services/dpd");
+const orderItem = require("../api/order-item/controllers/order-item");
 
 const STREET_MIN_LETTERS_OR_DIGITS = 5;
 const DPD_MAX_PARCEL_WEIGHT_KG = 25;
@@ -11,14 +12,10 @@ module.exports = {
       if (!orderId) {
         throw new Error("Order Id is required");
       }
-      const order = await strapi.documents("api::order.order").findOne({
-        orderNumber: orderId,
-        populate: {
-          shippingAddress: true,
-          orderItems: true,
-        },
+      const order = await strapi.db.query("api::order.order").findOne({
+        where: { orderNumber: orderId },
+        populate: ["billingAddress", "shippingAddress","orderItems"],
       });
-
       if (!order) {
         throw new Error("Order not found");
       }
@@ -147,15 +144,13 @@ module.exports = {
       //--------------------------------------------------------
       // Update Order
       //--------------------------------------------------------
-
-      await strapi.documents("api::order.order").update({
-        documentId: order.documentId,
+      await strapi.db.query("api::order.order").update({
+        where: { documentId: order.documentId },
         data: {
           isDpdLabelPrinted: true,
           orderStatus: "shipped",
         },
       });
-
       return {
         success: true,
       };
