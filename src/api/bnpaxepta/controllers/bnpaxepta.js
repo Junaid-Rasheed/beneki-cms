@@ -146,157 +146,152 @@ module.exports = {
   },
 
   async notify(ctx) {
-  try {
-    const { Blowfish } = await import("egoroof-blowfish");
+    try {
+      const { Blowfish } = await import("egoroof-blowfish");
 
-    const payload = ctx.request.body || ctx.query;
+      const payload = ctx.request.body || ctx.query;
 
-    if (!payload?.Data) {
-      return ctx.badRequest("Missing Data");
-    }
-
-    const bf = new Blowfish(
-      process.env.BNP_BLOWFISH_KEY,
-      Blowfish.MODE.ECB,
-      Blowfish.PADDING.PKCS5
-    );
-
-    const encryptedBytes = Buffer.from(payload.Data, "hex");
-    const decryptedBytes = bf.decode(encryptedBytes, Blowfish.TYPE.UINT8_ARRAY);
-
-    const decrypted = Buffer.from(decryptedBytes)
-      .toString("latin1")
-      .replace(/\0/g, "")
-      .trim();
-
-    const parsed = {};
-    decrypted.split("&").forEach((part) => {
-      const i = part.indexOf("=");
-      if (i === -1) return;
-      parsed[part.substring(0, i)] = part.substring(i + 1);
-    });
-
-    const orderId = parsed.TransID;
-    const transactionId = parsed.PayID;
-    const status = parsed.Status;
-
-
-    if (!orderId) {
-      return ctx.badRequest("Missing orderId");
-    }
-
-    const order = await strapi.db.query("api::order.order").findOne({
-      where: { orderNumber: orderId },
-      populate: ["billingAddress", "deliveryAddress"],
-    });
-
-    if (!order) {
-      return ctx.badRequest("Order not found");
-    }
-
-    const updateData = {
-      transactionId,
-    };
-
-    // =========================
-    // 🚨 CORE RULE (IMPORTANT)
-    // =========================
-
-    strapi.log.info(`✅ Status for ${orderId}: ${status}`);
-
-    if (FAILED_STATUSES.includes(status)) {
-      // ❌ DO NOT overwrite paid orders
-      if (order.paymentStatus === "paid") {
-        strapi.log.info(
-          `⛔ Ignoring FAILED for paid order ${orderId}`
-        );
-        return ctx.send("OK");
+      if (!payload?.Data) {
+        return ctx.badRequest("Missing Data");
       }
 
-      updateData.paymentStatus = "failed";
-      updateData.orderStatus = "pending";
+      const bf = new Blowfish(
+        process.env.BNP_BLOWFISH_KEY,
+        Blowfish.MODE.ECB,
+        Blowfish.PADDING.PKCS5,
+      );
 
-      const isTimeout =
-        parsed.Description?.toLowerCase().includes("timeout");
+      const encryptedBytes = Buffer.from(payload.Data, "hex");
+      const decryptedBytes = bf.decode(
+        encryptedBytes,
+        Blowfish.TYPE.UINT8_ARRAY,
+      );
 
-      if (isTimeout) {
-        const locale = getLocaleFromOrder(order);
-        const template = await getEmailTemplate(strapi, locale);
+      const decrypted = Buffer.from(decryptedBytes)
+        .toString("latin1")
+        .replace(/\0/g, "")
+        .trim();
 
-        const email =
-          order.deliveryAddress?.email || order.billingAddress?.email;
+      const parsed = {};
+      decrypted.split("&").forEach((part) => {
+        const i = part.indexOf("=");
+        if (i === -1) return;
+        parsed[part.substring(0, i)] = part.substring(i + 1);
+      });
 
-        await sendFailedPaymentEmail(strapi, email, template, order);
+      const orderId = parsed.TransID;
+      const transactionId = parsed.PayID;
+      const status = parsed.Status;
+
+      if (!orderId) {
+        return ctx.badRequest("Missing orderId");
       }
 
-    } else if (SUCCESS_STATUSES.includes(status)) {
-      const latestOrders = await strapi.db
-        .query("api::order.order")
-        .findMany({
-          select: ["invoiceId"],
-          where: {
-            invoiceId: { $notNull: true }, // 🔥 ignore nulls
-          },
-          orderBy: { invoiceId: "desc" },
-          limit: 1,
-        });
+      const order = await strapi.db.query("api::order.order").findOne({
+        where: { orderNumber: orderId },
+        populate: ["billingAddress", "deliveryAddress"],
+      });
 
-      let nextInvoiceId = 1;
-
-
-      if (latestOrders.length > 0) {
-        nextInvoiceId = Number(latestOrders[0].invoiceId) + 1;
+      if (!order) {
+        return ctx.badRequest("Order not found");
       }
-      console.log("invoiceId:", nextInvoiceId);
-      console.log("Latestorder:", latestOrders)
-      
-      updateData.paymentStatus = "paid";
-      updateData.orderStatus = "processing";
-      updateData.transactionId= transactionId,
-      updateData.invoiceId= nextInvoiceId
+
+      const updateData = {
+        transactionId,
+      };
+
+      // =========================
+      // 🚨 CORE RULE (IMPORTANT)
+      // =========================
+
+      strapi.log.info(`✅ Status for ${orderId}: ${status}`);
+
+      if (FAILED_STATUSES.includes(status)) {
+        // ❌ DO NOT overwrite paid orders
+        if (order.paymentStatus === "paid") {
+          strapi.log.info(`⛔ Ignoring FAILED for paid order ${orderId}`);
+          return ctx.send("OK");
+        }
+
+        updateData.paymentStatus = "failed";
+        updateData.orderStatus = "pending";
+
+        const isTimeout = parsed.Description?.toLowerCase().includes("timeout");
+
+        if (isTimeout) {
+          const locale = getLocaleFromOrder(order);
+          const template = await getEmailTemplate(strapi, locale);
+
+          const email =
+            order.deliveryAddress?.email || order.billingAddress?.email;
+
+          await sendFailedPaymentEmail(strapi, email, template, order);
+        }
+      } else if (SUCCESS_STATUSES.includes(status)) {
+        const latestOrders = await strapi.db
+          .query("api::order.order")
+          .findMany({
+            select: ["invoiceId"],
+            where: {
+              invoiceId: { $notNull: true }, // 🔥 ignore nulls
+            },
+            orderBy: { invoiceId: "desc" },
+            limit: 1,
+          });
+
+        let nextInvoiceId = 1;
+
+        if (latestOrders.length > 0) {
+          nextInvoiceId = Number(latestOrders[0].invoiceId) + 1;
+        }
+        console.log("invoiceId:", nextInvoiceId);
+        console.log("Latestorder:", latestOrders);
+
+        updateData.paymentStatus = "paid";
+        updateData.orderStatus = "processing";
+        (updateData.transactionId = transactionId),
+          (updateData.invoiceId = nextInvoiceId);
+      }
+
+      await strapi.db.query("api::order.order").update({
+        where: { orderNumber: orderId },
+        data: updateData,
+      });
+      strapi.log.info(`✅ Notify processed for ${orderId}`);
+      if (SUCCESS_STATUSES.includes(status)) {
+        await generateMultiLabelByOrderId(orderId);
+
+        strapi.log.info(`✅ label generated for ${orderId}`);
+      }
+
+      return ctx.send("OK");
+    } catch (error) {
+      strapi.log.error("❌ Notify error: " + error.message);
+      return ctx.internalServerError("Notify failed");
     }
-
-    await strapi.db.query("api::order.order").update({
-      where: { orderNumber: orderId },
-      data: updateData,
-    });
-    strapi.log.info(`✅ Notify processed for ${orderId}`);
-    await generateMultiLabelByOrderId(orderId);
-  
-    strapi.log.info(`✅ label generated for ${orderId}`);
-
-    return ctx.send("OK");
-  } catch (error) {
-    strapi.log.error("❌ Notify error: " + error.message);
-    return ctx.internalServerError("Notify failed");
-  }
-},
+  },
 
   async success(ctx) {
-  try {
-    const data = ctx.request.body;
+    try {
+      const data = ctx.request.body;
 
-    const orderId = data.TransID;
+      const orderId = data.TransID;
 
-    return ctx.redirect(
-      `${UiUrl}payment-success?orderId=${orderId}`
-    );
-  } catch (error) {
-    return ctx.redirect(`${UiUrl}payment-failed`);
-  }
-},
+      return ctx.redirect(`${UiUrl}payment-success?orderId=${orderId}`);
+    } catch (error) {
+      return ctx.redirect(`${UiUrl}payment-failed`);
+    }
+  },
 
-   async failure(ctx) {
-  try {
-    const data = ctx.method === "POST" ? ctx.request.body : ctx.query;
+  async failure(ctx) {
+    try {
+      const data = ctx.method === "POST" ? ctx.request.body : ctx.query;
 
-    const orderId = data.TransID;
+      const orderId = data.TransID;
 
-    return ctx.redirect(
-      `${UiUrl}payment-failed?orderId=${orderId}`
-    );
-  } catch (error) {
-    return ctx.redirect(`${UiUrl}payment-failed`);
-  }
-}
+      return ctx.redirect(`${UiUrl}payment-failed?orderId=${orderId}`);
+    } catch (error) {
+      return ctx.redirect(`${UiUrl}payment-failed`);
+    }
+  },
 };

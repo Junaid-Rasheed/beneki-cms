@@ -7,7 +7,7 @@ const MAX_PIECES_PER_PARCEL = 4;
 module.exports = {
   async generateMultiLabelByOrderId(orderId) {
     try {
-      console.log("generateMultiLabelByOrderId initiating");
+      console.log("generateMultiLabelByOrderId initiating", orderId);
       if (!orderId) {
         throw new Error("Order Id is required");
       }
