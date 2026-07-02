@@ -6,16 +6,10 @@ const DPD_MAX_PARCEL_WEIGHT_KG = 25;
 const MAX_PIECES_PER_PARCEL = 4;
 
 module.exports = {
-  async generateMultiLabelByOrderId(orderId) {
+  async generateMultiLabelByOrderId(order) {
     try {
-      console.log("generateMultiLabelByOrderId initiating", orderId);
-      if (!orderId) {
-        throw new Error("Order Id is required");
-      }
-      const order = await strapi.db.query("api::order.order").findOne({
-        where: { orderNumber: orderId },
-        populate: ["billingAddress", "shippingAddress","orderItems"],
-      });
+      console.log("generateMultiLabelByOrderId initiating", order.orderId);
+      
       if (!order) {
         throw new Error("Order not found");
       }
@@ -187,7 +181,7 @@ module.exports = {
   },
   getSidebarProductId(node) {
     if (!node) return null;
-    const pid = node.productId ?? node.attributes?.productId;
+    const pid = node.productId;
     if (pid == null || pid === "") return null;
     return String(pid);
   },

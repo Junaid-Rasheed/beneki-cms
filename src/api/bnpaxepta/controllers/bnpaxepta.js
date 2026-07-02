@@ -205,6 +205,10 @@ module.exports = {
       // =========================
 
       strapi.log.info(`✅ Status for ${orderId}: ${status}`);
+      if (order.paymentStatus === "paid") {
+        strapi.log.info(`⛔ Ignoring FAILED for paid order ${orderId}`);
+        return ctx.send("OK");
+      }
 
       if (FAILED_STATUSES.includes(status)) {
         // ❌ DO NOT overwrite paid orders
@@ -258,11 +262,11 @@ module.exports = {
         data: updateData,
       });
       strapi.log.info(`✅ Notify processed for ${orderId}`);
-      // if (SUCCESS_STATUSES.includes(status)) {
-      //   await generateMultiLabelByOrderId(orderId);
+      if (SUCCESS_STATUSES.includes(status)) {
+        await generateMultiLabelByOrderId(order);
 
-      //   strapi.log.info(`✅ label generated for ${orderId}`);
-      // }
+        strapi.log.info(`✅ label generated for ${orderId}`);
+      }
 
       return ctx.send("OK");
     } catch (error) {
