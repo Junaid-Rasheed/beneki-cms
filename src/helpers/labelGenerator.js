@@ -345,10 +345,11 @@ module.exports = {
         const products = await strapi
           .documents("api::sidebar-item.sidebar-item")
           .findMany({
+            locale: "fr",
             populate: "*",
           });
 
-        strapi.log.info("products fetched", products);
+        strapi.log.info("products fetched:  ${products}", );
         const allPieces = [];
 
         order.orderItems.forEach((item, index) => {
@@ -426,7 +427,7 @@ module.exports = {
       //--------------------------------------------------------
       strapi.log.info("calling generate shipments");
       await generateShipment(payload);
-
+      strapi.log.info("updating order");
       //--------------------------------------------------------
       // Update Order
       //--------------------------------------------------------
@@ -437,6 +438,7 @@ module.exports = {
           orderStatus: "shipped",
         },
       });
+      strapi.log.info("order updated");
       return {
         success: true,
       };
