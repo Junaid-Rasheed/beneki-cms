@@ -127,6 +127,11 @@ function buildPiecesForOrderLine(itemData, foundProduct, lineIndex) {
     }
     return pieces;
   }
+  else{
+    throw new Error(
+    `Invalid maximumVariation or maximumWeight for product '${foundProduct?.title || itemData.productName || itemData.productId}'.`
+  );
+  }
 
   // Fallback when the product doesn't have both caps configured.
   // Treat the variation amount as kg and only enforce the 30 kg hard cap.
