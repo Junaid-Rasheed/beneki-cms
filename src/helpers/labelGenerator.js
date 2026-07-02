@@ -8,7 +8,7 @@ const MAX_PIECES_PER_PARCEL = 4;
 module.exports = {
   async generateMultiLabelByOrderId(order) {
     try {
-      console.log("generateMultiLabelByOrderId initiating", order.orderId);
+       strapi.log.info("generateMultiLabelByOrderId initiating", order.orderId);
       
       if (!order) {
         throw new Error("Order not found");
@@ -44,12 +44,12 @@ module.exports = {
         ];
       } else {
         const products = await strapi
-          .documents("api::product.product")
+          .documents("api::sidebar-item.sidebar-item")
           .findMany({
             populate: "*",
           });
 
-        console.log("products fetched", products);
+        strapi.log.info("products fetched", products);
         const allPieces = [];
 
         order.orderItems.forEach((item, index) => {
@@ -73,7 +73,7 @@ module.exports = {
           throw new Error("No items to ship.");
         }
       }
-      console.log("slaves created");
+       strapi.log.info("slaves created");
       //--------------------------------------------------------
       // Delivery Instructions
       //--------------------------------------------------------
@@ -132,7 +132,7 @@ module.exports = {
       //--------------------------------------------------------
       // Call DPD API
       //--------------------------------------------------------
-      console.log("calling generate shipments");
+      strapi.log.info("calling generate shipments");
       await generateShipment(payload);
 
       //--------------------------------------------------------

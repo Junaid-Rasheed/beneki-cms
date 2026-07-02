@@ -189,7 +189,7 @@ module.exports = {
 
       const order = await strapi.db.query("api::order.order").findOne({
         where: { orderNumber: orderId },
-        populate: ["billingAddress", "deliveryAddress"],
+        populate: ["billingAddress", "shippingAddress", "orderItems"],
       });
 
       if (!order) {
