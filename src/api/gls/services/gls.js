@@ -69,7 +69,7 @@ async function generateShipment(payload) {
         Consignee: {
           ConsigneeID: payload.orderId?.toString() || "N/A",
           Address: {
-            Name1: payload.receiver.name,
+            Name1: payload.receiver.companyName || payload.receiver.name,
             CountryCode: payload.receiver.countryPrefix,
             ZIPCode: payload.receiver.zipCode,
             City: payload.receiver.city,
@@ -96,6 +96,8 @@ async function generateShipment(payload) {
         ShipmentUnit: (payload.slaves?.SlaveRequest || []).map((p) => ({
           Weight: p.weight || 1,
           ShipmentUnitReference: [p.referencenumber || "test"],
+          Note1: payload.receiver.deliveryInstruction,
+          Note2: payload.receiver.deliveryInstruction2
         })),
 
         Service: [
