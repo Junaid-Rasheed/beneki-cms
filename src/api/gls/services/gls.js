@@ -1,9 +1,15 @@
 const axios = require("axios");
 
-const TOKEN_URL = "https://api-sandbox.gls-group.net/oauth2/v2/token";
+// const TOKEN_URL = "https://api-sandbox.gls-group.net/oauth2/v2/token";
+
+// const SHIPMENT_URL =
+//   "https://api-sandbox.gls-group.net/shipit-farm/v1/backend/rs/shipments";
+
+  const TOKEN_URL = "https://api.gls-group.net/oauth2/v2/token";
 
 const SHIPMENT_URL =
-  "https://api-sandbox.gls-group.net/shipit-farm/v1/backend/rs/shipments";
+  "https://api.gls-group.net/shipit-farm/v1/backend/rs/shipments";
+
 
 const CLIENT_ID = process.env.GLS_CLIENT_ID;
 const CLIENT_SECRET = process.env.GLS_CLIENT_SECRET;
@@ -89,7 +95,7 @@ async function generateShipment(payload) {
         // ⚠️ IMPORTANT: each item = 1 label
         ShipmentUnit: (payload.slaves?.SlaveRequest || []).map((p) => ({
           Weight: p.weight || 1,
-          ShipmentUnitReference: [p.referencenumber || "test ref"],
+          ShipmentUnitReference: [p.referencenumber || "test"],
         })),
 
         Service: [
