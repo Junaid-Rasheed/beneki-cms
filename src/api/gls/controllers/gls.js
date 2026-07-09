@@ -7,7 +7,7 @@ module.exports = {
     try {
       const body = ctx.request.body;
 
-      await glsService.generateShipment(body);
+      await glsService.generateGlsShipment(body);
 
       ctx.status = 200;
       ctx.body = {

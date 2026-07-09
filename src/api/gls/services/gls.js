@@ -54,7 +54,7 @@ async function getAccessToken() {
 /**
  * 2. GENERATE GLS LABEL
  */
-async function generateShipment(payload) {
+async function generateGlsShipment(payload) {
   try {
     console.log("payload", payload);
     const token = await getAccessToken();
@@ -186,5 +186,5 @@ async function generateShipment(payload) {
 
 module.exports = {
   getAccessToken,
-  generateShipment,
+  generateGlsShipment,
 };

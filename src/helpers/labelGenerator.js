@@ -1,4 +1,5 @@
 const { generateShipment } = require("../api/dpd/services/dpd");
+const { generateGlsShipment } = require("../api/gls/services/gls");
 const orderItem = require("../api/order-item/controllers/order-item");
 
 const STREET_MIN_LETTERS_OR_DIGITS = 5;
@@ -17,7 +18,7 @@ function findProductByIdInTree(nodes, productId) {
     if (
       String(node.id) === pid ||
       String(node.documentId) === pid ||
-      getSidebarProductId(node) === pid
+      getSidebarProductId(node) === pid && node.maximumVariation > 0 && node.maximumWeight > 0
     ) {
       return node;
     }
@@ -126,11 +127,10 @@ function buildPiecesForOrderLine(itemData, foundProduct, lineIndex) {
       remaining -= variation;
     }
     return pieces;
-  }
-  else{
+  } else {
     throw new Error(
-    `Invalid maximumVariation or maximumWeight for product '${foundProduct?.title || itemData.productName || itemData.productId}'.`
-  );
+      `Invalid maximumVariation or maximumWeight for product '${foundProduct?.title || itemData.productName || itemData.productId}'.`,
+    );
   }
 
   // Fallback when the product doesn't have both caps configured.
@@ -354,7 +354,7 @@ module.exports = {
             populate: "*",
           });
 
-        strapi.log.info("products fetched:  ${products}", );
+        strapi.log.info("products fetched:  ${products}");
         const allPieces = [];
 
         order.orderItems.forEach((item, index) => {
@@ -431,7 +431,11 @@ module.exports = {
       // Call DPD API
       //--------------------------------------------------------
       strapi.log.info("calling generate shipments");
-      await generateShipment(payload);
+      if (order.shippingAddress.country?.toLowerCase() === "france") {
+        await generateShipment(payload);
+      } else {
+        await generateGlsShipment(payload);
+      }
       strapi.log.info("updating order");
       //--------------------------------------------------------
       // Update Order
