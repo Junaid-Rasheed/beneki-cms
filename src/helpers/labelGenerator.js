@@ -350,7 +350,7 @@ module.exports = {
         const products = await strapi
           .documents("api::sidebar-item.sidebar-item")
           .findMany({
-            locale: "fr",
+            locale: "*",
             populate: "*",
           });
 
