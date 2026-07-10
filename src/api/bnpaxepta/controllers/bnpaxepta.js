@@ -263,8 +263,7 @@ module.exports = {
       });
       strapi.log.info(`✅ Notify processed for ${orderId}`);
       if (
-        SUCCESS_STATUSES.includes(status) &&
-        order.shippingAddress?.country?.toLowerCase() === "france"
+        SUCCESS_STATUSES.includes(status)
       ) {
         await generateMultiLabelByOrderId(order);
 
