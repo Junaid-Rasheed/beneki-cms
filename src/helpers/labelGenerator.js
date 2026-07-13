@@ -37,31 +37,7 @@ function getSidebarProductId(node) {
   if (pid == null || pid === "") return null;
   return String(pid);
 }
-function findProductInTree(products, productName) {
-  if (!productName || typeof productName !== "string") return null;
-  const target = productName.trim();
-  if (!target) return null;
 
-  const walk = (nodes, mode) => {
-    if (!Array.isArray(nodes)) return null;
-    for (const node of nodes) {
-      if (!node) continue;
-      const title = node.title != null ? String(node.title).trim() : "";
-      const productTitle =
-        node.productTitle != null ? String(node.productTitle).trim() : "";
-      if (mode === "title" && title === target) return node;
-      if (mode === "productTitle" && productTitle && productTitle === target)
-        return node;
-      if (node.children?.length) {
-        const found = walk(node.children, mode);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
-  return walk(products, "title") || walk(products, "productTitle") || null;
-}
 function buildPiecesForOrderLine(itemData, foundProduct, lineIndex) {
   const productId = itemData.productId;
   const orderQuantity = parseInt(itemData.quantity, 10) || 1;
@@ -312,8 +288,7 @@ function formatNum(value) {
 module.exports = {
   async generateMultiLabelByOrderId(order) {
     try {
-      strapi.log.info("generateMultiLabelByOrderId initiating", order.orderId);
-
+      
       if (!order) {
         throw new Error("Order not found");
       }
@@ -354,7 +329,6 @@ module.exports = {
             populate: "*",
           });
 
-        strapi.log.info("products fetched:  ${products}");
         const allPieces = [];
 
         order.orderItems.forEach((item, index) => {
@@ -371,7 +345,6 @@ module.exports = {
           throw new Error("No items to ship.");
         }
       }
-      strapi.log.info("slaves created");
       //--------------------------------------------------------
       // Delivery Instructions
       //--------------------------------------------------------
@@ -430,13 +403,11 @@ module.exports = {
       //--------------------------------------------------------
       // Call DPD API
       //--------------------------------------------------------
-      strapi.log.info("calling generate shipments");
       if (order.shippingAddress.country?.toLowerCase() === "france") {
         await generateShipment(payload);
       } else {
         await generateGlsShipment(payload);
       }
-      strapi.log.info("updating order");
       //--------------------------------------------------------
       // Update Order
       //--------------------------------------------------------
@@ -447,7 +418,6 @@ module.exports = {
           orderStatus: "shipped",
         },
       });
-      strapi.log.info("order updated");
       return {
         success: true,
       };

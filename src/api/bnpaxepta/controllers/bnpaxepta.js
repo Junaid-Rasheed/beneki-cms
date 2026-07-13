@@ -125,7 +125,7 @@ module.exports = {
       `MAC=${mac}`,
     ].join("&");
 
-    strapi.log.info("Data" + clearParams);
+    
     // LEN = byte length of UNENCRYPTED string
     const len = Buffer.byteLength(clearParams, "utf8");
 
@@ -204,19 +204,12 @@ module.exports = {
       // 🚨 CORE RULE (IMPORTANT)
       // =========================
 
-      strapi.log.info(`✅ Status for ${orderId}: ${status}`);
+      
       if (order.paymentStatus === "paid") {
-        strapi.log.info(`⛔ Ignoring FAILED for paid order ${orderId}`);
         return ctx.send("OK");
       }
 
       if (FAILED_STATUSES.includes(status)) {
-        // ❌ DO NOT overwrite paid orders
-        if (order.paymentStatus === "paid") {
-          strapi.log.info(`⛔ Ignoring FAILED for paid order ${orderId}`);
-          return ctx.send("OK");
-        }
-
         updateData.paymentStatus = "failed";
         updateData.orderStatus = "pending";
 
@@ -248,8 +241,6 @@ module.exports = {
         if (latestOrders.length > 0) {
           nextInvoiceId = Number(latestOrders[0].invoiceId) + 1;
         }
-        console.log("invoiceId:", nextInvoiceId);
-        console.log("Latestorder:", latestOrders);
 
         updateData.paymentStatus = "paid";
         updateData.orderStatus = "processing";
@@ -261,7 +252,7 @@ module.exports = {
         where: { orderNumber: orderId },
         data: updateData,
       });
-      strapi.log.info(`✅ Notify processed for ${orderId}`);
+      
       if (
         SUCCESS_STATUSES.includes(status)
       ) {

@@ -33,7 +33,6 @@ module.exports = {
 
     try {
       const accessToken = await getAccessToken();
-      console.log("access token", accessToken);
       const response = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
         method: "POST",
         headers: {
@@ -56,9 +55,7 @@ module.exports = {
           ],
         }),
       });
-      console.log("paypal response", accessToken);
       const data = await response.json();
-      console.log("PayPal order create response:", data); // ADD THIS
 
       if (!response.ok) {
         console.error("PayPal order creation failed:", data);

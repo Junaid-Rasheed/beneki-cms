@@ -5,11 +5,10 @@ const axios = require("axios");
 // const SHIPMENT_URL =
 //   "https://api-sandbox.gls-group.net/shipit-farm/v1/backend/rs/shipments";
 
-  const TOKEN_URL = "https://api.gls-group.net/oauth2/v2/token";
+const TOKEN_URL = "https://api.gls-group.net/oauth2/v2/token";
 
 const SHIPMENT_URL =
   "https://api.gls-group.net/shipit-farm/v1/backend/rs/shipments";
-
 
 const CLIENT_ID = process.env.GLS_CLIENT_ID;
 const CLIENT_SECRET = process.env.GLS_CLIENT_SECRET;
@@ -18,7 +17,14 @@ const CONTACT_ID = process.env.GLS_CONTACT_ID;
 // simple cache
 let cachedToken = null;
 let tokenExpiresAt = null;
+function extractTokens(referenceNumber) {
+  if (!referenceNumber) return [];
 
+  return referenceNumber
+    .split(/\s+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
 /**
  * 1. GET GLS TOKEN
  */
@@ -42,7 +48,7 @@ async function getAccessToken() {
     cachedToken = response.data.access_token;
     tokenExpiresAt = Date.now() + response.data.expires_in * 1000;
 
-    console.log("✅ GLS token generated", cachedToken);
+    
 
     return cachedToken;
   } catch (err) {
@@ -56,7 +62,7 @@ async function getAccessToken() {
  */
 async function generateGlsShipment(payload) {
   try {
-    console.log("payload", payload);
+    
     const token = await getAccessToken();
 
     // 🔥 Build GLS body from YOUR payload
@@ -97,7 +103,7 @@ async function generateGlsShipment(payload) {
           Weight: p.weight || 1,
           ShipmentUnitReference: [p.referencenumber || "test"],
           Note1: payload.receiver.deliveryInstruction,
-          Note2: payload.receiver.deliveryInstruction2
+          Note2: payload.receiver.deliveryInstruction2,
         })),
 
         Service: [
@@ -116,7 +122,7 @@ async function generateGlsShipment(payload) {
         },
       },
     };
-    strapi.log.info("✅ calling gls endpoint");
+    
     const response = await axios.post(SHIPMENT_URL, glsBody, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -125,11 +131,63 @@ async function generateGlsShipment(payload) {
       },
     });
 
-    strapi.log.info("✅ GLS label generated");
-    console.log("✅ data", response.data);
+      const order = await strapi.documents("api::order.order").findOne({
+          documentId: payload.orderId,
+          populate: {
+            orderItems: true,
+          },
+        });
 
     const printData = response?.data?.CreatedShipment?.PrintData;
+    const parcels = response?.data?.CreatedShipment?.ParcelData;
 
+    for (let i = 0; i < parcels.length; i++) {
+      const parcel = parcels[i];
+      const slave = payload.slaves?.SlaveRequest[i];
+
+      if (!slave?.referencenumber) {
+        continue;
+      }
+
+      // Create tracking record
+      const tracking = await strapi
+        .documents("api::shipment-tracking.shipment-tracking")
+        .create({
+          data: {
+            barCodeId: parcel.TrackID,
+            barCode: parcel.ParcelNumber,
+            barCodeSource: 0,
+          },
+        });
+
+      const orderItems = Array.isArray(order?.orderItems)
+        ? order.orderItems
+        : [];
+
+      if (orderItems.length === 0) {
+        strapi.log.warn(`No order items found for order ${data.orderId}`);
+        continue;
+      }
+
+      const tokens = extractTokens(slave.referencenumber);
+
+      const matchedItems = orderItems.filter((item) =>
+        tokens.some((token) =>
+          token.toUpperCase().endsWith(String(item.productId).toUpperCase()),
+        ),
+      );
+
+      for (const item of matchedItems) {
+        await strapi.documents("api::order-item.order-item").update({
+          documentId: item.documentId,
+          data: {
+            shipment_trackings: {
+              connect: [tracking.documentId],
+            },
+          },
+        });
+      }
+    }
     if (!printData || !printData.length) {
       throw new Error("No GLS labels generated");
     }
@@ -175,13 +233,6 @@ async function generateGlsShipment(payload) {
 
     throw error;
   }
-  //   } catch (err) {
-  //     strapi.log.error(
-  //       "❌ GLS shipment error",
-  //       err?.response?.data || err.message,
-  //     );
-  //     throw new Error("GLS label generation failed");
-  //   }
 }
 
 module.exports = {

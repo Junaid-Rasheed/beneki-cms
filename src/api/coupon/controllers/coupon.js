@@ -60,7 +60,7 @@ module.exports = createCoreController('api::coupon.coupon', ({ strapi }) => ({
       // ===============================
       // 👤 STRICT USER VALIDATION
       // ===============================
-      console.log("allowedUser", coupon)
+      
       if (coupon.allowedUsers && coupon.allowedUsers.length > 0) {
         const allowedUserIds = coupon.allowedUsers.map(u => u.documentId);
 
