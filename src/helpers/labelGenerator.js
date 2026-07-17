@@ -294,9 +294,12 @@ module.exports = {
       }
 
       const shippingAddress = order.shippingAddress;
-
+      const billingAddress = order.billingAddress;
       if (!shippingAddress) {
         throw new Error("Shipping address missing.");
+      }
+      if (!billingAddress) {
+        throw new Error("Billing address missing.");
       }
       const receiverFullName = [
         shippingAddress.firstName,
@@ -389,7 +392,7 @@ module.exports = {
           deliveryInstruction,
           deliveryInstruction2,
           companyName: shippingAddress.companyName,
-          email: shippingAddress.email,
+          email: shippingAddress.email || billingAddress.email,
         },
 
         slaves: {
