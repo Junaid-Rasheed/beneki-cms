@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_details",
+  "info": {
+    "singularName": "product-detail",
+    "pluralName": "product-details",
+    "displayName": "ProductDetail",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "productId": {
+      "type": "string"
+    },
+    "maximumWeight": {
+      "type": "integer"
+    },
+    "maximumVariation": {
+      "type": "integer"
+    },
+    "priceRange": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "string"
+    },
+    "isFoodProduct": {
+      "type": "boolean"
+    },
+    "isOutOfStock": {
+      "type": "boolean"
+    },
+    "isSideBarProduct": {
+      "type": "boolean"
+    },
+    "isHomeProduct": {
+      "type": "boolean"
+    },
+    "isCollection": {
+      "type": "boolean"
+    }
+  }
+}

@@ -1656,6 +1656,45 @@ export interface ApiPrintLabelsJobPrintLabelsJob
   };
 }
 
+export interface ApiProductDetailProductDetail
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'product_details';
+  info: {
+    description: '';
+    displayName: 'ProductDetail';
+    pluralName: 'product-details';
+    singularName: 'product-detail';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    isCollection: Schema.Attribute.Boolean;
+    isFoodProduct: Schema.Attribute.Boolean;
+    isHomeProduct: Schema.Attribute.Boolean;
+    isOutOfStock: Schema.Attribute.Boolean;
+    isSideBarProduct: Schema.Attribute.Boolean;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::product-detail.product-detail'
+    > &
+      Schema.Attribute.Private;
+    maximumVariation: Schema.Attribute.Integer;
+    maximumWeight: Schema.Attribute.Integer;
+    priceRange: Schema.Attribute.String;
+    productId: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiSdsDocumentSdsDocument extends Struct.CollectionTypeSchema {
   collectionName: 'sds_documents';
   info: {
@@ -2016,6 +2055,10 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    product_detail: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::product-detail.product-detail'
+    >;
     productCoupons: Schema.Attribute.Relation<
       'manyToMany',
       'api::coupon.coupon'
@@ -5425,6 +5468,7 @@ declare module '@strapi/strapi' {
       'api::order.order': ApiOrderOrder;
       'api::politique.politique': ApiPolitiquePolitique;
       'api::print-labels-job.print-labels-job': ApiPrintLabelsJobPrintLabelsJob;
+      'api::product-detail.product-detail': ApiProductDetailProductDetail;
       'api::sds-document.sds-document': ApiSdsDocumentSdsDocument;
       'api::sds-page.sds-page': ApiSdsPageSdsPage;
       'api::sds-product.sds-product': ApiSdsProductSdsProduct;

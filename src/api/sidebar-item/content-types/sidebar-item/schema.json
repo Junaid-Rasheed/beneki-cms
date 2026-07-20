@@ -221,6 +221,11 @@
     },
     "isOutOfStock": {
       "type": "boolean"
+    },
+    "product_detail": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-detail.product-detail"
     }
   }
 }
