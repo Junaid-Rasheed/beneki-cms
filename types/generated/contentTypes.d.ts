@@ -1666,17 +1666,14 @@ export interface ApiProductDetailProductDetail
     singularName: 'product-detail';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    isCollection: Schema.Attribute.Boolean;
     isFoodProduct: Schema.Attribute.Boolean;
-    isHomeProduct: Schema.Attribute.Boolean;
     isOutOfStock: Schema.Attribute.Boolean;
-    isSideBarProduct: Schema.Attribute.Boolean;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',

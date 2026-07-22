@@ -31,15 +31,6 @@
     },
     "isOutOfStock": {
       "type": "boolean"
-    },
-    "isSideBarProduct": {
-      "type": "boolean"
-    },
-    "isHomeProduct": {
-      "type": "boolean"
-    },
-    "isCollection": {
-      "type": "boolean"
     }
   }
 }
