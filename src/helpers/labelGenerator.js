@@ -7,6 +7,10 @@ const DPD_MAX_PARCEL_WEIGHT_KG = 25;
 const MAX_PIECES_PER_PARCEL = 4;
 
 // ---------------- helpers ----------------
+function getProductDetail(node) {
+  return node?.product_detail || null;
+}
+
 function findProductByIdInTree(nodes, productId) {
   if (!productId || !Array.isArray(nodes)) return null;
 
@@ -15,10 +19,13 @@ function findProductByIdInTree(nodes, productId) {
   for (const node of nodes) {
     if (!node) continue;
 
+    const productDetail = getProductDetail(node);
     if (
       String(node.id) === pid ||
       String(node.documentId) === pid ||
-      getSidebarProductId(node) === pid && node.maximumVariation > 0 && node.maximumWeight > 0
+      (getSidebarProductId(node) === pid &&
+        productDetail?.maximumVariation > 0 &&
+        productDetail?.maximumWeight > 0)
     ) {
       return node;
     }
@@ -44,10 +51,11 @@ function buildPiecesForOrderLine(itemData, foundProduct, lineIndex) {
   const productVariationStr = itemData.productQuantity || "";
   const productVariationValue = parseVariationNumber(productVariationStr);
 
+  const productDetail = getProductDetail(foundProduct);
   const productMaxVariation = parseVariationNumber(
-    foundProduct?.maximumVariation,
+    productDetail?.maximumVariation,
   );
-  const productMaxWeight = parseVariationNumber(foundProduct?.maximumWeight);
+  const productMaxWeight = parseVariationNumber(productDetail?.maximumWeight);
 
   const unitVariation = productVariationValue > 0 ? productVariationValue : 1;
   const totalVariation = unitVariation * orderQuantity;
@@ -329,7 +337,14 @@ module.exports = {
           .documents("api::sidebar-item.sidebar-item")
           .findMany({
             locale: "*",
-            populate: "*",
+            populate: {
+              product_detail: true,
+              children: {
+                populate: {
+                  product_detail: true,
+                },
+              },
+            },
           });
 
         const allPieces = [];
