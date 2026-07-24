@@ -296,11 +296,15 @@ function formatNum(value) {
 module.exports = {
   async generateMultiLabelByOrderId(order) {
     try {
-      
       if (!order) {
         throw new Error("Order not found");
       }
-
+      if (
+        order.shippingAddress.country?.toLowerCase() === "france" &&
+        order.shippingAddress.zipCode?.toString().startsWith("20")
+      ) {
+        return;
+      }
       const shippingAddress = order.shippingAddress;
       const billingAddress = order.billingAddress;
       if (!shippingAddress) {
@@ -366,8 +370,11 @@ module.exports = {
       //--------------------------------------------------------
       // Delivery Instructions
       //--------------------------------------------------------
-
-      const instruction = shippingAddress.instruction || "";
+      const instruction = String(shippingAddress.instruction || "")
+        .replace(/\r\n|\r|\n/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      //const instruction = shippingAddress.instruction || "";
 
       const deliveryInstruction = instruction.substring(0, 36);
       const deliveryInstruction2 = instruction.substring(36, 72);
