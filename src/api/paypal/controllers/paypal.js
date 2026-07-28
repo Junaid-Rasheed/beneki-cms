@@ -1,6 +1,7 @@
 const fetch = require("node-fetch");
 const axios = require("axios");
 const PAYPAL_API = "https://api-m.paypal.com";
+//const PAYPAL_API =  "https://api-m.sandbox.paypal.com"
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
 const UiUrl = process.env.FRONTEND_URL;
@@ -25,7 +26,7 @@ async function getAccessToken() {
 
 module.exports = {
   async createOrder(ctx) {
-    const { amount } = ctx.request.body;
+    const { amount, orderId } = ctx.request.body;
 
     if (!amount) {
       return ctx.badRequest("Amount is required");
@@ -42,8 +43,8 @@ module.exports = {
         body: JSON.stringify({
           intent: "CAPTURE",
           application_context: {
-            return_url: `${UiUrl}paypalpayment-success`,
-            cancel_url: `${UiUrl}paypalpayment-cancel`,
+            return_url: `${UiUrl}paypalpayment-success?orderId=${orderId}`,
+            cancel_url: `${UiUrl}paypalpayment-cancel?orderId=${orderId}`,
           },
           purchase_units: [
             {
