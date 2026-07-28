@@ -247,6 +247,15 @@
     },
     "searchRecentOnlyHint": {
       "type": "string"
+    },
+    "ActionGenerateLabel": {
+      "type": "string"
+    },
+    "ActionPrintAgain": {
+      "type": "string"
+    },
+    "ActionGenerateLabelAgain": {
+      "type": "string"
     }
   }
 }

@@ -4476,8 +4476,11 @@ export interface ApiStaticYourOrderStaticYourOrder
   attributes: {
     ActionCancel: Schema.Attribute.String;
     ActionDownload: Schema.Attribute.String;
+    ActionGenerateLabel: Schema.Attribute.String;
+    ActionGenerateLabelAgain: Schema.Attribute.String;
     ActionOrderAgain: Schema.Attribute.String;
     ActionPay: Schema.Attribute.String;
+    ActionPrintAgain: Schema.Attribute.String;
     ActionView: Schema.Attribute.String;
     allOrdersTitle: Schema.Attribute.String;
     allPaymentsTitle: Schema.Attribute.String;
