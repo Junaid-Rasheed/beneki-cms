@@ -5,6 +5,10 @@ const AdmZip = require("adm-zip");
 const path = require("path");
 
 const WSDL_PATH = path.join(__dirname, "../../../wsdl/dpd.wsdl");
+const WEBTRACE_WSDL_PATH = path.join(
+  __dirname,
+  "../../../wsdl/dpd-webtrace.wsdl"
+);
 
 function extractTokens(referenceNumber) {
   if (!referenceNumber) return [];
@@ -15,7 +19,193 @@ function extractTokens(referenceNumber) {
     .filter(Boolean);
 }
 
+function getDpdCustomer() {
+  return {
+    countrycode: Number(process.env.DPD_COUNTRY_CODE),
+    centernumber: Number(process.env.DPD_CENTER_NUMBER),
+    number: Number(process.env.DPD_CUSTOMER_NUMBER),
+  };
+}
+
+async function createWebtraceClient() {
+  const client = await soap.createClientAsync(WEBTRACE_WSDL_PATH, {
+    disableCache: true,
+  });
+
+  client.addSoapHeader({
+    UserCredentials: {
+      userid: process.env.DPD_USER,
+      password: process.env.DPD_PASSWORD,
+      attributes: {
+        xmlns: "http://www.cargonet.software",
+      },
+    },
+  });
+
+  return client;
+}
+
+function normalizeTraces(traces) {
+  if (!traces) return [];
+  const list = traces.clsTrace ?? traces;
+  return Array.isArray(list) ? list : [list];
+}
+
+function getLatestTrace(traces) {
+  if (!traces.length) return null;
+
+  return traces.reduce((latest, trace) => {
+    if (!latest) return trace;
+
+    const latestKey = `${latest.ScanDate || ""}${latest.ScanTime || ""}`;
+    const currentKey = `${trace.ScanDate || ""}${trace.ScanTime || ""}`;
+    return currentKey >= latestKey ? trace : latest;
+  }, null);
+}
+
+/**
+ * Map DPD Webtrace StatusNumber / StatusDescription to orderStatus.
+ * Scan codes follow Geopost conventions used by DPD FR tracking.
+ */
+function mapTraceToOrderStatus(statusNumber, statusDescription = "") {
+  const code = Number(statusNumber);
+  const desc = String(statusDescription).toLowerCase();
+
+  if (
+    [13, 23].includes(code) ||
+    /livr[ée]|delivered|remis au destinataire|retir[ée] au point/.test(desc)
+  ) {
+    return "delivered";
+  }
+
+  if (
+    code === 3 ||
+    /en cours de livraison|out for delivery|en livraison|chez le livreur/.test(
+      desc
+    )
+  ) {
+    return "Parcel out for delivery";
+  }
+
+  if (
+    [2, 8, 9].includes(code) ||
+    /centre de (livraison|tri|distribution)|delivery (centre|center|depot)|au d[ée]p[ôo]t|entrep[ôo]t|at delivery/.test(
+      desc
+    )
+  ) {
+    return "At delivery centre";
+  }
+
+  if (
+    [5, 15].includes(code) ||
+    /pris en charge|remis [àa] dpd|handed to dpd|enlev[ée]|pick.?up|collect[ée] par dpd/.test(
+      desc
+    )
+  ) {
+    return "Parcel handed to DPD";
+  }
+
+  if (
+    [1, 10, 12, 17, 20].includes(code) ||
+    /acheminement|in transit|en transit|hub|consolidation|chargement/.test(desc)
+  ) {
+    return "In transit";
+  }
+
+  return null;
+}
+
 module.exports = {
+  mapTraceToOrderStatus,
+
+  /**
+   * Fetch the latest DPD scan for a shipment barcode (barCodeId).
+   * Uses GetLastTraceBc; falls back to GetShipmentTraceSingle if needed.
+   */
+  async getParcelTrace(shipmentNumber) {
+    if (!shipmentNumber) {
+      throw new Error("shipmentNumber is required");
+    }
+
+    const client = await createWebtraceClient();
+    const customer = getDpdCustomer();
+
+    try {
+      const lastTraceResponse = await client.GetLastTraceBcAsync({
+        request: {
+          Customer: customer,
+          Language: "FR",
+          Parcels: {
+            string: [String(shipmentNumber)],
+          },
+        },
+      });
+
+      const lastTraceResult =
+        lastTraceResponse?.[0]?.GetLastTraceBcResult?.GetLastTraceBcResponse;
+      const lastTraceEntries = Array.isArray(lastTraceResult)
+        ? lastTraceResult
+        : lastTraceResult
+          ? [lastTraceResult]
+          : [];
+      const lastTrace = lastTraceEntries[0]?.Trace;
+
+      if (lastTrace?.StatusNumber != null) {
+        return {
+          statusNumber: lastTrace.StatusNumber,
+          statusDescription: lastTrace.StatusDescription || "",
+          scanDate: lastTrace.ScanDate || null,
+          scanTime: lastTrace.ScanTime || null,
+          orderStatus: mapTraceToOrderStatus(
+            lastTrace.StatusNumber,
+            lastTrace.StatusDescription
+          ),
+          raw: lastTrace,
+        };
+      }
+    } catch (err) {
+      const message = `[DPD Webtrace] GetLastTraceBc failed for ${shipmentNumber}: ${err.message}`;
+      if (typeof strapi !== "undefined" && strapi?.log) {
+        strapi.log.warn(message);
+      } else {
+        console.warn(message);
+      }
+    }
+
+    const traceResponse = await client.GetShipmentTraceSingleAsync({
+      request: {
+        Customer: customer,
+        Language: "FR",
+        ShipmentNumber: String(shipmentNumber),
+        ExpandContainerMode: "MasterOnly",
+        GetImages: false,
+        GetPhotos: false,
+        GetParsedInfo: false,
+        GetServices: false,
+      },
+    });
+
+    const shipmentTrace = traceResponse?.[0]?.GetShipmentTraceSingleResult;
+    const traces = normalizeTraces(shipmentTrace?.Traces);
+    const latest = getLatestTrace(traces);
+
+    if (!latest) {
+      return null;
+    }
+
+    return {
+      statusNumber: latest.StatusNumber,
+      statusDescription: latest.StatusDescription || "",
+      scanDate: latest.ScanDate || null,
+      scanTime: latest.ScanTime || null,
+      orderStatus: mapTraceToOrderStatus(
+        latest.StatusNumber,
+        latest.StatusDescription
+      ),
+      raw: latest,
+    };
+  },
+
   async generateShipment(data) {
     const client = await soap.createClientAsync(WSDL_PATH, {
       disableCache: true,

@@ -1,0 +1,837 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.cargonet.software/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://www.cargonet.software/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.cargonet.software/">
+      <s:element name="isAlive">
+        <s:complexType />
+      </s:element>
+      <s:element name="isAliveResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="isAliveResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="setAlive">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="value" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="setAliveResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UserCredentials" type="tns:UserCredentials" />
+      <s:complexType name="UserCredentials">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+        </s:sequence>
+        <s:anyAttribute />
+      </s:complexType>
+      <s:element name="VerifyConfiguration">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:VerifyConfigurationRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="VerifyConfigurationRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="customer" type="tns:Customer" />
+          <s:element minOccurs="0" maxOccurs="1" name="ip" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Customer">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:CustomerSmall">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="countrycode" type="s:int" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="CustomerSmall">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="centernumber" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="number" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="VerifyConfigurationResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="VerifyConfigurationResult" type="tns:VerifyConfigurationResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="VerifyConfigurationResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Allowed" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="VerifyUserCredentials" type="tns:VerifyUserCredentials" />
+      <s:complexType name="VerifyUserCredentials">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:UserCredentials">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Verify_userid" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Verify_password" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="getInfo">
+        <s:complexType />
+      </s:element>
+      <s:element name="getInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="getInfoResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="runAction">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:RunActionRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RunActionRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Action" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="runActionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="runActionResult" type="tns:RunActionResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RunActionResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Response" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetShipmentTraceSingle">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:ShipmentDetailRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ShipmentDetailRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ShipmentBaseRequest">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="ExpandContainerMode" nillable="true" type="tns:ExpandContainerModeType" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetImages" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetPhotos" nillable="true" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetParsedInfo" nillable="true" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetServices" nillable="true" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="Options" type="tns:Options" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ShipmentBaseRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:RequestShipmentBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="ShipmentNumber" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="RequestShipmentBase" abstract="true">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:RequestBase" />
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="RequestBase">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Customer" type="tns:Customer" />
+          <s:element minOccurs="0" maxOccurs="1" name="Language" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="ExpandContainerModeType">
+        <s:restriction base="s:string">
+          <s:enumeration value="MasterOnly" />
+          <s:enumeration value="MasterAndSlave" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="Options">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CenterType" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetShipmentTraceSingleResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetShipmentTraceSingleResult" type="tns:ShipmentTrace" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ShipmentTrace">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:clsShipmentTraceBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="images" type="tns:ArrayOfImage" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="clsShipmentTraceBase">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ShipmentNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DestinationCountry" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DestinationZipcode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShippingDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DeliveryDate" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Weight" type="s:double" />
+          <s:element minOccurs="0" maxOccurs="1" name="Receiver" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reference" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reference2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reference3" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reference4" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DeliveryScheduled" type="tns:SdgiData" />
+          <s:element minOccurs="0" maxOccurs="1" name="Traces" type="tns:ArrayOfClsTrace" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reference_International" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsB2C" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsRetour" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="PointRelaisName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PointRelaisLink" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipmentNumber_Retour" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RetourType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Services" type="tns:ArrayOfServiceInfo" />
+          <s:element minOccurs="1" maxOccurs="1" name="CustomerCenternumber" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CustomerNumber" type="s:long" />
+          <s:element minOccurs="1" maxOccurs="1" name="BarcodeSource" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="BarcodeId" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReceiverDepotNumber" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReceiverTourNumber" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="DeliveryRecordNumber" nillable="true" type="s:long" />
+          <s:element minOccurs="1" maxOccurs="1" name="DeliveryRecordPosition" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SdgiData">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="StartDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="EndDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="StartTime" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="EndTime" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfClsTrace">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="clsTrace" nillable="true" type="tns:clsTrace" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="clsTrace">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ScanDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ScanTime" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="StatusNumber" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="StatusDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CenterName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CenterNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="User" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Remark" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Info" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RelaisInfo" type="tns:RelaisInfo" />
+          <s:element minOccurs="0" maxOccurs="1" name="GeoX" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GeoY" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Photo" type="tns:ArrayOfTracePhoto" />
+          <s:element minOccurs="0" maxOccurs="1" name="ExceptionNotes" type="tns:ArrayOfExceptionNote" />
+          <s:element minOccurs="0" maxOccurs="1" name="ParsedInfo" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Details" type="tns:ArrayOfClsTraceDetails" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RelaisInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CNSid" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTracePhoto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TracePhoto" nillable="true" type="tns:TracePhoto" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TracePhoto">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Image" type="s:base64Binary" />
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfExceptionNote">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ExceptionNote" nillable="true" type="tns:ExceptionNote" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ExceptionNote">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Text" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfClsTraceDetails">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="clsTraceDetails" nillable="true" type="tns:clsTraceDetails" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="clsTraceDetails">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Text" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Data" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfServiceInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ServiceInfo" nillable="true" type="tns:ServiceInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ServiceInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Type" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Attribute" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfImage">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Image" nillable="true" type="tns:Image" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Image">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="type" type="tns:ImageType" />
+          <s:element minOccurs="0" maxOccurs="1" name="image" type="s:base64Binary" />
+          <s:element minOccurs="0" maxOccurs="1" name="date" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="time" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="ImageType">
+        <s:restriction base="s:string">
+          <s:enumeration value="POD" />
+          <s:enumeration value="POA" />
+          <s:enumeration value="DeliverySignature" />
+          <s:enumeration value="DeliveryShop" />
+          <s:enumeration value="PickupSignature" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetShipmentTrace">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:ShipmentDetailRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetShipmentTraceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetShipmentTraceResult" type="tns:ArrayOfShipmentTrace" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfShipmentTrace">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ShipmentTrace" nillable="true" type="tns:ShipmentTrace" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetShipmentTraceByReference">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:ReferenceDetailRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ReferenceDetailRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:ReferenceBaseRequest">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="Searchmode" type="tns:ReferenceSearchMode" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetImages" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetPhotos" nillable="true" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetParsedInfo" nillable="true" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetServices" nillable="true" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="GetLastTrace" nillable="true" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="Options" type="tns:Options" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ReferenceBaseRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:RequestBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Reference" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ShippingDate" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:simpleType name="ReferenceSearchMode">
+        <s:restriction base="s:string">
+          <s:enumeration value="Equals" />
+          <s:enumeration value="Like" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetShipmentTraceByReferenceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetShipmentTraceByReferenceResult" type="tns:ArrayOfShipmentTrace" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetLastTrace">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:GetLastTraceRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetLastTraceRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:GetLastTraceBaseRequest">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Parcels" type="tns:ArrayOfParcel" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="GetLastTraceBaseRequest" abstract="true">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:RequestBase" />
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfParcel">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Parcel" nillable="true" type="tns:Parcel" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Parcel">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="countrycode" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="centernumber" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="parcelnumber" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetLastTraceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetLastTraceResult" type="tns:ArrayOfGetLastTraceResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfGetLastTraceResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GetLastTraceResponse" nillable="true" type="tns:GetLastTraceResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GetLastTraceResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:GetLastTraceBaseResponse">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Parcel" type="tns:Parcel" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="GetLastTraceBaseResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Trace" type="tns:clsTrace" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetLastTraceBc">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:GetLastTraceBcRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetLastTraceBcRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:GetLastTraceBaseRequest">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Parcels" type="tns:ArrayOfString" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetLastTraceBcResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetLastTraceBcResult" type="tns:ArrayOfGetLastTraceBcResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfGetLastTraceBcResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GetLastTraceBcResponse" nillable="true" type="tns:GetLastTraceBcResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GetLastTraceBcResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:GetLastTraceBaseResponse">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="ShipmentNumber" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="isAliveSoapIn">
+    <wsdl:part name="parameters" element="tns:isAlive" />
+  </wsdl:message>
+  <wsdl:message name="isAliveSoapOut">
+    <wsdl:part name="parameters" element="tns:isAliveResponse" />
+  </wsdl:message>
+  <wsdl:message name="setAliveSoapIn">
+    <wsdl:part name="parameters" element="tns:setAlive" />
+  </wsdl:message>
+  <wsdl:message name="setAliveSoapOut">
+    <wsdl:part name="parameters" element="tns:setAliveResponse" />
+  </wsdl:message>
+  <wsdl:message name="setAliveUserCredentials">
+    <wsdl:part name="UserCredentials" element="tns:UserCredentials" />
+  </wsdl:message>
+  <wsdl:message name="VerifyConfigurationSoapIn">
+    <wsdl:part name="parameters" element="tns:VerifyConfiguration" />
+  </wsdl:message>
+  <wsdl:message name="VerifyConfigurationSoapOut">
+    <wsdl:part name="parameters" element="tns:VerifyConfigurationResponse" />
+  </wsdl:message>
+  <wsdl:message name="VerifyConfigurationVerifyUserCredentials">
+    <wsdl:part name="VerifyUserCredentials" element="tns:VerifyUserCredentials" />
+  </wsdl:message>
+  <wsdl:message name="getInfoSoapIn">
+    <wsdl:part name="parameters" element="tns:getInfo" />
+  </wsdl:message>
+  <wsdl:message name="getInfoSoapOut">
+    <wsdl:part name="parameters" element="tns:getInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="getInfoUserCredentials">
+    <wsdl:part name="UserCredentials" element="tns:UserCredentials" />
+  </wsdl:message>
+  <wsdl:message name="runActionSoapIn">
+    <wsdl:part name="parameters" element="tns:runAction" />
+  </wsdl:message>
+  <wsdl:message name="runActionSoapOut">
+    <wsdl:part name="parameters" element="tns:runActionResponse" />
+  </wsdl:message>
+  <wsdl:message name="runActionUserCredentials">
+    <wsdl:part name="UserCredentials" element="tns:UserCredentials" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceSingleSoapIn">
+    <wsdl:part name="parameters" element="tns:GetShipmentTraceSingle" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceSingleSoapOut">
+    <wsdl:part name="parameters" element="tns:GetShipmentTraceSingleResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceSingleUserCredentials">
+    <wsdl:part name="UserCredentials" element="tns:UserCredentials" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceSoapIn">
+    <wsdl:part name="parameters" element="tns:GetShipmentTrace" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceSoapOut">
+    <wsdl:part name="parameters" element="tns:GetShipmentTraceResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceUserCredentials">
+    <wsdl:part name="UserCredentials" element="tns:UserCredentials" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceByReferenceSoapIn">
+    <wsdl:part name="parameters" element="tns:GetShipmentTraceByReference" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceByReferenceSoapOut">
+    <wsdl:part name="parameters" element="tns:GetShipmentTraceByReferenceResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetShipmentTraceByReferenceUserCredentials">
+    <wsdl:part name="UserCredentials" element="tns:UserCredentials" />
+  </wsdl:message>
+  <wsdl:message name="GetLastTraceSoapIn">
+    <wsdl:part name="parameters" element="tns:GetLastTrace" />
+  </wsdl:message>
+  <wsdl:message name="GetLastTraceSoapOut">
+    <wsdl:part name="parameters" element="tns:GetLastTraceResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetLastTraceUserCredentials">
+    <wsdl:part name="UserCredentials" element="tns:UserCredentials" />
+  </wsdl:message>
+  <wsdl:message name="GetLastTraceBcSoapIn">
+    <wsdl:part name="parameters" element="tns:GetLastTraceBc" />
+  </wsdl:message>
+  <wsdl:message name="GetLastTraceBcSoapOut">
+    <wsdl:part name="parameters" element="tns:GetLastTraceBcResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetLastTraceBcUserCredentials">
+    <wsdl:part name="UserCredentials" element="tns:UserCredentials" />
+  </wsdl:message>
+  <wsdl:portType name="Webtrace_ServiceSoap">
+    <wsdl:operation name="isAlive">
+      <wsdl:input message="tns:isAliveSoapIn" />
+      <wsdl:output message="tns:isAliveSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="setAlive">
+      <wsdl:input message="tns:setAliveSoapIn" />
+      <wsdl:output message="tns:setAliveSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VerifyConfiguration">
+      <wsdl:input message="tns:VerifyConfigurationSoapIn" />
+      <wsdl:output message="tns:VerifyConfigurationSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="getInfo">
+      <wsdl:input message="tns:getInfoSoapIn" />
+      <wsdl:output message="tns:getInfoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="runAction">
+      <wsdl:input message="tns:runActionSoapIn" />
+      <wsdl:output message="tns:runActionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTraceSingle">
+      <wsdl:input message="tns:GetShipmentTraceSingleSoapIn" />
+      <wsdl:output message="tns:GetShipmentTraceSingleSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTrace">
+      <wsdl:input message="tns:GetShipmentTraceSoapIn" />
+      <wsdl:output message="tns:GetShipmentTraceSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTraceByReference">
+      <wsdl:input message="tns:GetShipmentTraceByReferenceSoapIn" />
+      <wsdl:output message="tns:GetShipmentTraceByReferenceSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLastTrace">
+      <wsdl:input message="tns:GetLastTraceSoapIn" />
+      <wsdl:output message="tns:GetLastTraceSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLastTraceBc">
+      <wsdl:input message="tns:GetLastTraceBcSoapIn" />
+      <wsdl:output message="tns:GetLastTraceBcSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Webtrace_ServiceSoap" type="tns:Webtrace_ServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="isAlive">
+      <soap:operation soapAction="http://www.cargonet.software/isAlive" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setAlive">
+      <soap:operation soapAction="http://www.cargonet.software/setAlive" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:setAliveUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerifyConfiguration">
+      <soap:operation soapAction="http://www.cargonet.software/VerifyConfiguration" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:VerifyConfigurationVerifyUserCredentials" part="VerifyUserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getInfo">
+      <soap:operation soapAction="http://www.cargonet.software/getInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:getInfoUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="runAction">
+      <soap:operation soapAction="http://www.cargonet.software/runAction" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:runActionUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTraceSingle">
+      <soap:operation soapAction="http://www.cargonet.software/GetShipmentTraceSingle" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetShipmentTraceSingleUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTrace">
+      <soap:operation soapAction="http://www.cargonet.software/GetShipmentTrace" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetShipmentTraceUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTraceByReference">
+      <soap:operation soapAction="http://www.cargonet.software/GetShipmentTraceByReference" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetShipmentTraceByReferenceUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLastTrace">
+      <soap:operation soapAction="http://www.cargonet.software/GetLastTrace" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetLastTraceUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLastTraceBc">
+      <soap:operation soapAction="http://www.cargonet.software/GetLastTraceBc" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetLastTraceBcUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="Webtrace_ServiceSoap12" type="tns:Webtrace_ServiceSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="isAlive">
+      <soap12:operation soapAction="http://www.cargonet.software/isAlive" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setAlive">
+      <soap12:operation soapAction="http://www.cargonet.software/setAlive" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:setAliveUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerifyConfiguration">
+      <soap12:operation soapAction="http://www.cargonet.software/VerifyConfiguration" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:VerifyConfigurationVerifyUserCredentials" part="VerifyUserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getInfo">
+      <soap12:operation soapAction="http://www.cargonet.software/getInfo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:getInfoUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="runAction">
+      <soap12:operation soapAction="http://www.cargonet.software/runAction" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:runActionUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTraceSingle">
+      <soap12:operation soapAction="http://www.cargonet.software/GetShipmentTraceSingle" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetShipmentTraceSingleUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTrace">
+      <soap12:operation soapAction="http://www.cargonet.software/GetShipmentTrace" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetShipmentTraceUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetShipmentTraceByReference">
+      <soap12:operation soapAction="http://www.cargonet.software/GetShipmentTraceByReference" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetShipmentTraceByReferenceUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLastTrace">
+      <soap12:operation soapAction="http://www.cargonet.software/GetLastTrace" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetLastTraceUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLastTraceBc">
+      <soap12:operation soapAction="http://www.cargonet.software/GetLastTraceBc" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetLastTraceBcUserCredentials" part="UserCredentials" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Webtrace_Service">
+    <wsdl:port name="Webtrace_ServiceSoap" binding="tns:Webtrace_ServiceSoap">
+      <soap:address location="https://webtrace.dpd.fr/trace-service/Webtrace_Service.asmx" />
+    </wsdl:port>
+    <wsdl:port name="Webtrace_ServiceSoap12" binding="tns:Webtrace_ServiceSoap12">
+      <soap12:address location="https://webtrace.dpd.fr/trace-service/Webtrace_Service.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -428,19 +428,24 @@ module.exports = {
       //--------------------------------------------------------
       // Call DPD API
       //--------------------------------------------------------
-      if (order.shippingAddress.country?.toLowerCase() === "france") {
+      const isFrance =
+        order.shippingAddress.country?.toLowerCase() === "france";
+
+      if (isFrance) {
         await generateShipment(payload);
       } else {
         await generateGlsShipment(payload);
       }
       //--------------------------------------------------------
       // Update Order
+      // France/DPD → preparing (tracking job advances status)
+      // International/GLS → shipped
       //--------------------------------------------------------
       await strapi.db.query("api::order.order").update({
         where: { documentId: order.documentId },
         data: {
           isDpdLabelPrinted: true,
-          orderStatus: "shipped",
+          orderStatus: isFrance ? "preparing" : "shipped",
         },
       });
       return {
