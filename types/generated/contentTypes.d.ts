@@ -1489,6 +1489,11 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         'processing',
         'partially shipped',
         'shipped',
+        'preparing',
+        'Parcel handed to DPD',
+        'In transit',
+        'At delivery centre',
+        'Parcel out for delivery',
         'delivered',
         'cancelled',
       ]
