@@ -7,10 +7,10 @@ module.exports = ({ env }) => ({
   webhooks: {
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),
   },
-  cron: {
-    enabled: env.bool('CRON_ENABLED', true),
-    tasks: require('./cron-tasks'),
-  },
+  // cron: {
+  //   enabled: env.bool('CRON_ENABLED', true),
+  //   tasks: require('./cron-tasks'),
+  // },
    axepta: {
     merchantId: env('AXEPTA_MERCHANT_ID'),
     apiUrl: env('AXEPTA_API_URL', 'https://api.axepta.bnpparibas'),
