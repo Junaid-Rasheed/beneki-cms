@@ -43,6 +43,11 @@ async function syncDpdTrackingStatuses({ strapi }) {
       orderStatus: { $in: TRACKED_ORDER_STATUSES },
       isDpdLabelPrinted: true,
       shipment_trackings: { barCodeId: { $notNull: true } },
+      shippingAddress: {
+        country: {
+          $eq: "France",
+        },
+      },
     },
     populate: {
       shipment_trackings: true,
@@ -82,18 +87,18 @@ async function syncDpdTrackingStatuses({ strapi }) {
 
       updated += 1;
       strapi.log.info(
-        `[DPD Tracking Sync] Order ${order.orderNumber}: ${order.orderStatus} → ${trace.orderStatus} (${trace.statusNumber}: ${trace.statusDescription})`
+        `[DPD Tracking Sync] Order ${order.orderNumber}: ${order.orderStatus} → ${trace.orderStatus} (${trace.statusNumber}: ${trace.statusDescription})`,
       );
     } catch (err) {
       failed += 1;
       strapi.log.error(
-        `[DPD Tracking Sync] Failed for order ${order.orderNumber} / ${shipmentNumber}: ${err.message}`
+        `[DPD Tracking Sync] Failed for order ${order.orderNumber} / ${shipmentNumber}: ${err.message}`,
       );
     }
   }
 
   strapi.log.info(
-    `[DPD Tracking Sync] Done. checked=${orders.length} updated=${updated} skipped=${skipped} failed=${failed}`
+    `[DPD Tracking Sync] Done. checked=${orders.length} updated=${updated} skipped=${skipped} failed=${failed}`,
   );
 
   return { checked: orders.length, updated, skipped, failed };

@@ -1,14 +1,18 @@
 "use strict";
 
 const soap = require("soap");
+const axios = require("axios");
+const https = require("https");
 const AdmZip = require("adm-zip");
 const path = require("path");
 
 const WSDL_PATH = path.join(__dirname, "../../../wsdl/dpd.wsdl");
 const WEBTRACE_WSDL_PATH = path.join(
   __dirname,
-  "../../../wsdl/dpd-webtrace.wsdl"
+  "../../../wsdl/dpd-webtrace.wsdl",
 );
+const WEBTRACE_ENDPOINT =
+  "https://webtrace.dpd.fr/trace-service/Webtrace_Service.asmx";
 
 function extractTokens(referenceNumber) {
   if (!referenceNumber) return [];
@@ -27,17 +31,49 @@ function getDpdCustomer() {
   };
 }
 
+/**
+ * node-soap's default HTTP client gets ECONNRESET against webtrace.dpd.fr;
+ * axios + keepAlive:false is reliable.
+ */
+function createWebtraceHttpClient() {
+  const httpsAgent = new https.Agent({ keepAlive: false });
+
+  return {
+    request(rurl, data, callback, exheaders) {
+      axios
+        .post(rurl, data, {
+          headers: {
+            "Content-Type": "text/xml; charset=utf-8",
+            "Content-Length": Buffer.byteLength(data),
+            ...(exheaders || {}),
+          },
+          httpsAgent,
+          timeout: 30000,
+          transformResponse: [(body) => body],
+          validateStatus: () => true,
+        })
+        .then((res) => callback(null, res, res.data))
+        .catch((err) => callback(err));
+    },
+  };
+}
+
 async function createWebtraceClient() {
   const client = await soap.createClientAsync(WEBTRACE_WSDL_PATH, {
     disableCache: true,
+    forceSoap12Headers: false,
   });
 
+  client.setEndpoint(WEBTRACE_ENDPOINT);
+  client.httpClient = createWebtraceHttpClient();
+
+  // Namespace must include trailing slash (http://www.cargonet.software/)
   client.addSoapHeader({
     UserCredentials: {
       userid: process.env.DPD_USER,
       password: process.env.DPD_PASSWORD,
       attributes: {
-        xmlns: "http://www.cargonet.software",
+        xmlns: "http://www.cargonet.software/",
       },
     },
   });
@@ -65,48 +101,48 @@ function getLatestTrace(traces) {
 
 /**
  * Map DPD Webtrace StatusNumber / StatusDescription to orderStatus.
- * Scan codes follow Geopost conventions used by DPD FR tracking.
+ * Codes observed from DPD FR Webtrace (e.g. 40=livré, 30=en livraison, 20=acheminement).
  */
 function mapTraceToOrderStatus(statusNumber, statusDescription = "") {
   const code = Number(statusNumber);
   const desc = String(statusDescription).toLowerCase();
 
   if (
-    [13, 23].includes(code) ||
+    [13, 23, 40].includes(code) ||
     /livr[ée]|delivered|remis au destinataire|retir[ée] au point/.test(desc)
   ) {
     return "delivered";
   }
 
   if (
-    code === 3 ||
+    [3, 30].includes(code) ||
     /en cours de livraison|out for delivery|en livraison|chez le livreur/.test(
-      desc
+      desc,
     )
   ) {
     return "Parcel out for delivery";
   }
 
   if (
-    [2, 8, 9].includes(code) ||
+    [2, 9].includes(code) ||
     /centre de (livraison|tri|distribution)|delivery (centre|center|depot)|au d[ée]p[ôo]t|entrep[ôo]t|at delivery/.test(
-      desc
+      desc,
     )
   ) {
     return "At delivery centre";
   }
 
   if (
-    [5, 15].includes(code) ||
+    [5, 10, 15, 28].includes(code) ||
     /pris en charge|remis [àa] dpd|handed to dpd|enlev[ée]|pick.?up|collect[ée] par dpd/.test(
-      desc
+      desc,
     )
   ) {
     return "Parcel handed to DPD";
   }
 
   if (
-    [1, 10, 12, 17, 20].includes(code) ||
+    [1, 12, 17, 20].includes(code) ||
     /acheminement|in transit|en transit|hub|consolidation|chargement/.test(desc)
   ) {
     return "In transit";
@@ -120,7 +156,8 @@ module.exports = {
 
   /**
    * Fetch the latest DPD scan for a shipment barcode (barCodeId).
-   * Uses GetLastTraceBc; falls back to GetShipmentTraceSingle if needed.
+   * Uses GetLastTraceBc; Customer is required (omitting it → CustomerPermissionDenied).
+   * Falls back to GetShipmentTraceSingle if needed.
    */
   async getParcelTrace(shipmentNumber) {
     if (!shipmentNumber) {
@@ -158,7 +195,7 @@ module.exports = {
           scanTime: lastTrace.ScanTime || null,
           orderStatus: mapTraceToOrderStatus(
             lastTrace.StatusNumber,
-            lastTrace.StatusDescription
+            lastTrace.StatusDescription,
           ),
           raw: lastTrace,
         };
@@ -200,7 +237,7 @@ module.exports = {
       scanTime: latest.ScanTime || null,
       orderStatus: mapTraceToOrderStatus(
         latest.StatusNumber,
-        latest.StatusDescription
+        latest.StatusDescription,
       ),
       raw: latest,
     };
@@ -330,7 +367,7 @@ module.exports = {
       };
 
       const response = await client.CreateShipmentBcAsync({ request });
-      
+
       const shipment = response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
 
       // Fetch order with order items
@@ -384,7 +421,6 @@ module.exports = {
         });
       }
 
-     
       const barcodeId = shipment?.Shipment?.BarcodeId;
 
       if (!barcodeId) {
@@ -400,11 +436,8 @@ module.exports = {
     else {
       const slaveChunks = chunkArray(slaves, 5);
 
-      
-
       for (let chunkIndex = 0; chunkIndex < slaveChunks.length; chunkIndex++) {
         const chunk = slaveChunks[chunkIndex];
-       
 
         // =========================
         // SINGLE SHIPMENT FOR 1 ITEM CHUNK
@@ -457,12 +490,10 @@ module.exports = {
             referencenumber: singleSlave.referencenumber || "",
           };
 
-          
-
           const response = await client.CreateShipmentBcAsync({
             request,
           });
-         
+
           const shipment =
             response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
 
@@ -516,7 +547,6 @@ module.exports = {
             });
           }
 
-          
           const barcodeId = shipment?.Shipment?.BarcodeId;
 
           if (!barcodeId) {
@@ -592,11 +622,10 @@ module.exports = {
           },
         };
 
-        
         const response = await client.CreateMultiShipmentBcAsync({
           request,
         });
-        
+
         const multiShipment = response?.[0]?.CreateMultiShipmentBcResult;
 
         if (!multiShipment) {
@@ -682,7 +711,7 @@ module.exports = {
                 .endsWith(String(item.productId).toUpperCase()),
             ),
           );
- 
+
           for (const item of matchedItems) {
             await strapi.documents("api::order-item.order-item").update({
               documentId: item.documentId,
@@ -729,7 +758,7 @@ module.exports = {
     await strapi.documents("api::print-labels-job.print-labels-job").create({
       data: {
         orderNumber: data.orderNumber,
-        zpl: allLabels.map(l => l.buffer.toString("utf-8")), // ✅ store raw ZPL
+        zpl: allLabels.map((l) => l.buffer.toString("utf-8")), // ✅ store raw ZPL
         labelStatus: "Pending",
         attempts: 0,
       },
@@ -747,6 +776,6 @@ module.exports = {
     // const zipBuffer = zip.toBuffer();
 
     // return zipBuffer;
-     return true;
+    return true;
   },
 };
