@@ -4826,6 +4826,7 @@ export interface ApiUserAddressUserAddress extends Struct.CollectionTypeSchema {
         'Slovakia',
         'Czech Republic',
         'Switzerland',
+        'Croatia',
       ]
     > &
       Schema.Attribute.SetPluginOptions<{

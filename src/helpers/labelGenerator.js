@@ -220,6 +220,8 @@ function getCountryPrefix(country) {
     luxembourg: "LU",
     switzerland: "CH",
     suisse: "CH",
+    croatia: "HR",
+    croatie: "HR",
     portugal: "PT",
     austria: "AT",
     autriche: "AT",
