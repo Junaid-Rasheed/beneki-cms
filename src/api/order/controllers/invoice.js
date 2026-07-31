@@ -73,7 +73,11 @@ module.exports = {
         WHERE a."inv_user_id" = ?
           AND o."created_at" >= ? 
           AND o."created_at" <= ?
-          AND o."order_status" IN ('processing','shipped','delivered')
+          AND o."order_status" IN ('processing','shipped','delivered','preparing',
+        'Parcel handed to DPD',
+        'In transit',
+        'At delivery centre',
+        'Parcel out for delivery')
       `;
 
       params = [userId, startDate, endDate]; // ✅ correct order
@@ -81,7 +85,11 @@ module.exports = {
       query += `
         WHERE o."created_at" >= ? 
           AND o."created_at" <= ?
-          AND o."order_status" IN ('processing','shipped','delivered')
+          AND o."order_status" IN ('processing','shipped','delivered','preparing',
+        'Parcel handed to DPD',
+        'In transit',
+        'At delivery centre',
+        'Parcel out for delivery')
       `;
 
       params = [startDate, endDate]; // ✅ correct
