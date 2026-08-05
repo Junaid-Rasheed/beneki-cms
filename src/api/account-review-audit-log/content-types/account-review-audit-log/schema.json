@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "account_review_audit_logs",
+  "info": {
+    "singularName": "account-review-audit-log",
+    "pluralName": "account-review-audit-logs",
+    "displayName": "AccountReviewAuditLog",
+    "description": "Internal audit trail for B2B account review decisions"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "userId": {
+      "type": "string",
+      "required": true
+    },
+    "action": {
+      "type": "string",
+      "required": true
+    },
+    "changedAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "updatedByName": {
+      "type": "string"
+    },
+    "updatedByEmail": {
+      "type": "email"
+    },
+    "previousStatus": {
+      "type": "string"
+    },
+    "nextStatus": {
+      "type": "string"
+    },
+    "note": {
+      "type": "text"
+    },
+    "emailSent": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

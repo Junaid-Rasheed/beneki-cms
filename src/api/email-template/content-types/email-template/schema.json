@@ -31,7 +31,12 @@
     "module": {
       "type": "enumeration",
       "enum": [
-        "failedPayment"
+        "failedPayment",
+        "registrationtemplate",
+        "registrationadminnotify",
+        "accountapproved",
+        "accountmoreinfo",
+        "accountrefused"
       ]
     },
     "buttonUrl": {

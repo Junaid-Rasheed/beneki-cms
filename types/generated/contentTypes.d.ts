@@ -373,6 +373,44 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAccountReviewAuditLogAccountReviewAuditLog
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'account_review_audit_logs';
+  info: {
+    description: 'Internal audit trail for B2B account review decisions';
+    displayName: 'AccountReviewAuditLog';
+    pluralName: 'account-review-audit-logs';
+    singularName: 'account-review-audit-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    action: Schema.Attribute.String & Schema.Attribute.Required;
+    changedAt: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    emailSent: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::account-review-audit-log.account-review-audit-log'
+    > &
+      Schema.Attribute.Private;
+    nextStatus: Schema.Attribute.String;
+    note: Schema.Attribute.Text;
+    previousStatus: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedByEmail: Schema.Attribute.Email;
+    updatedByName: Schema.Attribute.String;
+    userId: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface ApiCgvCgv extends Struct.CollectionTypeSchema {
   collectionName: 'cgvs';
   info: {
@@ -652,7 +690,16 @@ export interface ApiEmailTemplateEmailTemplate
       'api::email-template.email-template'
     >;
     message: Schema.Attribute.Text;
-    module: Schema.Attribute.Enumeration<['failedPayment']>;
+    module: Schema.Attribute.Enumeration<
+      [
+        'failedPayment',
+        'registrationtemplate',
+        'registrationadminnotify',
+        'accountapproved',
+        'accountmoreinfo',
+        'accountrefused',
+      ]
+    >;
     publishedAt: Schema.Attribute.DateTime;
     subject: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
@@ -2560,6 +2607,48 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
     };
   };
   attributes: {
+    accountStatusBackToLogin: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    accountStatusMoreInfoBody: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    accountStatusMoreInfoTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    accountStatusPendingBody: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    accountStatusPendingTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    accountStatusRefusedBody: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    accountStatusRefusedTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2588,7 +2677,31 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
           localized: true;
         };
       }>;
+    registerAirbnbInvalid: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerAirbnbLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerAirbnbPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     registerBusinessNameLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerBusinessNameRequired: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -2628,6 +2741,30 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
     registerErrorVatRequired: Schema.Attribute.String;
     registerIndividualFranceMessage: Schema.Attribute.String;
     registerIndividualFranceOnly: Schema.Attribute.String;
+    registerListingsInvalid: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerListingsLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerListingsPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerListingsRequired: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     registerLoadingText: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2642,6 +2779,18 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
       }>;
     registerPrivacyLinkText: Schema.Attribute.String;
     registerPrivacyText: Schema.Attribute.String;
+    registerReasonLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerReasonPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     registerSubmitButton: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2667,6 +2816,18 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
     registerVatUnavailable: Schema.Attribute.String;
     registerVatValid: Schema.Attribute.String;
     registerVatValidating: Schema.Attribute.String;
+    registerWebsiteLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerWebsitePlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -3217,6 +3378,8 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    applyForB2BAccount: Schema.Attribute.String;
+    b2bPricingAvailableMessage: Schema.Attribute.String;
     basketActionEmptyCart: Schema.Attribute.String;
     basketActionRemoveItem: Schema.Attribute.String;
     basketActionValidateOrder: Schema.Attribute.String;
@@ -4209,6 +4372,7 @@ export interface ApiStaticProductDetailStaticProductDetail
           localized: true;
         };
       }>;
+    applyForB2BAccount: Schema.Attribute.String;
     basedOnPostalCode: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -5363,13 +5527,25 @@ export interface PluginUsersPermissionsUser
   };
   attributes: {
     accommodationsCount: Schema.Attribute.Integer;
+    accountReviewedAt: Schema.Attribute.DateTime;
+    accountReviewedByEmail: Schema.Attribute.Email;
+    accountReviewedByName: Schema.Attribute.String;
+    accountStatus: Schema.Attribute.Enumeration<
+      [
+        'pending_review',
+        'more_info_requested',
+        'refused',
+        'rejected_without_notification',
+        'approved',
+      ]
+    >;
     accountType: Schema.Attribute.Enumeration<['Individual', 'Business']>;
     affiliatedBy: Schema.Attribute.Relation<
       'oneToOne',
       'plugin::users-permissions.user'
     >;
     airbnbProfileUrl: Schema.Attribute.String;
-    autoprint: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    autoprint: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     businessName: Schema.Attribute.String;
     businessRegistrationCountry: Schema.Attribute.Enumeration<
@@ -5407,6 +5583,8 @@ export interface PluginUsersPermissionsUser
     firstName: Schema.Attribute.String;
     isValidVatNumber: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
+    legacyAutoValidated: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -5422,6 +5600,7 @@ export interface PluginUsersPermissionsUser
       }>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    reasonForPurchase: Schema.Attribute.Text;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
     role: Schema.Attribute.Relation<
       'manyToOne',
@@ -5441,6 +5620,7 @@ export interface PluginUsersPermissionsUser
         minLength: 3;
       }>;
     vatNumber: Schema.Attribute.String;
+    website: Schema.Attribute.String;
   };
 }
 
@@ -5454,6 +5634,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::account-review-audit-log.account-review-audit-log': ApiAccountReviewAuditLogAccountReviewAuditLog;
       'api::cgv.cgv': ApiCgvCgv;
       'api::coupon.coupon': ApiCouponCoupon;
       'api::cta-banner.cta-banner': ApiCtaBannerCtaBanner;

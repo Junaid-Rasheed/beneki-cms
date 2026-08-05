@@ -144,6 +144,12 @@
     },
     "basketOutOfStockBlockedMessage": {
       "type": "string"
+    },
+    "applyForB2BAccount": {
+      "type": "string"
+    },
+    "b2bPricingAvailableMessage": {
+      "type": "string"
     }
   }
 }

@@ -141,6 +141,35 @@
     "airbnbProfileUrl": {
       "type": "string"
     },
+    "website": {
+      "type": "string"
+    },
+    "reasonForPurchase": {
+      "type": "text"
+    },
+    "accountStatus": {
+      "type": "enumeration",
+      "enum": [
+        "pending_review",
+        "more_info_requested",
+        "refused",
+        "rejected_without_notification",
+        "approved"
+      ]
+    },
+    "legacyAutoValidated": {
+      "type": "boolean",
+      "default": false
+    },
+    "accountReviewedAt": {
+      "type": "datetime"
+    },
+    "accountReviewedByName": {
+      "type": "string"
+    },
+    "accountReviewedByEmail": {
+      "type": "email"
+    },
     "isValidVatNumber": {
       "type": "boolean",
       "default": false
