@@ -196,30 +196,36 @@ async function generateGlsShipment(payload) {
     //   (label.Data),
     // );
     const zplLabels = printData.map((label) => label.Data);
-    const existing = await strapi.db
-      .query("api::print-labels-job.print-labels-job")
-      .findOne({
-        where: {
+    // =========================
+    // SAVE GLS ZPL LABELS — only when autoprint enabled
+    // Manual API calls omit autoPrint → still enqueue (autoPrint !== false)
+    // =========================
+    if (payload.autoPrint !== false) {
+      const existing = await strapi.db
+        .query("api::print-labels-job.print-labels-job")
+        .findOne({
+          where: {
+            orderNumber: payload.orderNumber,
+          },
+        });
+
+      if (existing) {
+        throw new Error(`Order ${payload.orderNumber} already exists`);
+      }
+
+      await strapi.documents("api::print-labels-job.print-labels-job").create({
+        data: {
           orderNumber: payload.orderNumber,
+          zpl: zplLabels, // keep Base64, same format expected by printer worker
+          labelStatus: "Pending",
+          attempts: 0,
         },
       });
-
-    if (existing) {
-      throw new Error(`Order ${payload.orderNumber} already exists`);
+    } else {
+      strapi.log.info(
+        `Skipping print job for ${payload.orderNumber} (user.autoprint=false)`,
+      );
     }
-
-    // =========================
-    // SAVE GLS ZPL LABELS
-    // =========================
-
-    await strapi.documents("api::print-labels-job.print-labels-job").create({
-      data: {
-        orderNumber: payload.orderNumber,
-        zpl: zplLabels, // keep Base64, same format expected by printer worker
-        labelStatus: "Pending",
-        attempts: 0,
-      },
-    });
   } catch (error) {
     strapi.log.error("❌ GLS shipment error");
 

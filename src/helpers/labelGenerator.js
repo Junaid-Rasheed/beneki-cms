@@ -393,6 +393,23 @@ module.exports = {
         .join(", ");
 
       //--------------------------------------------------------
+      // Autoprint: only enqueue printer job when user.autoprint is true
+      //--------------------------------------------------------
+      let autoPrint = false;
+
+      if (typeof order.user?.autoprint === "boolean") {
+        autoPrint = order.user.autoprint;
+      } else {
+        const orderWithUser = await strapi.db.query("api::order.order").findOne({
+          where: order.documentId
+            ? { documentId: order.documentId }
+            : { id: order.id },
+          populate: ["user"],
+        });
+        autoPrint = Boolean(orderWithUser?.user?.autoprint);
+      }
+
+      //--------------------------------------------------------
       // Payload
       //--------------------------------------------------------
 
@@ -425,6 +442,7 @@ module.exports = {
 
         orderId: order.documentId,
         orderNumber: order.orderNumber,
+        autoPrint,
       };
 
       //--------------------------------------------------------

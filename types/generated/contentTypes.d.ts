@@ -5369,6 +5369,7 @@ export interface PluginUsersPermissionsUser
       'plugin::users-permissions.user'
     >;
     airbnbProfileUrl: Schema.Attribute.String;
+    autoprint: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     businessName: Schema.Attribute.String;
     businessRegistrationCountry: Schema.Attribute.Enumeration<

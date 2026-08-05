@@ -741,28 +741,36 @@ module.exports = {
       throw new Error("No labels generated");
     }
 
-    const existing = await strapi.db
-      .query("api::print-labels-job.print-labels-job")
-      .findOne({
-        where: {
+    // =========================
+    // OPTIONAL: SAVE TO STRAPI (ZPL STORAGE) — only when autoprint enabled
+    // Manual API calls omit autoPrint → still enqueue (autoPrint !== false)
+    // =========================
+    if (data.autoPrint !== false) {
+      const existing = await strapi.db
+        .query("api::print-labels-job.print-labels-job")
+        .findOne({
+          where: {
+            orderNumber: data.orderNumber,
+          },
+        });
+
+      if (existing) {
+        throw new Error(`Order ${data.orderNumber} already exists`);
+      }
+
+      await strapi.documents("api::print-labels-job.print-labels-job").create({
+        data: {
           orderNumber: data.orderNumber,
+          zpl: allLabels.map((l) => l.buffer.toString("utf-8")), // ✅ store raw ZPL
+          labelStatus: "Pending",
+          attempts: 0,
         },
       });
-
-    if (existing) {
-      throw new Error(`Order ${data.orderNumber} already exists`);
+    } else {
+      strapi.log.info(
+        `Skipping print job for ${data.orderNumber} (user.autoprint=false)`,
+      );
     }
-    // =========================
-    // OPTIONAL: SAVE TO STRAPI (ZPL STORAGE)
-    // =========================
-    await strapi.documents("api::print-labels-job.print-labels-job").create({
-      data: {
-        orderNumber: data.orderNumber,
-        zpl: allLabels.map((l) => l.buffer.toString("utf-8")), // ✅ store raw ZPL
-        labelStatus: "Pending",
-        attempts: 0,
-      },
-    });
 
     // =========================
     // CREATE ZIP (ZPL FILES)
