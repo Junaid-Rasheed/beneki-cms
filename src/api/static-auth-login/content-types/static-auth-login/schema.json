@@ -80,6 +80,14 @@
         }
       }
     },
+    "loginNotApprovedError": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "loginInvalidCredentials": {
       "type": "string",
       "pluginOptions": {
