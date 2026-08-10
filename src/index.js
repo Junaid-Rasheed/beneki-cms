@@ -1,5 +1,49 @@
 'use strict';
 
+const ACCOUNT_REVIEW_ACTIONS = [
+  'api::account-review.account-review.find',
+  'api::account-review.account-review.findOne',
+  'api::account-review.account-review.performAction',
+];
+
+/**
+ * Ensure Admin role can call account-review Content API routes.
+ * Safe to re-run: skips actions that already exist.
+ */
+async function ensureAccountReviewPermissions(strapi) {
+  const adminRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({ where: { name: 'Admin' } });
+
+  if (!adminRole) {
+    strapi.log.warn(
+      '[account-review] No users-permissions role named "Admin"; skip permission bootstrap'
+    );
+    return;
+  }
+
+  for (const action of ACCOUNT_REVIEW_ACTIONS) {
+    const existing = await strapi.db
+      .query('plugin::users-permissions.permission')
+      .findOne({
+        where: {
+          action,
+          role: adminRole.id,
+        },
+      });
+
+    if (existing) continue;
+
+    await strapi.db.query('plugin::users-permissions.permission').create({
+      data: {
+        action,
+        role: adminRole.id,
+      },
+    });
+    strapi.log.info(`[account-review] Enabled permission ${action} for Admin`);
+  }
+}
+
 module.exports = {
   /**
    * An asynchronous register function that runs before
@@ -16,5 +60,25 @@ module.exports = {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap(/*{ strapi }*/) {},
+  async bootstrap({ strapi }) {
+    // users-permissions does not always pick up extension lifecycles.js;
+    // subscribe explicitly so new accounts always start in pending_review.
+    strapi.db.lifecycles.subscribe({
+      models: ['plugin::users-permissions.user'],
+      beforeCreate(event) {
+        const { data } = event.params;
+        if (data) {
+          data.accountStatus = 'pending_review';
+        }
+      },
+    });
+
+    try {
+      await ensureAccountReviewPermissions(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[account-review] Permission bootstrap failed: ${err.message}`
+      );
+    }
+  },
 };

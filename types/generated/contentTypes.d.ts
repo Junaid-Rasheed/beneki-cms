@@ -2552,6 +2552,12 @@ export interface ApiStaticAuthLoginStaticAuthLogin
           localized: true;
         };
       }>;
+    loginNotApprovedError: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     loginPasswordLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

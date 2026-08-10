@@ -1,23 +1,36 @@
 "use strict";
 
+const { isAccountApproved } = require("../../../utils/accountStatus");
+
 /** Max line items per user cart (abuse guard). */
 const MAX_CART_ITEMS = 200;
+
+async function requireApprovedUser(ctx) {
+  const userId = ctx.state.user?.id;
+  if (!userId) {
+    ctx.unauthorized();
+    return null;
+  }
+
+  const user = await strapi.db
+    .query("plugin::users-permissions.user")
+    .findOne({ where: { id: userId } });
+
+  if (!user || !isAccountApproved(user)) {
+    ctx.forbidden("Your account is not approved for shop access.");
+    return null;
+  }
+
+  return user;
+}
 
 module.exports = {
   /**
    * GET /api/cart/me — returns only the authenticated user's cart.
    */
   async me(ctx) {
-    const userId = ctx.state.user?.id;
-    if (!userId) {
-      return ctx.unauthorized();
-    }
-
-    const user = await strapi.entityService.findOne(
-      "plugin::users-permissions.user",
-      userId,
-      { fields: ["cart"] },
-    );
+    const user = await requireApprovedUser(ctx);
+    if (!user) return;
 
     const cart = Array.isArray(user?.cart) ? user.cart : [];
     return { data: { cart } };
@@ -28,10 +41,10 @@ module.exports = {
    * No other user fields are accepted or updated.
    */
   async updateMe(ctx) {
-    const userId = ctx.state.user?.id;
-    if (!userId) {
-      return ctx.unauthorized();
-    }
+    const user = await requireApprovedUser(ctx);
+    if (!user) return;
+
+    const userId = user.id;
 
     const body = ctx.request.body;
     if (!body || typeof body !== "object" || Array.isArray(body)) {
