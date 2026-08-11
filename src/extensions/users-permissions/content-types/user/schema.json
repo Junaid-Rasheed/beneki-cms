@@ -161,6 +161,14 @@
       "type": "boolean",
       "default": false
     },
+    "legacyReapplyEligible": {
+      "type": "boolean",
+      "default": false
+    },
+    "legacyReapplyUsed": {
+      "type": "boolean",
+      "default": false
+    },
     "accountReviewedAt": {
       "type": "datetime"
     },

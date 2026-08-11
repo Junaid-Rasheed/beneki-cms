@@ -6,9 +6,13 @@ const {
   ACTION_TO_STATUS,
   getAccountStatus,
   isLegacyAutoValidated,
+  canReapplyApplication,
 } = require('../../../utils/accountStatus');
 const {
   sendAccountReviewDecisionEmail,
+  sendRegistrationConfirmationEmail,
+  sendRegistrationAdminNotifyEmail,
+  resolveLocaleFromContext,
 } = require('../../../utils/sendRegistrationConfirmationEmail');
 
 const APPLICATION_FIELDS = [
@@ -31,6 +35,8 @@ const APPLICATION_FIELDS = [
   'reasonForPurchase',
   'accountStatus',
   'legacyAutoValidated',
+  'legacyReapplyEligible',
+  'legacyReapplyUsed',
   'accountReviewedAt',
   'accountReviewedByName',
   'accountReviewedByEmail',
@@ -293,18 +299,28 @@ module.exports = {
       admin.username ||
       admin.email;
 
+    const wasLegacy = isLegacyAutoValidated(user);
+    const updateData = {
+      accountStatus: nextStatus,
+      // Human review → no longer treated as 2026 auto-validated.
+      legacyAutoValidated: false,
+      accountReviewedAt: changedAt,
+      accountReviewedByName: reviewerName,
+      accountReviewedByEmail: admin.email || null,
+    };
+
+    // Old (legacy) users who are refused may re-apply once.
+    if (action === REVIEW_ACTIONS.REFUSE && wasLegacy && !user.legacyReapplyUsed) {
+      updateData.legacyReapplyEligible = true;
+    } else if (action !== REVIEW_ACTIONS.REFUSE) {
+      updateData.legacyReapplyEligible = false;
+    }
+
     const updated = await strapi.db
       .query('plugin::users-permissions.user')
       .update({
         where: { id: user.id },
-        data: {
-          accountStatus: nextStatus,
-          // Human review → no longer treated as 2026 auto-validated.
-          legacyAutoValidated: false,
-          accountReviewedAt: changedAt,
-          accountReviewedByName: reviewerName,
-          accountReviewedByEmail: admin.email || null,
-        },
+        data: updateData,
       });
 
     let emailSent = false;
@@ -355,6 +371,212 @@ module.exports = {
         hasOrderHistory: orderCount > 0,
         orderCount,
         auditTrail,
+        emailSent,
+      },
+    };
+  },
+
+  /**
+   * POST /api/account-reapply
+   * Refused user re-applies with updated business details.
+   * Auth: Bearer JWT (refused/more-info allowed) OR identifier+password in body
+   * (password path avoids /auth/local, which blocks non-approved accounts).
+   * Body: {
+   *   businessName*,
+   *   accommodationsCount* (number of listings),
+   *   website?,
+   *   airbnbProfileUrl?,
+   *   reasonForPurchase?,
+   *   locale?,
+   *   identifier?/email?,
+   *   password?
+   * }
+   */
+  async reapply(ctx) {
+    const body = ctx.request.body || {};
+    let user = null;
+
+    const authUserId = ctx.state.user?.id;
+    if (authUserId) {
+      user = await strapi.db
+        .query('plugin::users-permissions.user')
+        .findOne({ where: { id: authUserId } });
+    }
+
+    if (!user) {
+      const identifier = String(
+        body.identifier || body.email || ''
+      ).trim();
+      const password = body.password != null ? String(body.password) : '';
+
+      if (!identifier || !password) {
+        return ctx.unauthorized(
+          'Authentication required. Sign in or provide email and password.'
+        );
+      }
+
+      user = await strapi.db.query('plugin::users-permissions.user').findOne({
+        where: {
+          $or: [
+            { email: { $eqi: identifier } },
+            { username: { $eqi: identifier } },
+          ],
+        },
+      });
+
+      if (!user || user.blocked) {
+        return ctx.badRequest('Invalid email or password.');
+      }
+
+      const validPassword = await strapi
+        .plugin('users-permissions')
+        .service('user')
+        .validatePassword(password, user.password);
+
+      if (!validPassword) {
+        return ctx.badRequest('Invalid email or password.');
+      }
+    }
+
+    if (!user) {
+      return ctx.unauthorized();
+    }
+
+    if (!canReapplyApplication(user)) {
+      if (user.legacyReapplyUsed) {
+        return ctx.badRequest(
+          'You have already re-applied once. Further applications are not available.',
+          {
+            accountStatus: getAccountStatus(user),
+            legacyReapplyUsed: true,
+          }
+        );
+      }
+      return ctx.badRequest(
+        'Only eligible legacy accounts can re-apply. Current status does not allow re-application.',
+        { accountStatus: getAccountStatus(user) }
+      );
+    }
+
+    const locale = body.locale || resolveLocaleFromContext(ctx);
+
+    const businessName =
+      body.businessName != null ? String(body.businessName).trim() : '';
+    if (!businessName) {
+      return ctx.badRequest('Business Name is required.');
+    }
+
+    const listingsRaw =
+      body.accommodationsCount != null
+        ? body.accommodationsCount
+        : body.numberOfListings != null
+          ? body.numberOfListings
+          : body.listings;
+    const accommodationsCount = parseInt(listingsRaw, 10);
+    if (
+      listingsRaw == null ||
+      String(listingsRaw).trim() === '' ||
+      !Number.isFinite(accommodationsCount) ||
+      accommodationsCount < 1
+    ) {
+      return ctx.badRequest(
+        'Number of listings is required and must be a positive integer.'
+      );
+    }
+
+    const website =
+      body.website != null ? String(body.website).trim() : '';
+    const airbnbProfileUrl =
+      body.airbnbProfileUrl != null
+        ? String(body.airbnbProfileUrl).trim()
+        : '';
+    const reasonForPurchase =
+      body.reasonForPurchase != null
+        ? String(body.reasonForPurchase).trim()
+        : '';
+
+    if (airbnbProfileUrl) {
+      try {
+        // eslint-disable-next-line no-new
+        new URL(airbnbProfileUrl);
+      } catch (_) {
+        return ctx.badRequest('Airbnb profile URL is invalid.');
+      }
+    }
+
+    const previousStatus = getAccountStatus(user);
+    const changedAt = new Date();
+
+    const updated = await strapi.db
+      .query('plugin::users-permissions.user')
+      .update({
+        where: { id: user.id },
+        data: {
+          businessName,
+          accommodationsCount,
+          website: website || null,
+          airbnbProfileUrl: airbnbProfileUrl || null,
+          reasonForPurchase: reasonForPurchase || null,
+          accountStatus: ACCOUNT_STATUS.PENDING_REVIEW,
+          legacyAutoValidated: false,
+          legacyReapplyEligible: false,
+          // One-time re-apply for legacy users — cannot re-apply again.
+          legacyReapplyUsed: true,
+          accountReviewedAt: null,
+          accountReviewedByName: null,
+          accountReviewedByEmail: null,
+        },
+      });
+
+    let emailSent = false;
+    try {
+      await sendRegistrationConfirmationEmail(strapi, {
+        email: user.email,
+        locale,
+      });
+
+      await sendRegistrationAdminNotifyEmail(strapi, {
+        applicant: {
+          id: updated.id,
+          email: user.email,
+          username: updated.username || user.username,
+          accountStatus: ACCOUNT_STATUS.PENDING_REVIEW,
+          businessName: updated.businessName,
+        },
+        locale: 'en',
+      });
+      emailSent = true;
+    } catch (err) {
+      strapi.log.error(
+        `[account-reapply] Failed review emails for ${user.email}: ${err.message}`
+      );
+    }
+
+    try {
+      await writeAuditLog(strapi, {
+        userId: String(user.id),
+        action: 'reapply',
+        changedAt,
+        updatedByName:
+          user.displayName ||
+          [user.firstName, user.name].filter(Boolean).join(' ').trim() ||
+          user.username ||
+          user.email,
+        updatedByEmail: user.email || null,
+        previousStatus,
+        nextStatus: ACCOUNT_STATUS.PENDING_REVIEW,
+        note: reasonForPurchase || null,
+        emailSent,
+      });
+    } catch (err) {
+      strapi.log.warn(
+        `[account-reapply] Failed audit log for user ${user.id}: ${err.message}`
+      );
+    }
+
+    ctx.body = {
+      data: {
+        ...pickApplicationFields(updated),
         emailSent,
       },
     };

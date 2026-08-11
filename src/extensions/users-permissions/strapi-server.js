@@ -4,6 +4,7 @@ const utils = require('@strapi/utils');
 const {
   getAccountStatus,
   isAccountBlockedFromAuth,
+  canReapplyApplication,
 } = require('../../utils/accountStatus');
 const {
   sendRegistrationConfirmationEmail,
@@ -17,6 +18,8 @@ const { ApplicationError } = utils.errors;
 const PROTECTED_USER_FIELDS = [
   'accountStatus',
   'legacyAutoValidated',
+  'legacyReapplyEligible',
+  'legacyReapplyUsed',
   'accountReviewedAt',
   'accountReviewedByName',
   'accountReviewedByEmail',
@@ -52,7 +55,10 @@ module.exports = (plugin) => {
         ctx.body = undefined;
         throw new ApplicationError(
           'Your account is not approved for access yet.',
-          { accountStatus: getAccountStatus(freshUser) }
+          {
+            accountStatus: getAccountStatus(freshUser),
+            canReapply: canReapplyApplication(freshUser),
+          }
         );
       }
     };

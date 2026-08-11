@@ -14,8 +14,14 @@ const NON_APPROVED = new Set([
   ACCOUNT_STATUS.REJECTED_WITHOUT_NOTIFICATION,
 ]);
 
-/** Statuses that may authenticate only to complete a resubmission. */
-const RESUBMIT_ALLOWED = new Set([ACCOUNT_STATUS.MORE_INFO_REQUESTED]);
+/**
+ * Statuses that may authenticate only to complete a resubmission / re-apply
+ * (shop access still requires approved via isAccountApproved).
+ */
+const RESUBMIT_ALLOWED = new Set([
+  ACCOUNT_STATUS.MORE_INFO_REQUESTED,
+  ACCOUNT_STATUS.REFUSED,
+]);
 
 const REVIEW_ACTIONS = {
   APPROVE: 'approve',
@@ -47,18 +53,34 @@ function isAccountApproved(user) {
   return getAccountStatus(user) === ACCOUNT_STATUS.APPROVED;
 }
 
-function isAccountBlockedFromAuth(user) {
-  const status = getAccountStatus(user);
-  if (RESUBMIT_ALLOWED.has(status)) return false;
-  return NON_APPROVED.has(status);
-}
-
 function canResubmitApplication(user) {
-  return RESUBMIT_ALLOWED.has(getAccountStatus(user));
+  return getAccountStatus(user) === ACCOUNT_STATUS.MORE_INFO_REQUESTED;
 }
 
 function isLegacyAutoValidated(user) {
   return Boolean(user?.legacyAutoValidated);
+}
+
+/**
+ * Only legacy (old) refused users may re-apply, and only once.
+ * Eligibility: legacyAutoValidated OR legacyReapplyEligible, and not yet used.
+ */
+function canReapplyApplication(user) {
+  if (getAccountStatus(user) !== ACCOUNT_STATUS.REFUSED) return false;
+  if (Boolean(user?.legacyReapplyUsed)) return false;
+  return (
+    Boolean(user?.legacyAutoValidated) || Boolean(user?.legacyReapplyEligible)
+  );
+}
+
+function isAccountBlockedFromAuth(user) {
+  const status = getAccountStatus(user);
+  if (status === ACCOUNT_STATUS.MORE_INFO_REQUESTED) return false;
+  // Refused JWT only for legacy users who still have a one-time re-apply left.
+  if (status === ACCOUNT_STATUS.REFUSED && canReapplyApplication(user)) {
+    return false;
+  }
+  return NON_APPROVED.has(status);
 }
 
 module.exports = {
@@ -71,5 +93,6 @@ module.exports = {
   isAccountApproved,
   isAccountBlockedFromAuth,
   canResubmitApplication,
+  canReapplyApplication,
   isLegacyAutoValidated,
 };

@@ -180,6 +180,7 @@ async function sendRegistrationAdminNotifyEmail(
     userId: String(applicant.id ?? ''),
     username: applicant.username || applicant.email || '',
     accountStatus: applicant.accountStatus || 'pending_review',
+    businessName: applicant.businessName || '',
   };
 
   const subject =

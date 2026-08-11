@@ -33,5 +33,17 @@ module.exports = {
         middlewares: [],
       },
     },
+    {
+      method: 'POST',
+      path: '/account-reapply',
+      handler: 'account-review.reapply',
+      config: {
+        // Public: refused users may be blocked from /auth/local JWT issuance.
+        // Controller accepts JWT or email+password.
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
   ],
 };
