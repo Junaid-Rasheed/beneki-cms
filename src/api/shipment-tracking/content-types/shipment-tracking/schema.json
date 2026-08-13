@@ -18,6 +18,17 @@
     },
     "barCodeSource": {
       "type": "integer"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "preparing",
+        "Parcel handed to DPD",
+        "In transit",
+        "At delivery centre",
+        "Parcel out for delivery",
+        "delivered"
+      ]
     }
   }
 }

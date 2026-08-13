@@ -1992,6 +1992,16 @@ export interface ApiShipmentTrackingShipmentTracking
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<
+      [
+        'preparing',
+        'Parcel handed to DPD',
+        'In transit',
+        'At delivery centre',
+        'Parcel out for delivery',
+        'delivered',
+      ]
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
