@@ -9,7 +9,15 @@ const ACCOUNT_REVIEW_ACTIONS = [
 const ACCOUNT_REAPPLY_ACTION =
   'api::account-review.account-review.reapply';
 
-async function ensurePermission(strapi, role, action, label) {
+const DELAYED_DPD_ORDER_ACTIONS = [
+  'api::delayed-dpd-order.delayed-dpd-order.find',
+];
+
+const MISSING_DPD_ORDER_ACTIONS = [
+  'api::missing-dpd-order.missing-dpd-order.find',
+];
+
+async function ensurePermission(strapi, role, action, label, logTag) {
   if (!role) return;
   const existing = await strapi.db
     .query('plugin::users-permissions.permission')
@@ -23,7 +31,9 @@ async function ensurePermission(strapi, role, action, label) {
   await strapi.db.query('plugin::users-permissions.permission').create({
     data: { action, role: role.id },
   });
-  strapi.log.info(`[account-review] Enabled permission ${action} for ${label}`);
+  strapi.log.info(
+    `[${logTag || 'permissions'}] Enabled permission ${action} for ${label}`
+  );
 }
 
 /**
@@ -41,7 +51,7 @@ async function ensureAccountReviewPermissions(strapi) {
     );
   } else {
     for (const action of ACCOUNT_REVIEW_ACTIONS) {
-      await ensurePermission(strapi, adminRole, action, 'Admin');
+      await ensurePermission(strapi, adminRole, action, 'Admin', 'account-review');
     }
   }
 
@@ -66,9 +76,16 @@ async function ensureAccountReviewPermissions(strapi) {
     strapi,
     authenticatedRole,
     ACCOUNT_REAPPLY_ACTION,
-    'Authenticated'
+    'Authenticated',
+    'account-review'
   );
-  await ensurePermission(strapi, publicRole, ACCOUNT_REAPPLY_ACTION, 'Public');
+  await ensurePermission(
+    strapi,
+    publicRole,
+    ACCOUNT_REAPPLY_ACTION,
+    'Public',
+    'account-review'
+  );
 
   if (!authenticatedRole) {
     strapi.log.warn(
@@ -78,6 +95,39 @@ async function ensureAccountReviewPermissions(strapi) {
   if (!publicRole) {
     strapi.log.warn(
       '[account-reapply] No Public role; Public reapply permission skipped'
+    );
+  }
+}
+
+async function ensureAdminDpdOrderPermissions(strapi) {
+  const adminRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({ where: { name: 'Admin' } });
+
+  if (!adminRole) {
+    strapi.log.warn(
+      '[dpd-orders] No users-permissions role named "Admin"; skip permission bootstrap'
+    );
+    return;
+  }
+
+  for (const action of DELAYED_DPD_ORDER_ACTIONS) {
+    await ensurePermission(
+      strapi,
+      adminRole,
+      action,
+      'Admin',
+      'delayed-dpd-order'
+    );
+  }
+
+  for (const action of MISSING_DPD_ORDER_ACTIONS) {
+    await ensurePermission(
+      strapi,
+      adminRole,
+      action,
+      'Admin',
+      'missing-dpd-order'
     );
   }
 }
@@ -116,6 +166,14 @@ module.exports = {
     } catch (err) {
       strapi.log.error(
         `[account-review] Permission bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureAdminDpdOrderPermissions(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[dpd-orders] Permission bootstrap failed: ${err.message}`
       );
     }
   },

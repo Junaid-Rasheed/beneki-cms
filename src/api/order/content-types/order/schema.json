@@ -207,6 +207,14 @@
       "type": "boolean",
       "default": false
     },
+    "dpdHandledDate": {
+      "type": "datetime",
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      }
+    },
     "isOssVatOrder": {
       "type": "boolean"
     },

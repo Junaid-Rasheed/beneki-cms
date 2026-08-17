@@ -1502,6 +1502,12 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    dpdHandledDate: Schema.Attribute.DateTime &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }>;
     emailLocale: Schema.Attribute.String;
     invoiceId: Schema.Attribute.BigInteger;
     isDpdLabelPrinted: Schema.Attribute.Boolean &
@@ -3520,40 +3526,180 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    applyForB2BAccount: Schema.Attribute.String;
-    b2bPricingAvailableMessage: Schema.Attribute.String;
-    basketActionEmptyCart: Schema.Attribute.String;
-    basketActionRemoveItem: Schema.Attribute.String;
-    basketActionValidateOrder: Schema.Attribute.String;
-    basketContinueShopping: Schema.Attribute.String;
+    applyForB2BAccount: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    b2bPricingAvailableMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketActionEmptyCart: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketActionRemoveItem: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketActionValidateOrder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketContinueShopping: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     basketDeliveryCountdown: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    basketDeliveryLoginMessage: Schema.Attribute.String;
-    basketDeliveryOrderNow: Schema.Attribute.String;
-    basketDeliveryOrderWithin: Schema.Attribute.String;
-    basketDeliveryReceiveOn: Schema.Attribute.String;
-    basketEmptyCartMessage: Schema.Attribute.String;
-    basketEmptyMessage: Schema.Attribute.String;
-    basketOutOfStockBlockedMessage: Schema.Attribute.String;
-    basketPromoApplied: Schema.Attribute.String;
-    basketPromoApplyButton: Schema.Attribute.String;
-    basketPromoErrorEmpty: Schema.Attribute.String;
-    basketPromoErrorExpired: Schema.Attribute.String;
-    basketPromoErrorInvalid: Schema.Attribute.String;
-    basketPromoPlaceholder: Schema.Attribute.String;
-    basketPromoRemove: Schema.Attribute.String;
-    basketSummaryDiscountLabel: Schema.Attribute.String;
-    basketSummaryShipping: Schema.Attribute.String;
-    basketSummaryShippingFree: Schema.Attribute.String;
-    basketSummaryShippingNote: Schema.Attribute.String;
-    basketSummarySubtotalLabel: Schema.Attribute.String;
-    basketSummaryTitle: Schema.Attribute.String;
-    basketSummaryTotalLabel: Schema.Attribute.String;
-    basketSummaryVatLabel: Schema.Attribute.String;
+    basketDeliveryLoginMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketDeliveryOrderNow: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketDeliveryOrderWithin: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketDeliveryReceiveOn: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketEmptyCartMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketEmptyMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketOutOfStockBlockedMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketPromoApplied: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketPromoApplyButton: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketPromoErrorEmpty: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketPromoErrorExpired: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketPromoErrorInvalid: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketPromoPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketPromoRemove: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketSummaryDiscountLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketSummaryShipping: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketSummaryShippingFree: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketSummaryShippingNote: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketSummarySubtotalLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketSummaryTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketSummaryTotalLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    basketSummaryVatLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     basketTablePrice: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3584,7 +3730,12 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
-    cartLabel: Schema.Attribute.String;
+    cartLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

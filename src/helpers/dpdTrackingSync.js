@@ -20,6 +20,50 @@ const STATUS_RANK = {
   delivered: 5,
 };
 
+const HANDED_RANK = STATUS_RANK["Parcel handed to DPD"];
+
+function isHandedToDpdOrBeyond(status) {
+  const rank = STATUS_RANK[status];
+  return rank != null && rank >= HANDED_RANK;
+}
+
+/**
+ * DPD Webtrace ScanDate / ScanTime → Date (Europe/Paris wall time as local ISO).
+ */
+function parseDpdScanDateTime(scanDate, scanTime) {
+  if (!scanDate) return null;
+
+  let datePart = String(scanDate).trim();
+  let timePart = String(scanTime || "00:00:00").trim();
+
+  if (/^\d{8}$/.test(datePart)) {
+    datePart = `${datePart.slice(0, 4)}-${datePart.slice(4, 6)}-${datePart.slice(6, 8)}`;
+  } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(datePart)) {
+    const [d, m, y] = datePart.split("/");
+    datePart = `${y}-${m}-${d}`;
+  } else if (datePart.includes("T")) {
+    datePart = datePart.slice(0, 10);
+  }
+
+  if (/^\d{6}$/.test(timePart)) {
+    timePart = `${timePart.slice(0, 2)}:${timePart.slice(2, 4)}:${timePart.slice(4, 6)}`;
+  } else if (/^\d{4}$/.test(timePart)) {
+    timePart = `${timePart.slice(0, 2)}:${timePart.slice(2, 4)}:00`;
+  } else if (/^\d{2}:\d{2}$/.test(timePart)) {
+    timePart = `${timePart}:00`;
+  }
+
+  const parsed = new Date(`${datePart}T${timePart}`);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function earlierDate(a, b) {
+  if (!a) return b || null;
+  if (!b) return a;
+  return a.getTime() <= b.getTime() ? a : b;
+}
+
 function shouldAdvanceStatus(currentStatus, nextStatus) {
   if (!nextStatus || currentStatus === nextStatus) return false;
   const currentRank = STATUS_RANK[currentStatus];
@@ -31,17 +75,60 @@ function shouldAdvanceStatus(currentStatus, nextStatus) {
 /**
  * Unique shipment trackings attached to order items (per-box barcodes).
  */
-function collectItemTrackings(order) {
-  const byId = new Map();
+function unwrapRelationList(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value.data)) return value.data;
+  return [];
+}
 
-  for (const item of order.orderItems || []) {
-    for (const tracking of item.shipment_trackings || []) {
-      if (!tracking?.barCodeId || !tracking.documentId) continue;
-      byId.set(tracking.documentId, tracking);
+function unwrapEntity(value) {
+  if (!value) return null;
+  if (value.attributes) {
+    return {
+      id: value.id,
+      documentId: value.documentId,
+      ...value.attributes,
+    };
+  }
+  return value;
+}
+
+function collectTrackingsFromOrder(
+  order,
+  { requireBarCodeId = true, includeOrderTrackings = true } = {},
+) {
+  const byId = new Map();
+  const items = unwrapRelationList(order.orderItems).map(unwrapEntity);
+  const lists = items.map((item) => item?.shipment_trackings);
+  if (includeOrderTrackings) {
+    lists.push(order.shipment_trackings);
+  }
+
+  for (const list of lists) {
+    for (const raw of unwrapRelationList(list)) {
+      const tracking = unwrapEntity(raw);
+      const key = tracking?.documentId || tracking?.id;
+      if (!tracking || !key) continue;
+      if (requireBarCodeId && !tracking.barCodeId) continue;
+      const prev = byId.get(key);
+      byId.set(key, prev ? { ...prev, ...tracking } : tracking);
     }
   }
 
   return [...byId.values()];
+}
+
+function collectItemTrackings(order) {
+  return collectTrackingsFromOrder(order, { requireBarCodeId: true });
+}
+
+/** Per-box trackings on order items only (not the order-level master tracking). */
+function collectAllBoxTrackings(order) {
+  return collectTrackingsFromOrder(order, {
+    requireBarCodeId: false,
+    includeOrderTrackings: false,
+  });
 }
 
 /**
@@ -84,6 +171,7 @@ async function syncDpdTrackingStatuses({ strapi }) {
       },
     },
     populate: {
+      shipment_trackings: true,
       orderItems: {
         populate: {
           shipment_trackings: true,
@@ -107,12 +195,19 @@ async function syncDpdTrackingStatuses({ strapi }) {
 
     try {
       const boxStatuses = [];
+      let earliestHandledDate = order.dpdHandledDate
+        ? new Date(order.dpdHandledDate)
+        : null;
+      if (earliestHandledDate && Number.isNaN(earliestHandledDate.getTime())) {
+        earliestHandledDate = null;
+      }
 
       for (const tracking of trackings) {
         let status = tracking.status || null;
+        let trace = null;
 
         try {
-          const trace = await dpdService.getParcelTrace(tracking.barCodeId);
+          trace = await dpdService.getParcelTrace(tracking.barCodeId);
 
           if (
             trace?.orderStatus &&
@@ -137,29 +232,53 @@ async function syncDpdTrackingStatuses({ strapi }) {
           );
         }
 
+        if (isHandedToDpdOrBeyond(status) && !order.dpdHandledDate) {
+          const fromScan = parseDpdScanDateTime(
+            trace?.scanDate,
+            trace?.scanTime,
+          );
+          earliestHandledDate = earlierDate(
+            earliestHandledDate,
+            fromScan || new Date(),
+          );
+        }
+
         // Unknown / not yet scanned → treat as preparing so order cannot outrun lagging boxes
         boxStatuses.push(status || "preparing");
       }
 
       const nextOrderStatus = leastStatus(boxStatuses);
+      const shouldUpdateStatus =
+        nextOrderStatus &&
+        shouldAdvanceStatus(order.orderStatus, nextOrderStatus);
+      const shouldSetHandledDate =
+        !order.dpdHandledDate && Boolean(earliestHandledDate);
 
-      if (
-        !nextOrderStatus ||
-        !shouldAdvanceStatus(order.orderStatus, nextOrderStatus)
-      ) {
+      if (!shouldUpdateStatus && !shouldSetHandledDate) {
         skipped += 1;
         continue;
       }
 
+      const data = {};
+      if (shouldUpdateStatus) data.orderStatus = nextOrderStatus;
+      if (shouldSetHandledDate) data.dpdHandledDate = earliestHandledDate;
+
       await strapi.db.query("api::order.order").update({
         where: { documentId: order.documentId },
-        data: { orderStatus: nextOrderStatus },
+        data,
       });
 
       updated += 1;
-      strapi.log.info(
-        `[DPD Tracking Sync] Order ${order.orderNumber}: ${order.orderStatus} → ${nextOrderStatus} (least of ${trackings.length} boxes: ${boxStatuses.join(", ")})`,
-      );
+      if (shouldUpdateStatus) {
+        strapi.log.info(
+          `[DPD Tracking Sync] Order ${order.orderNumber}: ${order.orderStatus} → ${nextOrderStatus} (least of ${trackings.length} boxes: ${boxStatuses.join(", ")})`,
+        );
+      }
+      if (shouldSetHandledDate) {
+        strapi.log.info(
+          `[DPD Tracking Sync] Order ${order.orderNumber}: dpdHandledDate=${earliestHandledDate.toISOString()}`,
+        );
+      }
     } catch (err) {
       failed += 1;
       strapi.log.error(
@@ -178,7 +297,13 @@ async function syncDpdTrackingStatuses({ strapi }) {
 module.exports = {
   TRACKED_ORDER_STATUSES,
   STATUS_RANK,
+  HANDED_RANK,
+  isHandedToDpdOrBeyond,
+  parseDpdScanDateTime,
   leastStatus,
   collectItemTrackings,
+  collectAllBoxTrackings,
+  unwrapRelationList,
+  unwrapEntity,
   syncDpdTrackingStatuses,
 };
