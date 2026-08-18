@@ -119,8 +119,20 @@ function collectTrackingsFromOrder(
   return [...byId.values()];
 }
 
+function trackingKey(tracking) {
+  return tracking?.documentId || tracking?.id || null;
+}
+
+function orderLevelTrackingKeys(order) {
+  return new Set(
+    unwrapRelationList(order.shipment_trackings)
+      .map((raw) => trackingKey(unwrapEntity(raw)))
+      .filter(Boolean),
+  );
+}
+
 function collectItemTrackings(order) {
-  return collectTrackingsFromOrder(order, { requireBarCodeId: true });
+  return collectOrderItemBoxTrackings(order).filter((t) => t.barCodeId);
 }
 
 /** Per-box trackings on order items only (not the order-level master tracking). */
@@ -129,6 +141,23 @@ function collectAllBoxTrackings(order) {
     requireBarCodeId: false,
     includeOrderTrackings: false,
   });
+}
+
+/**
+ * Boxes = order-item shipment trackings only.
+ * The order-level master barcode is never a box. If it leaked onto items,
+ * drop it whenever the items also have their own (slave) trackings.
+ */
+function collectOrderItemBoxTrackings(order) {
+  const itemTrackings = collectAllBoxTrackings(order);
+  const orderKeys = orderLevelTrackingKeys(order);
+  if (!orderKeys.size) return itemTrackings;
+
+  const itemOnly = itemTrackings.filter((t) => !orderKeys.has(trackingKey(t)));
+  if (itemOnly.length > 0) return itemOnly;
+
+  // Single-parcel orders connect the same tracking to the order and every item.
+  return itemTrackings;
 }
 
 /**
@@ -186,7 +215,7 @@ async function syncDpdTrackingStatuses({ strapi }) {
   let failed = 0;
 
   for (const order of orders) {
-    const trackings = collectItemTrackings(order);
+    const trackings = collectOrderItemBoxTrackings(order);
 
     if (!trackings.length) {
       skipped += 1;
@@ -205,6 +234,11 @@ async function syncDpdTrackingStatuses({ strapi }) {
       for (const tracking of trackings) {
         let status = tracking.status || null;
         let trace = null;
+
+        if (!tracking.barCodeId) {
+          boxStatuses.push(status || "preparing");
+          continue;
+        }
 
         try {
           trace = await dpdService.getParcelTrace(tracking.barCodeId);
@@ -303,6 +337,7 @@ module.exports = {
   leastStatus,
   collectItemTrackings,
   collectAllBoxTrackings,
+  collectOrderItemBoxTrackings,
   unwrapRelationList,
   unwrapEntity,
   syncDpdTrackingStatuses,

@@ -2,7 +2,7 @@
 
 const {
   isHandedToDpdOrBeyond,
-  collectAllBoxTrackings,
+  collectOrderItemBoxTrackings,
   unwrapRelationList,
   unwrapEntity,
 } = require('./dpdTrackingSync');
@@ -83,35 +83,6 @@ function normalizeBoxStatus(status) {
   if (status == null) return null;
   const value = String(status).trim();
   return value === '' ? null : value;
-}
-
-function trackingKey(tracking) {
-  return tracking?.documentId || tracking?.id || null;
-}
-
-function orderLevelTrackingKeys(order) {
-  return new Set(
-    unwrapRelationList(order.shipment_trackings)
-      .map((raw) => trackingKey(unwrapEntity(raw)))
-      .filter(Boolean)
-  );
-}
-
-/**
- * Boxes = order-item shipment trackings only.
- * The order-level master barcode is never a box. If it leaked onto items,
- * drop it whenever the items also have their own (slave) trackings.
- */
-function collectOrderItemBoxTrackings(order) {
-  const itemTrackings = collectAllBoxTrackings(order);
-  const orderKeys = orderLevelTrackingKeys(order);
-  if (!orderKeys.size) return itemTrackings;
-
-  const itemOnly = itemTrackings.filter((t) => !orderKeys.has(trackingKey(t)));
-  if (itemOnly.length > 0) return itemOnly;
-
-  // Single-parcel orders connect the same tracking to the order and every item.
-  return itemTrackings;
 }
 
 function summarizeBoxes(order) {
