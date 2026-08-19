@@ -23,6 +23,22 @@ function extractTokens(referenceNumber) {
     .filter(Boolean);
 }
 
+function labelDataFromFetchedLabels(labels) {
+  if (!Array.isArray(labels) || labels.length === 0) return null;
+  return labels.map((label) => label.buffer.toString("utf-8"));
+}
+
+async function createShipmentTrackingRecord(shipment, labels) {
+  return strapi.documents("api::shipment-tracking.shipment-tracking").create({
+    data: {
+      barCodeId: shipment?.BarcodeId,
+      barCode: shipment?.BarCode,
+      barCodeSource: shipment?.BarcodeSource,
+      labelData: labelDataFromFetchedLabels(labels),
+    },
+  });
+}
+
 function getDpdCustomer() {
   return {
     countrycode: Number(process.env.DPD_COUNTRY_CODE),
@@ -387,16 +403,19 @@ module.exports = {
         throw new Error(`Order not found: ${data.documentId}`);
       }
 
-      // Create shipment tracking record
-      const tracking = await strapi
-        .documents("api::shipment-tracking.shipment-tracking")
-        .create({
-          data: {
-            barCodeId: shipment.Shipment.BarcodeId,
-            barCode: shipment.Shipment.BarCode,
-            barCodeSource: shipment.Shipment.BarcodeSource,
-          },
-        });
+      const barcodeId = shipment?.Shipment?.BarcodeId;
+
+      if (!barcodeId) {
+        throw new Error("No barcode returned from DPD");
+      }
+
+      const labels = await fetchLabels(barcodeId);
+      allLabels.push(...labels);
+
+      const tracking = await createShipmentTrackingRecord(
+        shipment.Shipment,
+        labels,
+      );
 
       // Attach tracking to order
       await strapi.documents("api::order.order").update({
@@ -420,16 +439,6 @@ module.exports = {
           },
         });
       }
-
-      const barcodeId = shipment?.Shipment?.BarcodeId;
-
-      if (!barcodeId) {
-        throw new Error("No barcode returned from DPD");
-      }
-
-      const labels = await fetchLabels(barcodeId);
-
-      allLabels.push(...labels);
     }
 
     // MULTI SHIPMENT WITH CHUNKS OF 5
@@ -513,16 +522,20 @@ module.exports = {
             throw new Error(`Order not found: ${data.documentId}`);
           }
 
-          // Create shipment tracking record
-          const tracking = await strapi
-            .documents("api::shipment-tracking.shipment-tracking")
-            .create({
-              data: {
-                barCodeId: shipment.Shipment.BarcodeId,
-                barCode: shipment.Shipment.BarCode,
-                barCodeSource: shipment.Shipment.BarcodeSource,
-              },
-            });
+          const barcodeId = shipment?.Shipment?.BarcodeId;
+
+          if (!barcodeId) {
+            console.warn("No barcode returned for single shipment");
+            continue;
+          }
+
+          const labels = await fetchLabels(barcodeId);
+          allLabels.push(...labels);
+
+          const tracking = await createShipmentTrackingRecord(
+            shipment.Shipment,
+            labels,
+          );
 
           // Attach tracking to order
           await strapi.documents("api::order.order").update({
@@ -546,17 +559,6 @@ module.exports = {
               },
             });
           }
-
-          const barcodeId = shipment?.Shipment?.BarcodeId;
-
-          if (!barcodeId) {
-            console.warn("No barcode returned for single shipment");
-            continue;
-          }
-
-          const labels = await fetchLabels(barcodeId);
-
-          allLabels.push(...labels);
 
           continue;
         }
@@ -651,15 +653,9 @@ module.exports = {
         const masterShipment = multiShipment.mastershipment;
 
         if (masterShipment?.Shipment) {
-          const tracking = await strapi
-            .documents("api::shipment-tracking.shipment-tracking")
-            .create({
-              data: {
-                barCodeId: masterShipment.Shipment.BarcodeId,
-                barCode: masterShipment.Shipment.BarCode,
-                barCodeSource: masterShipment.Shipment.BarcodeSource,
-              },
-            });
+          const tracking = await createShipmentTrackingRecord(
+            masterShipment.Shipment,
+          );
 
           await strapi.documents("api::order.order").update({
             documentId: order.documentId,
@@ -671,15 +667,18 @@ module.exports = {
           });
         }
         for (const shipment of shipments) {
-          const tracking = await strapi
-            .documents("api::shipment-tracking.shipment-tracking")
-            .create({
-              data: {
-                barCodeId: shipment.Shipment.BarcodeId,
-                barCode: shipment.Shipment.BarCode,
-                barCodeSource: shipment.Shipment.BarcodeSource,
-              },
-            });
+          const barcodeId = shipment?.Shipment?.BarcodeId;
+          let labels = [];
+
+          if (barcodeId) {
+            labels = await fetchLabels(barcodeId);
+            allLabels.push(...labels);
+          }
+
+          const tracking = await createShipmentTrackingRecord(
+            shipment.Shipment,
+            labels,
+          );
 
           // Find the slave corresponding to this shipment
           // Assuming DPD preserves order
@@ -722,14 +721,6 @@ module.exports = {
               },
             });
           }
-
-          const barcodeId = shipment?.Shipment?.BarcodeId;
-
-          if (!barcodeId) continue;
-
-          const labels = await fetchLabels(barcodeId);
-
-          allLabels.push(...labels);
         }
       }
     }

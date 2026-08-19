@@ -149,6 +149,8 @@ async function generateGlsShipment(payload) {
         continue;
       }
 
+      const parcelLabel = printData?.[i]?.Data;
+
       // Create tracking record
       const tracking = await strapi
         .documents("api::shipment-tracking.shipment-tracking")
@@ -157,6 +159,7 @@ async function generateGlsShipment(payload) {
             barCodeId: parcel.TrackID,
             barCode: parcel.ParcelNumber,
             barCodeSource: 0,
+            labelData: parcelLabel ? [parcelLabel] : null,
           },
         });
 

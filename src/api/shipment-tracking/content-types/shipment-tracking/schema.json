@@ -29,6 +29,9 @@
         "Parcel out for delivery",
         "delivered"
       ]
+    },
+    "labelData": {
+      "type": "json"
     }
   }
 }
