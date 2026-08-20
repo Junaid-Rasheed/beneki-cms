@@ -40,9 +40,34 @@ function findProductByIdInTree(nodes, productId) {
 }
 function getSidebarProductId(node) {
   if (!node) return null;
-  const pid = node.productId;
-  if (pid == null || pid === "") return null;
-  return String(pid);
+  return getProductId(node);
+}
+function getProductId(node) {
+  const val = getProductDetailValue(node, "productId");
+  if (val == null || val === "") return null;
+  return String(val);
+}
+function getProductDetailValue(node, fieldName) {
+  if (!node) return undefined;
+
+  const detail =
+    getProductDetail(node) ??
+    (node.raw ? getProductDetail(node.raw) : null);
+
+  return readField(detail, fieldName);
+}
+function readField(source, fieldName) {
+  if (!source) return undefined;
+  if (source[fieldName] !== undefined && source[fieldName] !== null) {
+    return source[fieldName];
+  }
+  if (
+    source.attributes?.[fieldName] !== undefined &&
+    source.attributes?.[fieldName] !== null
+  ) {
+    return source.attributes[fieldName];
+  }
+  return undefined;
 }
 
 function buildPiecesForOrderLine(itemData, foundProduct, lineIndex) {
