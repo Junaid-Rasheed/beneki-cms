@@ -47,6 +47,13 @@ function getDpdCustomer() {
   };
 }
 
+/** DPD expects dd.mm.yyyy in French local calendar day (not UTC). */
+function getDpdShippingDate(date = new Date()) {
+  return date
+    .toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" })
+    .replace(/\//g, ".");
+}
+
 /**
  * node-soap's default HTTP client gets ECONNRESET against webtrace.dpd.fr;
  * axios + keepAlive:false is reliable.
@@ -367,9 +374,7 @@ module.exports = {
           contact: data.receiver.name || "",
         },
 
-        shippingdate: new Date()
-          .toLocaleDateString("fr-FR")
-          .replace(/\//g, "."),
+        shippingdate: getDpdShippingDate(),
 
         services: {
           contact: {
@@ -491,9 +496,7 @@ module.exports = {
               vinfo2: data.receiver.deliveryInstruction2 || "",
             },
 
-            shippingdate: new Date()
-              .toLocaleDateString("fr-FR")
-              .replace(/\//g, "."),
+            shippingdate: getDpdShippingDate(),
 
             weight: singleSlave.weight || "",
             referencenumber: singleSlave.referencenumber || "",
@@ -603,9 +606,7 @@ module.exports = {
             vinfo2: data.receiver.deliveryInstruction2 || "",
           },
 
-          shippingdate: new Date()
-            .toLocaleDateString("fr-FR")
-            .replace(/\//g, "."),
+          shippingdate: getDpdShippingDate(),
 
           services: {
             consolidation: {
