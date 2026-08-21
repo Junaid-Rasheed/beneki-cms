@@ -25,6 +25,40 @@ function extractTokens(referenceNumber) {
     .map((t) => t.trim())
     .filter(Boolean);
 }
+
+/**
+ * Match order items to a slave referencenumber (`{variation}{productId}` tokens).
+ * Longest productId wins so shorter IDs that are suffixes of longer ones
+ * do not false-match.
+ */
+function matchOrderItemsByReference(orderItems, referenceNumber) {
+  const items = Array.isArray(orderItems) ? orderItems : [];
+  const tokens = extractTokens(referenceNumber);
+  if (!items.length || !tokens.length) return [];
+
+  const sorted = [...items].sort(
+    (a, b) =>
+      String(b.productId || "").length - String(a.productId || "").length,
+  );
+
+  const matched = new Map();
+  for (const token of tokens) {
+    const upper = String(token).toUpperCase();
+    for (const item of sorted) {
+      const pid = String(item.productId || "").toUpperCase();
+      if (!pid || !upper.endsWith(pid)) continue;
+
+      const prefix = upper.slice(0, upper.length - pid.length);
+      if (prefix !== "" && !/^\d+(?:\.\d+)?$/.test(prefix)) continue;
+
+      const key = item.documentId || item.id;
+      if (key != null) matched.set(key, item);
+      break;
+    }
+  }
+
+  return [...matched.values()];
+}
 /**
  * 1. GET GLS TOKEN
  */
@@ -168,16 +202,13 @@ async function generateGlsShipment(payload) {
         : [];
 
       if (orderItems.length === 0) {
-        strapi.log.warn(`No order items found for order ${data.orderId}`);
+        strapi.log.warn(`No order items found for order ${payload.orderId}`);
         continue;
       }
 
-      const tokens = extractTokens(slave.referencenumber);
-
-      const matchedItems = orderItems.filter((item) =>
-        tokens.some((token) =>
-          token.toUpperCase().endsWith(String(item.productId).toUpperCase()),
-        ),
+      const matchedItems = matchOrderItemsByReference(
+        orderItems,
+        slave.referencenumber,
       );
 
       for (const item of matchedItems) {

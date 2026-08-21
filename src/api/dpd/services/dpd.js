@@ -23,6 +23,40 @@ function extractTokens(referenceNumber) {
     .filter(Boolean);
 }
 
+/**
+ * Match order items to a slave referencenumber (`{variation}{productId}` tokens).
+ * Longest productId wins so shorter IDs that are suffixes of longer ones
+ * (e.g. "123" vs "1123") do not false-match.
+ */
+function matchOrderItemsByReference(orderItems, referenceNumber) {
+  const items = Array.isArray(orderItems) ? orderItems : [];
+  const tokens = extractTokens(referenceNumber);
+  if (!items.length || !tokens.length) return [];
+
+  const sorted = [...items].sort(
+    (a, b) =>
+      String(b.productId || "").length - String(a.productId || "").length,
+  );
+
+  const matched = new Map();
+  for (const token of tokens) {
+    const upper = String(token).toUpperCase();
+    for (const item of sorted) {
+      const pid = String(item.productId || "").toUpperCase();
+      if (!pid || !upper.endsWith(pid)) continue;
+
+      const prefix = upper.slice(0, upper.length - pid.length);
+      if (prefix !== "" && !/^\d+(?:\.\d+)?$/.test(prefix)) continue;
+
+      const key = item.documentId || item.id;
+      if (key != null) matched.set(key, item);
+      break;
+    }
+  }
+
+  return [...matched.values()];
+}
+
 function labelDataFromFetchedLabels(labels) {
   if (!Array.isArray(labels) || labels.length === 0) return null;
   return labels.map((label) => label.buffer.toString("utf-8"));
@@ -540,19 +574,22 @@ module.exports = {
             labels,
           );
 
-          // Attach tracking to order
-          await strapi.documents("api::order.order").update({
-            documentId: order.documentId,
-            data: {
-              shipment_trackings: {
-                connect: [tracking.documentId],
-              },
-            },
-          });
+          // Leftover single slave from a multi-parcel chunk (e.g. 6 → [5,1]).
+          // Match by reference like multi-shipment slaves — do NOT attach to
+          // every order item, and do NOT put it on order-level trackings
+          // (that would hide this box from item-based tracking sync).
+          const matchedItems = matchOrderItemsByReference(
+            order.orderItems,
+            singleSlave.referencenumber,
+          );
 
-          // Since this is a SINGLE shipment,
-          // connect the same tracking to all order items
-          for (const item of order.orderItems || []) {
+          if (!matchedItems.length) {
+            strapi.log.warn(
+              `No order items matched leftover slave ref "${singleSlave.referencenumber}" for order ${data.orderId}`,
+            );
+          }
+
+          for (const item of matchedItems) {
             await strapi.documents("api::order-item.order-item").update({
               documentId: item.documentId,
               data: {
@@ -690,26 +727,17 @@ module.exports = {
             continue;
           }
 
-          const orderItemMap = new Map();
           const orderItems = Array.isArray(order?.orderItems)
             ? order.orderItems
             : [];
-          for (const item of orderItems) {
-            orderItemMap.set(String(item.productId), item);
-          }
           if (orderItems.length === 0) {
             strapi.log.warn(`No order items found for order ${data.orderId}`);
             continue;
           }
 
-          const tokens = extractTokens(slave.referencenumber);
-
-          const matchedItems = orderItems.filter((item) =>
-            tokens.some((token) =>
-              token
-                .toUpperCase()
-                .endsWith(String(item.productId).toUpperCase()),
-            ),
+          const matchedItems = matchOrderItemsByReference(
+            orderItems,
+            slave.referencenumber,
           );
 
           for (const item of matchedItems) {
