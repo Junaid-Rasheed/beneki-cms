@@ -31,9 +31,9 @@ const DPD_STATUS_RANK = {
 };
 
 const GLS_STATUS_RANK = {
-  Preadvice: 1,
   shipped: 0,
   preparing: 0,
+  Preadvice: 1,
   "In transit": 2,
   "Final parcel center": 3,
   "In delivery": 4,
@@ -208,8 +208,8 @@ function leastStatus(statuses, carrier) {
   return least;
 }
 
-function defaultBoxStatus() {
-  return "preparing";
+function defaultBoxStatus(carrier) {
+  return carrier === "gls" ? "Preadvice" : "preparing";
 }
 
 async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
@@ -244,7 +244,7 @@ async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
         let trace = null;
 
         if (!tracking.barCodeId) {
-          boxStatuses.push(status || defaultBoxStatus());
+          boxStatuses.push(status || defaultBoxStatus(carrier));
           continue;
         }
 
@@ -285,7 +285,7 @@ async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
           );
         }
 
-        boxStatuses.push(status || defaultBoxStatus());
+        boxStatuses.push(status || defaultBoxStatus(carrier));
       }
 
       const nextOrderStatus = leastStatus(boxStatuses, carrier);
