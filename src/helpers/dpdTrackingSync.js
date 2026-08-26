@@ -16,8 +16,7 @@ const GLS_TRACKED_ORDER_STATUSES = [
   "Preadvice",
   "In transit",
   "Final parcel center",
-  "In delivery",
-  "shipped", // legacy GLS orders before status tracking
+  "In delivery"
 ];
 
 const DPD_STATUS_RANK = {
