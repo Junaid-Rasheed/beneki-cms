@@ -207,8 +207,9 @@ function leastStatus(statuses, carrier) {
   return least;
 }
 
-function defaultBoxStatus(carrier) {
-  return carrier === "gls" ? "Preadvice" : "preparing";
+/** Unknown / unscanned boxes stay preparing so the order cannot jump ahead. */
+function defaultBoxStatus() {
+  return "preparing";
 }
 
 async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
@@ -243,7 +244,7 @@ async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
         let trace = null;
 
         if (!tracking.barCodeId) {
-          boxStatuses.push(status || defaultBoxStatus(carrier));
+          boxStatuses.push(status || defaultBoxStatus());
           continue;
         }
 
@@ -284,7 +285,7 @@ async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
           );
         }
 
-        boxStatuses.push(status || defaultBoxStatus(carrier));
+        boxStatuses.push(status || defaultBoxStatus());
       }
 
       const nextOrderStatus = leastStatus(boxStatuses, carrier);

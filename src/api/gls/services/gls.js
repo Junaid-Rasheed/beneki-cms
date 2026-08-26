@@ -10,8 +10,19 @@ const TOKEN_URL = "https://api.gls-group.net/oauth2/v2/token";
 const SHIPMENT_URL =
   "https://api.gls-group.net/shipit-farm/v1/backend/rs/shipments";
 
-const TRACKING_URL =
+const TRACKING_DETAILS_URL =
   "https://api.gls-group.net/shipit-farm/v1/backend/rs/tracking/parceldetails";
+
+const TRACKING_PARCELS_URL =
+  "https://api.gls-group.net/shipit-farm/v1/backend/rs/tracking/parcels";
+
+const GLS_STATUS_RANK = {
+  DATA_RECEIVED: 1,
+  PICKUP: 2,
+  HUB: 3,
+  IN_DELIVERY: 4,
+  DELIVERED: 5,
+};
 
 const CLIENT_ID = process.env.GLS_CLIENT_ID;
 const CLIENT_SECRET = process.env.GLS_CLIENT_SECRET;
@@ -279,11 +290,67 @@ async function generateGlsShipment(payload) {
 }
 
 /**
- * Map GLS ShipIT API status to orderStatus.
+ * Normalize GLS API status enum / history StatusCode / description → canonical enum.
  * @see https://shipit.gls-group.com/webservices/4_0_F3/doxygen/WS-REST-API/rest_tracking.html
  */
+function normalizeGlsStatus(statusCode, description = "") {
+  const code = String(statusCode || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[\s-]+/g, "_");
+  const desc = String(description || "").toLowerCase();
+
+  if (
+    code === "DELIVERED" ||
+    /delivered|livr[ée]|zugestellt|entregado|consegnat/.test(desc)
+  ) {
+    return "DELIVERED";
+  }
+
+  if (
+    code === "IN_DELIVERY" ||
+    /in[_ ]?delivery|out for delivery|en livraison|zustellung|in consegna/.test(
+      desc,
+    )
+  ) {
+    return "IN_DELIVERY";
+  }
+
+  if (
+    code === "HUB" ||
+    /hub|final parcel|depot|parcel center|centre de tri|sort/.test(desc)
+  ) {
+    return "HUB";
+  }
+
+  if (
+    code === "PICKUP" ||
+    /pickup|picked up|enlev|collected|abgeholt|ritirat/.test(desc)
+  ) {
+    return "PICKUP";
+  }
+
+  if (
+    code === "DATA_RECEIVED" ||
+    /data[_ ]?received|preadvice|pre.?advice|données reçues|avis/.test(desc)
+  ) {
+    return "DATA_RECEIVED";
+  }
+
+  if (code === "CANCELLED" || /cancel/.test(desc)) {
+    return "CANCELLED";
+  }
+
+  // Pass through unknown codes that already look like enums
+  if (GLS_STATUS_RANK[code] != null) return code;
+  return null;
+}
+
+/**
+ * Map GLS ShipIT API status to orderStatus.
+ */
 function mapGlsStatusToOrderStatus(glsStatus) {
-  switch (String(glsStatus || "").toUpperCase()) {
+  switch (normalizeGlsStatus(glsStatus) || String(glsStatus || "").toUpperCase()) {
     case "DATA_RECEIVED":
       return "Preadvice";
     case "PICKUP":
@@ -306,45 +373,115 @@ function parseGlsEventDate(value) {
   return parsed;
 }
 
-function extractGlsParcelStatus(data) {
+function eventDateKey(event) {
+  return String(event?.Date || event?.DateTime || event?.InitialDate || "");
+}
+
+function eventStatusCode(event) {
+  return (
+    event?.StatusCode ||
+    event?.statusCode ||
+    event?.Status ||
+    event?.TrackTraceStatus ||
+    null
+  );
+}
+
+function eventDescription(event) {
+  return event?.Description || event?.description || "";
+}
+
+/**
+ * UnitDetail has no top-level Status — current state is the latest History entry
+ * (StatusCode + Description). DeliveryDate set ⇒ delivered.
+ */
+function extractFromParcelDetails(data) {
   const detail = data?.UnitDetail || data?.unitDetail;
   if (!detail) return { glsStatus: null, eventDate: null };
 
-  const direct = detail.Status || detail.TrackTraceStatus;
-  if (direct) {
+  if (detail.DeliveryDate) {
     return {
-      glsStatus: direct,
-      eventDate: parseGlsEventDate(detail.InitialDate || detail.DeliveryDate),
+      glsStatus: "DELIVERED",
+      eventDate: parseGlsEventDate(detail.DeliveryDate),
     };
   }
 
-  const history =
-    detail.History ||
-    detail.Events ||
-    detail.TrackTraceEvents ||
-    detail.UnitItems;
+  const history = detail.History || detail.history;
   const events = Array.isArray(history) ? history : history ? [history] : [];
-  if (!events.length) {
-    return { glsStatus: null, eventDate: null };
+
+  let bestStatus = null;
+  let bestRank = -1;
+  let bestDate = null;
+
+  for (const event of events) {
+    const normalized = normalizeGlsStatus(
+      eventStatusCode(event),
+      eventDescription(event),
+    );
+    if (!normalized || normalized === "CANCELLED") continue;
+
+    const rank = GLS_STATUS_RANK[normalized] ?? -1;
+    const date = parseGlsEventDate(eventDateKey(event));
+
+    // Prefer highest lifecycle rank; tie-break on newest event date
+    const newer =
+      date && bestDate ? date.getTime() > bestDate.getTime() : Boolean(date);
+    if (rank > bestRank || (rank === bestRank && newer)) {
+      bestRank = rank;
+      bestStatus = normalized;
+      bestDate = date || bestDate;
+    }
   }
 
-  const latest = events.reduce((best, event) => {
-    if (!best) return event;
-    const bestKey = String(best.DateTime || best.InitialDate || "");
-    const currentKey = String(event.DateTime || event.InitialDate || "");
-    return currentKey >= bestKey ? event : best;
-  }, null);
+  if (bestStatus) {
+    return { glsStatus: bestStatus, eventDate: bestDate };
+  }
 
+  const direct = normalizeGlsStatus(
+    detail.Status || detail.TrackTraceStatus,
+    "",
+  );
   return {
-    glsStatus: latest?.Status || latest?.TrackTraceStatus || null,
-    eventDate: parseGlsEventDate(
-      latest?.DateTime || latest?.InitialDate || detail.InitialDate,
-    ),
+    glsStatus: direct,
+    eventDate: parseGlsEventDate(detail.InitialDate || detail.DeliveryDate),
+  };
+}
+
+function extractFromParcelsList(data) {
+  const items = data?.UnitItems || data?.unitItems;
+  const list = Array.isArray(items) ? items : items ? [items] : [];
+  if (!list.length) return { glsStatus: null, eventDate: null };
+
+  let bestStatus = null;
+  let bestRank = -1;
+  let bestDate = null;
+
+  for (const item of list) {
+    const normalized = normalizeGlsStatus(item.Status || item.status, "");
+    if (!normalized || normalized === "CANCELLED") continue;
+    const rank = GLS_STATUS_RANK[normalized] ?? -1;
+    const date = parseGlsEventDate(item.InitialDate || item.initialDate);
+    if (rank > bestRank) {
+      bestRank = rank;
+      bestStatus = normalized;
+      bestDate = date;
+    }
+  }
+
+  return { glsStatus: bestStatus, eventDate: bestDate };
+}
+
+function trackingHeaders(token) {
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/glsVersion1+json",
+    Accept: "application/glsVersion1+json, application/json",
   };
 }
 
 /**
  * Fetch the latest GLS scan for a parcel TrackID (barCodeId).
+ * Uses parceldetails History.StatusCode, falls back to /parcels Status.
  */
 async function getParcelTrace(trackId) {
   if (!trackId) {
@@ -352,28 +489,62 @@ async function getParcelTrace(trackId) {
   }
 
   const token = await getAccessToken();
-  const response = await axios.post(
-    TRACKING_URL,
-    { TrackID: String(trackId) },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/glsVersion1+json",
-        Accept: "application/glsVersion1+json, application/json",
-      },
-    },
+  const id = String(trackId);
+
+  let detailsData = null;
+  try {
+    const detailsResponse = await axios.post(
+      TRACKING_DETAILS_URL,
+      { TrackID: id },
+      { headers: trackingHeaders(token) },
+    );
+    detailsData = detailsResponse.data;
+    const fromDetails = extractFromParcelDetails(detailsData);
+    if (fromDetails.glsStatus) {
+      return {
+        glsStatus: fromDetails.glsStatus,
+        eventDate: fromDetails.eventDate,
+        orderStatus: mapGlsStatusToOrderStatus(fromDetails.glsStatus),
+        raw: detailsData,
+      };
+    }
+  } catch (err) {
+    const message = `[GLS Tracking] parceldetails failed for ${id}: ${err.message}`;
+    if (typeof strapi !== "undefined" && strapi?.log) {
+      strapi.log.warn(message);
+    } else {
+      console.warn(message);
+    }
+  }
+
+  // Fallback: findParcels returns UnitItems[].Status (requires date window)
+  const today = new Date();
+  const dateTo = today.toISOString().slice(0, 10);
+  const from = new Date(today);
+  from.setDate(from.getDate() - 60);
+  const dateFrom = from.toISOString().slice(0, 10);
+
+  const parcelsResponse = await axios.post(
+    TRACKING_PARCELS_URL,
+    { TrackID: id, DateFrom: dateFrom, DateTo: dateTo },
+    { headers: trackingHeaders(token) },
   );
 
-  const { glsStatus, eventDate } = extractGlsParcelStatus(response.data);
-  if (!glsStatus) {
+  const fromList = extractFromParcelsList(parcelsResponse.data);
+  if (!fromList.glsStatus) {
+    if (typeof strapi !== "undefined" && strapi?.log) {
+      strapi.log.warn(
+        `[GLS Tracking] No status for ${id}. detailsKeys=${Object.keys(detailsData || {}).join(",") || "n/a"} parcelsKeys=${Object.keys(parcelsResponse.data || {}).join(",") || "n/a"}`,
+      );
+    }
     return null;
   }
 
   return {
-    glsStatus,
-    eventDate,
-    orderStatus: mapGlsStatusToOrderStatus(glsStatus),
-    raw: response.data,
+    glsStatus: fromList.glsStatus,
+    eventDate: fromList.eventDate,
+    orderStatus: mapGlsStatusToOrderStatus(fromList.glsStatus),
+    raw: parcelsResponse.data,
   };
 }
 
@@ -381,5 +552,6 @@ module.exports = {
   getAccessToken,
   generateGlsShipment,
   mapGlsStatusToOrderStatus,
+  normalizeGlsStatus,
   getParcelTrace,
 };
