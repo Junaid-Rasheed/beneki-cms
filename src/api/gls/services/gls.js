@@ -10,6 +10,9 @@ const TOKEN_URL = "https://api.gls-group.net/oauth2/v2/token";
 const SHIPMENT_URL =
   "https://api.gls-group.net/shipit-farm/v1/backend/rs/shipments";
 
+const TRACKING_URL =
+  "https://api.gls-group.net/shipit-farm/v1/backend/rs/tracking/parceldetails";
+
 const CLIENT_ID = process.env.GLS_CLIENT_ID;
 const CLIENT_SECRET = process.env.GLS_CLIENT_SECRET;
 const CONTACT_ID = process.env.GLS_CONTACT_ID;
@@ -275,7 +278,108 @@ async function generateGlsShipment(payload) {
   }
 }
 
+/**
+ * Map GLS ShipIT API status to orderStatus.
+ * @see https://shipit.gls-group.com/webservices/4_0_F3/doxygen/WS-REST-API/rest_tracking.html
+ */
+function mapGlsStatusToOrderStatus(glsStatus) {
+  switch (String(glsStatus || "").toUpperCase()) {
+    case "DATA_RECEIVED":
+      return "Preadvice";
+    case "PICKUP":
+      return "In transit";
+    case "HUB":
+      return "Final parcel center";
+    case "IN_DELIVERY":
+      return "In delivery";
+    case "DELIVERED":
+      return "delivered";
+    default:
+      return null;
+  }
+}
+
+function parseGlsEventDate(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function extractGlsParcelStatus(data) {
+  const detail = data?.UnitDetail || data?.unitDetail;
+  if (!detail) return { glsStatus: null, eventDate: null };
+
+  const direct = detail.Status || detail.TrackTraceStatus;
+  if (direct) {
+    return {
+      glsStatus: direct,
+      eventDate: parseGlsEventDate(detail.InitialDate || detail.DeliveryDate),
+    };
+  }
+
+  const history =
+    detail.History ||
+    detail.Events ||
+    detail.TrackTraceEvents ||
+    detail.UnitItems;
+  const events = Array.isArray(history) ? history : history ? [history] : [];
+  if (!events.length) {
+    return { glsStatus: null, eventDate: null };
+  }
+
+  const latest = events.reduce((best, event) => {
+    if (!best) return event;
+    const bestKey = String(best.DateTime || best.InitialDate || "");
+    const currentKey = String(event.DateTime || event.InitialDate || "");
+    return currentKey >= bestKey ? event : best;
+  }, null);
+
+  return {
+    glsStatus: latest?.Status || latest?.TrackTraceStatus || null,
+    eventDate: parseGlsEventDate(
+      latest?.DateTime || latest?.InitialDate || detail.InitialDate,
+    ),
+  };
+}
+
+/**
+ * Fetch the latest GLS scan for a parcel TrackID (barCodeId).
+ */
+async function getParcelTrace(trackId) {
+  if (!trackId) {
+    throw new Error("trackId is required");
+  }
+
+  const token = await getAccessToken();
+  const response = await axios.post(
+    TRACKING_URL,
+    { TrackID: String(trackId) },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/glsVersion1+json",
+        Accept: "application/glsVersion1+json, application/json",
+      },
+    },
+  );
+
+  const { glsStatus, eventDate } = extractGlsParcelStatus(response.data);
+  if (!glsStatus) {
+    return null;
+  }
+
+  return {
+    glsStatus,
+    eventDate,
+    orderStatus: mapGlsStatusToOrderStatus(glsStatus),
+    raw: response.data,
+  };
+}
+
 module.exports = {
   getAccessToken,
   generateGlsShipment,
+  mapGlsStatusToOrderStatus,
+  getParcelTrace,
 };

@@ -483,14 +483,13 @@ module.exports = {
       }
       //--------------------------------------------------------
       // Update Order
-      // France/DPD → preparing (tracking job advances status)
-      // International/GLS → shipped
+      // France/DPD and International/GLS → preparing (tracking job advances status)
       //--------------------------------------------------------
       await strapi.db.query("api::order.order").update({
         where: { documentId: order.documentId },
         data: {
           isDpdLabelPrinted: true,
-          orderStatus: isFrance ? "preparing" : "shipped",
+          orderStatus: "preparing",
         },
       });
       return {

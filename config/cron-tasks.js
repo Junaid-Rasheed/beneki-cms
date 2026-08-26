@@ -4,7 +4,7 @@ const { syncDpdTrackingStatuses } = require("../src/helpers/dpdTrackingSync");
 
 /**
  * Strapi cron tasks (node-schedule).
- * DPD tracking sync: every 15 minutes, Mon–Fri, 06:00–20:00 Europe/Paris.
+ * DPD + GLS tracking sync: every 5 minutes, Mon–Fri, 06:00–20:00 Europe/Paris.
  */
 module.exports = {
   dpdTrackingSync: {
@@ -23,7 +23,7 @@ module.exports = {
       try {
         await syncDpdTrackingStatuses({ strapi });
       } catch (err) {
-        strapi.log.error(`[DPD Tracking Sync] Job failed: ${err.message}`);
+        strapi.log.error(`[Shipment Tracking Sync] Job failed: ${err.message}`);
       }
     },
     options: {

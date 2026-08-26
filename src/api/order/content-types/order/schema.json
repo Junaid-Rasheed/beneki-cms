@@ -62,10 +62,13 @@
         "partially shipped",
         "shipped",
         "preparing",
+        "Preadvice",
         "Parcel handed to DPD",
         "In transit",
         "At delivery centre",
+        "Final parcel center",
         "Parcel out for delivery",
+        "In delivery",
         "delivered",
         "cancelled"
       ],

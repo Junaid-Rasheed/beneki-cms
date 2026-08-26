@@ -1,8 +1,9 @@
 "use strict";
 
 const dpdService = require("../api/dpd/services/dpd");
+const glsService = require("../api/gls/services/gls");
 
-const TRACKED_ORDER_STATUSES = [
+const DPD_TRACKED_ORDER_STATUSES = [
   "preparing",
   "Parcel handed to DPD",
   "In transit",
@@ -10,7 +11,16 @@ const TRACKED_ORDER_STATUSES = [
   "Parcel out for delivery",
 ];
 
-const STATUS_RANK = {
+const GLS_TRACKED_ORDER_STATUSES = [
+  "preparing",
+  "Preadvice",
+  "In transit",
+  "Final parcel center",
+  "In delivery",
+  "shipped", // legacy GLS orders before status tracking
+];
+
+const DPD_STATUS_RANK = {
   preparing: 0,
   shipped: 0,
   "Parcel handed to DPD": 1,
@@ -20,11 +30,29 @@ const STATUS_RANK = {
   delivered: 5,
 };
 
-const HANDED_RANK = STATUS_RANK["Parcel handed to DPD"];
+const GLS_STATUS_RANK = {
+  Preadvice: 1,
+  shipped: 0,
+  preparing: 0,
+  "In transit": 2,
+  "Final parcel center": 3,
+  "In delivery": 4,
+  delivered: 5,
+};
+
+/** @deprecated use DPD_STATUS_RANK */
+const STATUS_RANK = DPD_STATUS_RANK;
+
+const HANDED_RANK = DPD_STATUS_RANK["Parcel handed to DPD"];
 
 function isHandedToDpdOrBeyond(status) {
-  const rank = STATUS_RANK[status];
+  const rank = DPD_STATUS_RANK[status];
   return rank != null && rank >= HANDED_RANK;
+}
+
+function statusRankForCarrier(status, carrier) {
+  const ranks = carrier === "gls" ? GLS_STATUS_RANK : DPD_STATUS_RANK;
+  return ranks[status];
 }
 
 /**
@@ -64,10 +92,10 @@ function earlierDate(a, b) {
   return a.getTime() <= b.getTime() ? a : b;
 }
 
-function shouldAdvanceStatus(currentStatus, nextStatus) {
+function shouldAdvanceStatus(currentStatus, nextStatus, carrier) {
   if (!nextStatus || currentStatus === nextStatus) return false;
-  const currentRank = STATUS_RANK[currentStatus];
-  const nextRank = STATUS_RANK[nextStatus];
+  const currentRank = statusRankForCarrier(currentStatus, carrier);
+  const nextRank = statusRankForCarrier(nextStatus, carrier);
   if (currentRank == null || nextRank == null) return true;
   return nextRank >= currentRank;
 }
@@ -161,16 +189,15 @@ function collectOrderItemBoxTrackings(order) {
 }
 
 /**
- * Least-advanced status across all boxes (lowest STATUS_RANK).
- * e.g. 10 delivered + 1 in transit → "In transit"
+ * Least-advanced status across all boxes (lowest rank for the carrier).
  */
-function leastStatus(statuses) {
+function leastStatus(statuses, carrier) {
   let least = null;
   let leastRank = Infinity;
 
   for (const status of statuses) {
     if (!status) continue;
-    const rank = STATUS_RANK[status];
+    const rank = statusRankForCarrier(status, carrier);
     if (rank == null) continue;
     if (rank < leastRank) {
       leastRank = rank;
@@ -181,34 +208,15 @@ function leastStatus(statuses) {
   return least;
 }
 
-/**
- * Sync DPD parcel statuses for in-flight orders (Mon–Fri 06:00–20:00 Europe/Paris).
- * Tracks every order-item box; order status follows the least-advanced box.
- */
-async function syncDpdTrackingStatuses({ strapi }) {
-  const orders = await strapi.documents("api::order.order").findMany({
-    filters: {
-      orderStatus: { $in: TRACKED_ORDER_STATUSES },
-      isDpdLabelPrinted: true,
-      orderItems: {
-        shipment_trackings: { barCodeId: { $notNull: true } },
-      },
-      shippingAddress: {
-        country: {
-          $eq: "France",
-        },
-      },
-    },
-    populate: {
-      shipment_trackings: true,
-      orderItems: {
-        populate: {
-          shipment_trackings: true,
-        },
-      },
-    },
-    limit: 200,
-  });
+function defaultBoxStatus() {
+  return "preparing";
+}
+
+async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
+  const getTrace =
+    carrier === "gls"
+      ? (barCodeId) => glsService.getParcelTrace(barCodeId)
+      : (barCodeId) => dpdService.getParcelTrace(barCodeId);
 
   let updated = 0;
   let skipped = 0;
@@ -236,16 +244,16 @@ async function syncDpdTrackingStatuses({ strapi }) {
         let trace = null;
 
         if (!tracking.barCodeId) {
-          boxStatuses.push(status || "preparing");
+          boxStatuses.push(status || defaultBoxStatus());
           continue;
         }
 
         try {
-          trace = await dpdService.getParcelTrace(tracking.barCodeId);
+          trace = await getTrace(tracking.barCodeId);
 
           if (
             trace?.orderStatus &&
-            shouldAdvanceStatus(tracking.status, trace.orderStatus)
+            shouldAdvanceStatus(tracking.status, trace.orderStatus, carrier)
           ) {
             await strapi
               .documents("api::shipment-tracking.shipment-tracking")
@@ -255,18 +263,18 @@ async function syncDpdTrackingStatuses({ strapi }) {
               });
             status = trace.orderStatus;
             strapi.log.info(
-              `[DPD Tracking Sync] Box ${tracking.barCodeId} (order ${order.orderNumber}): ${tracking.status || "n/a"} → ${trace.orderStatus}`,
+              `${logPrefix} Box ${tracking.barCodeId} (order ${order.orderNumber}): ${tracking.status || "n/a"} → ${trace.orderStatus}`,
             );
           } else if (trace?.orderStatus) {
             status = tracking.status || trace.orderStatus;
           }
         } catch (err) {
           strapi.log.error(
-            `[DPD Tracking Sync] Failed box ${tracking.barCodeId} on order ${order.orderNumber}: ${err.message}`,
+            `${logPrefix} Failed box ${tracking.barCodeId} on order ${order.orderNumber}: ${err.message}`,
           );
         }
 
-        if (isHandedToDpdOrBeyond(status) && !order.dpdHandledDate) {
+        if (carrier === "dpd" && isHandedToDpdOrBeyond(status) && !order.dpdHandledDate) {
           const fromScan = parseDpdScanDateTime(
             trace?.scanDate,
             trace?.scanTime,
@@ -277,16 +285,17 @@ async function syncDpdTrackingStatuses({ strapi }) {
           );
         }
 
-        // Unknown / not yet scanned → treat as preparing so order cannot outrun lagging boxes
-        boxStatuses.push(status || "preparing");
+        boxStatuses.push(status || defaultBoxStatus());
       }
 
-      const nextOrderStatus = leastStatus(boxStatuses);
+      const nextOrderStatus = leastStatus(boxStatuses, carrier);
       const shouldUpdateStatus =
         nextOrderStatus &&
-        shouldAdvanceStatus(order.orderStatus, nextOrderStatus);
+        shouldAdvanceStatus(order.orderStatus, nextOrderStatus, carrier);
       const shouldSetHandledDate =
-        !order.dpdHandledDate && Boolean(earliestHandledDate);
+        carrier === "dpd" &&
+        !order.dpdHandledDate &&
+        Boolean(earliestHandledDate);
 
       if (!shouldUpdateStatus && !shouldSetHandledDate) {
         skipped += 1;
@@ -305,32 +314,104 @@ async function syncDpdTrackingStatuses({ strapi }) {
       updated += 1;
       if (shouldUpdateStatus) {
         strapi.log.info(
-          `[DPD Tracking Sync] Order ${order.orderNumber}: ${order.orderStatus} → ${nextOrderStatus} (least of ${trackings.length} boxes: ${boxStatuses.join(", ")})`,
+          `${logPrefix} Order ${order.orderNumber}: ${order.orderStatus} → ${nextOrderStatus} (least of ${trackings.length} boxes: ${boxStatuses.join(", ")})`,
         );
       }
       if (shouldSetHandledDate) {
         strapi.log.info(
-          `[DPD Tracking Sync] Order ${order.orderNumber}: dpdHandledDate=${earliestHandledDate.toISOString()}`,
+          `${logPrefix} Order ${order.orderNumber}: dpdHandledDate=${earliestHandledDate.toISOString()}`,
         );
       }
     } catch (err) {
       failed += 1;
       strapi.log.error(
-        `[DPD Tracking Sync] Failed for order ${order.orderNumber}: ${err.message}`,
+        `${logPrefix} Failed for order ${order.orderNumber}: ${err.message}`,
       );
     }
   }
 
   strapi.log.info(
-    `[DPD Tracking Sync] Done. checked=${orders.length} updated=${updated} skipped=${skipped} failed=${failed}`,
+    `${logPrefix} Done. checked=${orders.length} updated=${updated} skipped=${skipped} failed=${failed}`,
   );
 
   return { checked: orders.length, updated, skipped, failed };
 }
 
+const ORDER_POPULATE = {
+  shipment_trackings: true,
+  orderItems: {
+    populate: {
+      shipment_trackings: true,
+    },
+  },
+};
+
+/**
+ * Sync DPD parcel statuses for in-flight France orders (Mon–Fri 06:00–20:00 Europe/Paris).
+ * Tracks every order-item box; order status follows the least-advanced box.
+ */
+async function syncDpdTrackingStatuses({ strapi }) {
+  const [dpdOrders, glsOrders] = await Promise.all([
+    strapi.documents("api::order.order").findMany({
+      filters: {
+        orderStatus: { $in: DPD_TRACKED_ORDER_STATUSES },
+        isDpdLabelPrinted: true,
+        orderItems: {
+          shipment_trackings: { barCodeId: { $notNull: true } },
+        },
+        shippingAddress: {
+          country: { $eq: "France" },
+        },
+      },
+      populate: ORDER_POPULATE,
+      limit: 200,
+    }),
+    strapi.documents("api::order.order").findMany({
+      filters: {
+        orderStatus: { $in: GLS_TRACKED_ORDER_STATUSES },
+        isDpdLabelPrinted: true,
+        orderItems: {
+          shipment_trackings: { barCodeId: { $notNull: true } },
+        },
+        shippingAddress: {
+          country: { $ne: "France" },
+        },
+      },
+      populate: ORDER_POPULATE,
+      limit: 200,
+    }),
+  ]);
+
+  const dpdResult = await syncCarrierOrders({
+    strapi,
+    orders: dpdOrders,
+    carrier: "dpd",
+    logPrefix: "[DPD Tracking Sync]",
+  });
+  const glsResult = await syncCarrierOrders({
+    strapi,
+    orders: glsOrders,
+    carrier: "gls",
+    logPrefix: "[GLS Tracking Sync]",
+  });
+
+  return {
+    checked: dpdResult.checked + glsResult.checked,
+    updated: dpdResult.updated + glsResult.updated,
+    skipped: dpdResult.skipped + glsResult.skipped,
+    failed: dpdResult.failed + glsResult.failed,
+    dpd: dpdResult,
+    gls: glsResult,
+  };
+}
+
 module.exports = {
-  TRACKED_ORDER_STATUSES,
+  TRACKED_ORDER_STATUSES: DPD_TRACKED_ORDER_STATUSES,
+  DPD_TRACKED_ORDER_STATUSES,
+  GLS_TRACKED_ORDER_STATUSES,
   STATUS_RANK,
+  DPD_STATUS_RANK,
+  GLS_STATUS_RANK,
   HANDED_RANK,
   isHandedToDpdOrBeyond,
   parseDpdScanDateTime,
