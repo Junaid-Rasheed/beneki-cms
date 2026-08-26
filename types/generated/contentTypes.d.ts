@@ -1543,10 +1543,13 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         'partially shipped',
         'shipped',
         'preparing',
+        'Preadvice',
         'Parcel handed to DPD',
         'In transit',
         'At delivery centre',
+        'Final parcel center',
         'Parcel out for delivery',
+        'In delivery',
         'delivered',
         'cancelled',
       ]
@@ -2002,10 +2005,13 @@ export interface ApiShipmentTrackingShipmentTracking
     status: Schema.Attribute.Enumeration<
       [
         'preparing',
+        'Preadvice',
         'Parcel handed to DPD',
         'In transit',
         'At delivery centre',
+        'Final parcel center',
         'Parcel out for delivery',
+        'In delivery',
         'delivered',
       ]
     >;
