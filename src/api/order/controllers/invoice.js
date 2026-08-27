@@ -77,7 +77,10 @@ module.exports = {
         'Parcel handed to DPD',
         'In transit',
         'At delivery centre',
-        'Parcel out for delivery')
+        'Parcel out for delivery',
+        'Preadvice',
+        'Final parcel center',
+        'In delivery')
       `;
 
       params = [userId, startDate, endDate]; // ✅ correct order
@@ -89,7 +92,11 @@ module.exports = {
         'Parcel handed to DPD',
         'In transit',
         'At delivery centre',
-        'Parcel out for delivery')
+        'Parcel out for delivery',
+        'Preadvice',
+        'Final parcel center',
+        'In delivery'
+        )
       `;
 
       params = [startDate, endDate]; // ✅ correct
