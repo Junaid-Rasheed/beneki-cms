@@ -131,7 +131,7 @@ async function generateGlsShipment(payload) {
             eMail: payload.receiver.email,
             FixedLinePhonenumber: "",
             MobilePhoneNumber: payload.receiver.phoneNumber,
-            ContactPerson: payload.receiver.name,
+            ContactPerson: payload.receiver.name?.trim().slice(0, 40) || "",
           },
         },
 
