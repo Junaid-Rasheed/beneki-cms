@@ -320,12 +320,33 @@ function formatNum(value) {
   const rounded = Math.round(value * 1000) / 1000;
   return String(rounded);
 }
+async function resolveAutoPrint(order) {
+  if (typeof order.user?.autoprint === "boolean") {
+    return order.user.autoprint !== false;
+  }
+  const orderWithUser = await strapi.db.query("api::order.order").findOne({
+    where: order.documentId
+      ? { documentId: order.documentId }
+      : { id: order.id },
+    populate: ["user"],
+  });
+  return orderWithUser?.user?.autoprint !== false;
+}
 module.exports = {
   async generateMultiLabelByOrderId(order) {
     try {
       if (!order) {
         throw new Error("Order not found");
       }
+
+      const autoPrint = await resolveAutoPrint(order);
+      if (!autoPrint) {
+        strapi.log.info(
+          `Skipping label generation for ${order.orderNumber} (user.autoprint=false)`,
+        );
+        return;
+      }
+
       if (
         order.shippingAddress.country?.toLowerCase() === "france" &&
         order.shippingAddress.zipCode?.toString().startsWith("20")
@@ -416,23 +437,6 @@ module.exports = {
       ]
         .filter(Boolean)
         .join(", ");
-
-      //--------------------------------------------------------
-      // Autoprint: only enqueue printer job when user.autoprint is true
-      //--------------------------------------------------------
-      let autoPrint = false;
-
-      if (typeof order.user?.autoprint === "boolean") {
-        autoPrint = order.user.autoprint;
-      } else {
-        const orderWithUser = await strapi.db.query("api::order.order").findOne({
-          where: order.documentId
-            ? { documentId: order.documentId }
-            : { id: order.id },
-          populate: ["user"],
-        });
-        autoPrint = Boolean(orderWithUser?.user?.autoprint);
-      }
 
       //--------------------------------------------------------
       // Payload

@@ -189,7 +189,7 @@ module.exports = {
 
       const order = await strapi.db.query("api::order.order").findOne({
         where: { orderNumber: orderId },
-        populate: ["billingAddress", "shippingAddress", "orderItems"],
+        populate: ["billingAddress", "shippingAddress", "orderItems", "user"],
       });
 
       if (!order) {
@@ -253,12 +253,15 @@ module.exports = {
         data: updateData,
       });
       
-      if (
-        SUCCESS_STATUSES.includes(status)
-      ) {
-        await generateMultiLabelByOrderId(order);
-
-        strapi.log.info(`✅ Label generated for ${orderId}`);
+      if (SUCCESS_STATUSES.includes(status)) {
+        if (order.user?.autoprint !== false) {
+          await generateMultiLabelByOrderId(order);
+          strapi.log.info(`✅ Label generated for ${orderId}`);
+        } else {
+          strapi.log.info(
+            `Skipping label generation for ${orderId} (user.autoprint=false)`,
+          );
+        }
       }
 
       return ctx.send("OK");
