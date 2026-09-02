@@ -2,8 +2,8 @@
 
 const { createCoreService } = require('@strapi/strapi').factories;
 const {
-  sendTemplatedEmail,
-} = require('../../../utils/sendRegistrationConfirmationEmail');
+  sendLogisticNotifyEmail,
+} = require('../utils/sendLogisticNotifyEmail');
 
 function parseTime(timeStr) {
   const raw = String(timeStr || '00:00:00');
@@ -86,16 +86,12 @@ async function notifyOnDutyLogistics(strapi, { labelCount, locale = 'en' } = {})
   for (const person of onDuty) {
     if (!person.email) continue;
 
-    const sent = await sendTemplatedEmail(strapi, {
+    const sent = await sendLogisticNotifyEmail(strapi, {
       to: person.email,
-      module: 'logistic',
+      name: person.name || '',
+      labelCount: labelCountStr,
+      time,
       locale,
-      vars: {
-        name: person.name || '',
-        labelCount: labelCountStr,
-        time,
-      },
-      fallbackSubject: `Pending shipping labels: ${labelCountStr}`,
     });
 
     if (sent) {
