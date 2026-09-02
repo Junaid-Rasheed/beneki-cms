@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "logistics",
+  "info": {
+    "singularName": "logistic",
+    "pluralName": "logistics",
+    "displayName": "Logistic",
+    "description": "Logistics staff schedule and contact details"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "workingFrom": {
+      "type": "time",
+      "required": true
+    },
+    "workingTo": {
+      "type": "time",
+      "required": true
+    }
+  }
+}

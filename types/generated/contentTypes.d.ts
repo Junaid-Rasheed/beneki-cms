@@ -698,6 +698,7 @@ export interface ApiEmailTemplateEmailTemplate
         'accountapproved',
         'accountmoreinfo',
         'accountrefused',
+        'logistic',
       ]
     >;
     publishedAt: Schema.Attribute.DateTime;
@@ -1187,6 +1188,38 @@ export interface ApiHomePageTrustLogoHomePageTrustLogo
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     url: Schema.Attribute.String;
+  };
+}
+
+export interface ApiLogisticLogistic extends Struct.CollectionTypeSchema {
+  collectionName: 'logistics';
+  info: {
+    description: 'Logistics staff schedule and contact details';
+    displayName: 'Logistic';
+    pluralName: 'logistics';
+    singularName: 'logistic';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::logistic.logistic'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    workingFrom: Schema.Attribute.Time & Schema.Attribute.Required;
+    workingTo: Schema.Attribute.Time & Schema.Attribute.Required;
   };
 }
 
@@ -5953,6 +5986,7 @@ declare module '@strapi/strapi' {
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
       'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
+      'api::logistic.logistic': ApiLogisticLogistic;
       'api::mentions-legale.mentions-legale': ApiMentionsLegaleMentionsLegale;
       'api::order-address.order-address': ApiOrderAddressOrderAddress;
       'api::order-audit-log.order-audit-log': ApiOrderAuditLogOrderAuditLog;

@@ -17,6 +17,8 @@ const MISSING_DPD_ORDER_ACTIONS = [
   'api::missing-dpd-order.missing-dpd-order.find',
 ];
 
+const LOGISTIC_NOTIFY_ACTION = 'api::logistic.logistic.notify';
+
 async function ensurePermission(strapi, role, action, label, logTag) {
   if (!role) return;
   const existing = await strapi.db
@@ -132,6 +134,53 @@ async function ensureAdminDpdOrderPermissions(strapi) {
   }
 }
 
+async function ensureLogisticNotifyPermission(strapi) {
+  const publicRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({
+      where: {
+        $or: [{ type: 'public' }, { name: 'Public' }],
+      },
+    });
+
+  if (!publicRole) {
+    strapi.log.warn('[logistic] No Public role; notify permission skipped');
+    return;
+  }
+
+  await ensurePermission(
+    strapi,
+    publicRole,
+    LOGISTIC_NOTIFY_ACTION,
+    'Public',
+    'logistic'
+  );
+}
+
+async function ensureLogisticEmailTemplate(strapi) {
+  const existing = await strapi.db
+    .query('api::email-template.email-template')
+    .findOne({
+      where: { module: 'logistic', locale: 'en' },
+    });
+
+  if (existing) return;
+
+  await strapi.documents('api::email-template.email-template').create({
+    data: {
+      module: 'logistic',
+      subject: 'Pending shipping labels: {{labelCount}}',
+      message:
+        '<p>Hello {{name}},</p><p>There are currently <strong>{{labelCount}}</strong> shipping labels waiting to be printed (as of {{time}} Europe/Paris).</p>',
+      closingText: 'Beneki Logistics',
+    },
+    locale: 'en',
+    status: 'published',
+  });
+
+  strapi.log.info('[logistic] Created default email-template (module=logistic, locale=en)');
+}
+
 module.exports = {
   /**
    * An asynchronous register function that runs before
@@ -174,6 +223,22 @@ module.exports = {
     } catch (err) {
       strapi.log.error(
         `[dpd-orders] Permission bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureLogisticNotifyPermission(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[logistic] Permission bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureLogisticEmailTemplate(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[logistic] Email template bootstrap failed: ${err.message}`
       );
     }
   },

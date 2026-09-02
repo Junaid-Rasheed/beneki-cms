@@ -36,7 +36,8 @@
         "registrationadminnotify",
         "accountapproved",
         "accountmoreinfo",
-        "accountrefused"
+        "accountrefused",
+        "logistic"
       ]
     },
     "buttonUrl": {
