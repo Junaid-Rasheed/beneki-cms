@@ -60,57 +60,54 @@ function isWithinWorkingHours(nowMinutes, workingFrom, workingTo) {
   return nowMinutes >= fromMinutes || nowMinutes <= toMinutesValue;
 }
 
-async function findOnDutyLogistics(strapi, now) {
-  const nowTime = parisHoursMinutes(now);
-  const nowMinutes = toMinutes(nowTime);
+module.exports = createCoreService('api::logistic.logistic', ({ strapi }) => ({
+  async findOnDutyLogistics(now = new Date()) {
+    const nowTime = parisHoursMinutes(now);
+    const nowMinutes = toMinutes(nowTime);
 
-  const logistics = await strapi.db.query('api::logistic.logistic').findMany({
-    where: {
-      publishedAt: { $notNull: true },
-    },
-  });
-
-  return logistics.filter((person) =>
-    isWithinWorkingHours(nowMinutes, person.workingFrom, person.workingTo)
-  );
-}
-
-async function notifyOnDutyLogistics(strapi, { labelCount, locale = 'en' } = {}) {
-  const now = new Date();
-  const onDuty = await findOnDutyLogistics(strapi, now);
-  const time = formatParisTime(now);
-  const labelCountStr = String(labelCount);
-
-  const notified = [];
-
-  for (const person of onDuty) {
-    if (!person.email) continue;
-
-    const sent = await sendLogisticNotifyEmail(strapi, {
-      to: person.email,
-      name: person.name || '',
-      labelCount: labelCountStr,
-      time,
-      locale,
+    const logistics = await strapi.db.query('api::logistic.logistic').findMany({
+      where: {
+        publishedAt: { $notNull: true },
+      },
     });
 
-    if (sent) {
-      notified.push({
-        name: person.name,
-        email: person.email,
+    return logistics.filter((person) =>
+      isWithinWorkingHours(nowMinutes, person.workingFrom, person.workingTo)
+    );
+  },
+
+  async notifyOnDutyLogistics({ labelCount, locale = 'en' } = {}) {
+    const now = new Date();
+    const onDuty = await this.findOnDutyLogistics(now);
+    const time = formatParisTime(now);
+    const labelCountStr = String(labelCount);
+
+    const notified = [];
+
+    for (const person of onDuty) {
+      if (!person.email) continue;
+
+      const sent = await sendLogisticNotifyEmail(strapi, {
+        to: person.email,
+        name: person.name || '',
+        labelCount: labelCountStr,
+        time,
+        locale,
       });
+
+      if (sent) {
+        notified.push({
+          name: person.name,
+          email: person.email,
+        });
+      }
     }
-  }
 
-  return {
-    labelCount,
-    currentTime: time,
-    onDutyCount: onDuty.length,
-    notified,
-  };
-}
-
-module.exports = createCoreService('api::logistic.logistic', () => ({
-  findOnDutyLogistics,
-  notifyOnDutyLogistics,
+    return {
+      labelCount,
+      currentTime: time,
+      onDutyCount: onDuty.length,
+      notified,
+    };
+  },
 }));
