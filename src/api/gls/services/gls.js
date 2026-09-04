@@ -21,7 +21,8 @@ const GLS_STATUS_RANK = {
   PICKUP: 2,
   HUB: 3,
   IN_DELIVERY: 4,
-  DELIVERED: 5,
+  NOT_DELIVERED: 5,
+  DELIVERED: 6,
 };
 
 const CLIENT_ID = process.env.GLS_CLIENT_ID;
@@ -300,6 +301,16 @@ function normalizeGlsStatus(statusCode, description = "") {
     .replace(/[\s-]+/g, "_");
   const desc = String(description || "").toLowerCase();
 
+  // Must run before DELIVERED — "not delivered" also contains "delivered"
+  if (
+    code === "NOT_DELIVERED" ||
+    /not[\s_-]*delivered|undeliver|non[\s_-]*livr|nicht[\s_-]*zugestellt|no[\s_-]*entregad|non[\s_-]*consegnat/.test(
+      desc,
+    )
+  ) {
+    return "NOT_DELIVERED";
+  }
+
   if (
     code === "DELIVERED" ||
     /delivered|livr[ée]|zugestellt|entregado|consegnat/.test(desc)
@@ -359,6 +370,8 @@ function mapGlsStatusToOrderStatus(glsStatus) {
       return "Final parcel center";
     case "IN_DELIVERY":
       return "In delivery";
+    case "NOT_DELIVERED":
+      return "Not delivered";
     case "DELIVERED":
       return "delivered";
     default:

@@ -16,7 +16,8 @@ const GLS_TRACKED_ORDER_STATUSES = [
   "Preadvice",
   "In transit",
   "Final parcel center",
-  "In delivery"
+  "In delivery",
+  "Not delivered",
 ];
 
 const DPD_STATUS_RANK = {
@@ -36,7 +37,8 @@ const GLS_STATUS_RANK = {
   "In transit": 2,
   "Final parcel center": 3,
   "In delivery": 4,
-  delivered: 5,
+  "Not delivered": 5,
+  delivered: 6,
 };
 
 /** @deprecated use DPD_STATUS_RANK */

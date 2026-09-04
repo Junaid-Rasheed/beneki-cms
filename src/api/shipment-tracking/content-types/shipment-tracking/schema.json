@@ -30,6 +30,7 @@
         "Final parcel center",
         "Parcel out for delivery",
         "In delivery",
+        "Not delivered",
         "delivered"
       ]
     },

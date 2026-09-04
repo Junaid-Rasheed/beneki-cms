@@ -1583,6 +1583,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         'Final parcel center',
         'Parcel out for delivery',
         'In delivery',
+        'Not delivered',
         'delivered',
         'cancelled',
       ]
@@ -2045,6 +2046,7 @@ export interface ApiShipmentTrackingShipmentTracking
         'Final parcel center',
         'Parcel out for delivery',
         'In delivery',
+        'Not delivered',
         'delivered',
       ]
     >;
