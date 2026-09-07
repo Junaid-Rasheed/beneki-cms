@@ -17,6 +17,14 @@ const MISSING_DPD_ORDER_ACTIONS = [
   'api::missing-dpd-order.missing-dpd-order.find',
 ];
 
+const DELAYED_GLS_ORDER_ACTIONS = [
+  'api::delayed-gls-order.delayed-gls-order.find',
+];
+
+const MISSING_GLS_ORDER_ACTIONS = [
+  'api::missing-gls-order.missing-gls-order.find',
+];
+
 const LOGISTIC_NOTIFY_ACTION = 'api::logistic.logistic.notify';
 
 async function ensurePermission(strapi, role, action, label, logTag) {
@@ -134,6 +142,39 @@ async function ensureAdminDpdOrderPermissions(strapi) {
   }
 }
 
+async function ensureAdminGlsOrderPermissions(strapi) {
+  const adminRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({ where: { name: 'Admin' } });
+
+  if (!adminRole) {
+    strapi.log.warn(
+      '[gls-orders] No users-permissions role named "Admin"; skip permission bootstrap'
+    );
+    return;
+  }
+
+  for (const action of DELAYED_GLS_ORDER_ACTIONS) {
+    await ensurePermission(
+      strapi,
+      adminRole,
+      action,
+      'Admin',
+      'delayed-gls-order'
+    );
+  }
+
+  for (const action of MISSING_GLS_ORDER_ACTIONS) {
+    await ensurePermission(
+      strapi,
+      adminRole,
+      action,
+      'Admin',
+      'missing-gls-order'
+    );
+  }
+}
+
 async function ensureLogisticNotifyPermission(strapi) {
   const publicRole = await strapi.db
     .query('plugin::users-permissions.role')
@@ -223,6 +264,14 @@ module.exports = {
     } catch (err) {
       strapi.log.error(
         `[dpd-orders] Permission bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureAdminGlsOrderPermissions(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[gls-orders] Permission bootstrap failed: ${err.message}`
       );
     }
 

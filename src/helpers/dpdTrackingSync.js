@@ -45,10 +45,16 @@ const GLS_STATUS_RANK = {
 const STATUS_RANK = DPD_STATUS_RANK;
 
 const HANDED_RANK = DPD_STATUS_RANK["Parcel handed to DPD"];
+const GLS_HANDED_RANK = GLS_STATUS_RANK.Preadvice;
 
 function isHandedToDpdOrBeyond(status) {
   const rank = DPD_STATUS_RANK[status];
   return rank != null && rank >= HANDED_RANK;
+}
+
+function isHandedToGlsOrBeyond(status) {
+  const rank = GLS_STATUS_RANK[status];
+  return rank != null && rank >= GLS_HANDED_RANK;
 }
 
 function statusRankForCarrier(status, carrier) {
@@ -91,6 +97,13 @@ function earlierDate(a, b) {
   if (!a) return b || null;
   if (!b) return a;
   return a.getTime() <= b.getTime() ? a : b;
+}
+
+function parseGlsEventDate(value) {
+  if (!value) return null;
+  const parsed = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
 }
 
 function shouldAdvanceStatus(currentStatus, nextStatus, carrier) {
@@ -276,7 +289,11 @@ async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
           );
         }
 
-        if (carrier === "dpd" && isHandedToDpdOrBeyond(status) && !order.dpdHandledDate) {
+        if (
+          carrier === "dpd" &&
+          isHandedToDpdOrBeyond(status) &&
+          !order.dpdHandledDate
+        ) {
           const fromScan = parseDpdScanDateTime(
             trace?.scanDate,
             trace?.scanTime,
@@ -284,6 +301,18 @@ async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
           earliestHandledDate = earlierDate(
             earliestHandledDate,
             fromScan || new Date(),
+          );
+        }
+
+        if (
+          carrier === "gls" &&
+          isHandedToGlsOrBeyond(status) &&
+          !order.dpdHandledDate
+        ) {
+          const fromEvent = parseGlsEventDate(trace?.eventDate);
+          earliestHandledDate = earlierDate(
+            earliestHandledDate,
+            fromEvent || new Date(),
           );
         }
 
@@ -295,7 +324,7 @@ async function syncCarrierOrders({ strapi, orders, carrier, logPrefix }) {
         nextOrderStatus &&
         shouldAdvanceStatus(order.orderStatus, nextOrderStatus, carrier);
       const shouldSetHandledDate =
-        carrier === "dpd" &&
+        (carrier === "dpd" || carrier === "gls") &&
         !order.dpdHandledDate &&
         Boolean(earliestHandledDate);
 
@@ -416,6 +445,7 @@ module.exports = {
   GLS_STATUS_RANK,
   HANDED_RANK,
   isHandedToDpdOrBeyond,
+  isHandedToGlsOrBeyond,
   parseDpdScanDateTime,
   leastStatus,
   collectItemTrackings,

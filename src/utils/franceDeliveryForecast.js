@@ -201,6 +201,58 @@ function isPastExpectedDelivery(deliveryDateMax, now = new Date()) {
   return todayKey > deliveryDateMax;
 }
 
+/**
+ * Expected delivery window for any country, given an explicit business-day range
+ * (e.g. "2–4 days"). Same calendar rules as France / storefront checkout.
+ */
+function computeDeliveryForecast(orderDate, range, config) {
+  if (!orderDate) return null;
+
+  const when = orderDate instanceof Date ? orderDate : new Date(orderDate);
+  if (Number.isNaN(when.getTime())) return null;
+
+  const holidaySet = config?.holidaySet || new Set();
+  const workingDaysSet = config?.workingDaysSet || new Set();
+  const cutoff = config?.cutoff || { hours: 15, minutes: 0 };
+  const resolvedRange = range || '2–4 days';
+  const { minBusinessDays, maxBusinessDays } = parseRangeDays(resolvedRange);
+
+  const orderDateKey = toParisDateKey(when);
+  const { hours, minutes } = parisHoursMinutes(when);
+  const orderMinutes = hours * 60 + minutes;
+  const cutoffMinutes = cutoff.hours * 60 + cutoff.minutes;
+
+  const alreadyWithCarrier = Boolean(config?.alreadyWithCarrier);
+  const canShipSameDay = alreadyWithCarrier
+    ? isWorkingDateKey(orderDateKey, holidaySet, workingDaysSet)
+    : isWorkingDateKey(orderDateKey, holidaySet, workingDaysSet) &&
+      orderMinutes <= cutoffMinutes;
+
+  const shipStartDate = canShipSameDay
+    ? orderDateKey
+    : addBusinessDaysFromKey(orderDateKey, 1, holidaySet, workingDaysSet);
+
+  const deliveryDateMin = addBusinessDaysFromKey(
+    shipStartDate,
+    minBusinessDays,
+    holidaySet,
+    workingDaysSet
+  );
+  const deliveryDateMax = addBusinessDaysFromKey(
+    shipStartDate,
+    maxBusinessDays,
+    holidaySet,
+    workingDaysSet
+  );
+
+  return {
+    range: resolvedRange,
+    shipStartDate,
+    deliveryDateMin,
+    deliveryDateMax,
+  };
+}
+
 module.exports = {
   FRANCE_ONE_DAY_ZIP_CODES,
   FRANCE_BASE_RANGE,
@@ -210,6 +262,7 @@ module.exports = {
   normalizeWorkingDays,
   getFranceRangeForPostalCode,
   computeFranceDeliveryForecast,
+  computeDeliveryForecast,
   calendarDaysBetween,
   isPastExpectedDelivery,
 };
