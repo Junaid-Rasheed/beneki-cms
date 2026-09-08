@@ -349,7 +349,7 @@ module.exports = {
 
       if (
         order.shippingAddress.country?.toLowerCase() === "france" &&
-        order.shippingAddress.zipCode?.toString().startsWith("20")
+        order.shippingAddress.postalCode?.toString().startsWith("20")
       ) {
         return;
       }
