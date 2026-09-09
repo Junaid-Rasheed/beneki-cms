@@ -1769,6 +1769,7 @@ export interface ApiProductDetailProductDetail
       Schema.Attribute.Private;
     isFoodProduct: Schema.Attribute.Boolean;
     isOutOfStock: Schema.Attribute.Boolean;
+    isService: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -2109,6 +2110,7 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
         };
       }>;
     isOutOfStock: Schema.Attribute.Boolean;
+    isService: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isSideBarProduct: Schema.Attribute.Boolean;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<

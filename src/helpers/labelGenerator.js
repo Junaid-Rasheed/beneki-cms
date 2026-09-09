@@ -11,6 +11,12 @@ function getProductDetail(node) {
   return node?.product_detail || null;
 }
 
+function isServiceProduct(node) {
+  if (!node) return false;
+  if (node.isService === true) return true;
+  return getProductDetailValue(node, "isService") === true;
+}
+
 function findProductByIdInTree(nodes, productId) {
   if (!productId || !Array.isArray(nodes)) return null;
 
@@ -24,8 +30,9 @@ function findProductByIdInTree(nodes, productId) {
       String(node.id) === pid ||
       String(node.documentId) === pid ||
       (getSidebarProductId(node) === pid &&
-        productDetail?.maximumVariation > 0 &&
-        productDetail?.maximumWeight > 0)
+        (isServiceProduct(node) ||
+          (productDetail?.maximumVariation > 0 &&
+            productDetail?.maximumWeight > 0)))
     ) {
       return node;
     }
@@ -71,6 +78,10 @@ function readField(source, fieldName) {
 }
 
 function buildPiecesForOrderLine(itemData, foundProduct, lineIndex) {
+  if (isServiceProduct(foundProduct)) {
+    return [];
+  }
+
   const productId = itemData.productId;
   const orderQuantity = parseInt(itemData.quantity, 10) || 1;
   const productVariationStr = itemData.productQuantity || "";
@@ -404,6 +415,10 @@ module.exports = {
         order.orderItems.forEach((item, index) => {
           const foundProduct = findProductByIdInTree(products, item.productId);
 
+          if (isServiceProduct(foundProduct)) {
+            return;
+          }
+
           const pieces = buildPiecesForOrderLine(item, foundProduct, index);
 
           allPieces.push(...pieces);
@@ -412,7 +427,10 @@ module.exports = {
         slaveRequests = packPiecesIntoSlaves(allPieces);
 
         if (!slaveRequests.length) {
-          throw new Error("No items to ship.");
+          strapi.log.info(
+            `Skipping label generation for ${order.orderNumber} (no shippable items; service-only order)`,
+          );
+          return;
         }
       }
       //--------------------------------------------------------
