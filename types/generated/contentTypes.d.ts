@@ -2110,7 +2110,6 @@ export interface ApiSidebarItemSidebarItem extends Struct.CollectionTypeSchema {
         };
       }>;
     isOutOfStock: Schema.Attribute.Boolean;
-    isService: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isSideBarProduct: Schema.Attribute.Boolean;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<

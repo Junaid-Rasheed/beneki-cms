@@ -12,8 +12,6 @@ function getProductDetail(node) {
 }
 
 function isServiceProduct(node) {
-  if (!node) return false;
-  if (node.isService === true) return true;
   return getProductDetailValue(node, "isService") === true;
 }
 

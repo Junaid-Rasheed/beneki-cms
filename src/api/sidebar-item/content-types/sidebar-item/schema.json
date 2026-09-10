@@ -222,10 +222,6 @@
     "isOutOfStock": {
       "type": "boolean"
     },
-    "isService": {
-      "type": "boolean",
-      "default": false
-    },
     "product_detail": {
       "type": "relation",
       "relation": "oneToOne",
