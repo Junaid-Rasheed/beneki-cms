@@ -3647,6 +3647,7 @@ export interface ApiStaticCartStaticCart extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    basketInvalidVariationRemovedMessage: Schema.Attribute.String;
     basketOutOfStockBlockedMessage: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3914,6 +3915,7 @@ export interface ApiStaticCheckoutStaticCheckout
     discountAppliedTitle: Schema.Attribute.String;
     discountCodeLabel: Schema.Attribute.String;
     discountText: Schema.Attribute.String;
+    invalidVariationCheckoutRemovedMessage: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
