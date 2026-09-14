@@ -295,6 +295,9 @@
           "localized": true
         }
       }
+    },
+    "basketInvalidVariationRemovedMessage": {
+      "type": "string"
     }
   }
 }

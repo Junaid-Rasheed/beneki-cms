@@ -243,6 +243,9 @@
     },
     "outOfStockCheckoutBlockedMessage": {
       "type": "string"
+    },
+    "invalidVariationCheckoutRemovedMessage": {
+      "type": "string"
     }
   }
 }
