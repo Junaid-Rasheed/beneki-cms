@@ -58,7 +58,8 @@ function getLocaleFromOrder(order) {
     unitedkingdom: "en",
     "united kingdom": "en",
     uk: "en",
-    ireland: "en"
+    ireland: "en",
+    malta: "en"
   };
 
   return countryLocaleMap[normalizedCountry] || "en";

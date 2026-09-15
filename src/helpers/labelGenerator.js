@@ -272,6 +272,8 @@ function getCountryPrefix(country) {
     uk: "GB",
     "great britain": "GB",
     monaco: "MC",
+    malta: "MT",
+    malte: "MT",
   };
   return map[value.toLowerCase()] || value.slice(0, 2).toUpperCase();
 }
