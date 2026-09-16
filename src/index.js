@@ -25,6 +25,8 @@ const MISSING_GLS_ORDER_ACTIONS = [
   'api::missing-gls-order.missing-gls-order.find',
 ];
 
+const ORDER_MARK_COMPLETED_ACTION = 'api::order.order.markAsCompleted';
+
 const LOGISTIC_NOTIFY_ACTION = 'api::logistic.logistic.notify';
 
 async function ensurePermission(strapi, role, action, label, logTag) {
@@ -175,6 +177,27 @@ async function ensureAdminGlsOrderPermissions(strapi) {
   }
 }
 
+async function ensureAdminOrderMarkCompletedPermission(strapi) {
+  const adminRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({ where: { name: 'Admin' } });
+
+  if (!adminRole) {
+    strapi.log.warn(
+      '[order.markAsCompleted] No users-permissions role named "Admin"; skip permission bootstrap'
+    );
+    return;
+  }
+
+  await ensurePermission(
+    strapi,
+    adminRole,
+    ORDER_MARK_COMPLETED_ACTION,
+    'Admin',
+    'order.markAsCompleted'
+  );
+}
+
 async function ensureLogisticNotifyPermission(strapi) {
   const publicRole = await strapi.db
     .query('plugin::users-permissions.role')
@@ -272,6 +295,14 @@ module.exports = {
     } catch (err) {
       strapi.log.error(
         `[gls-orders] Permission bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureAdminOrderMarkCompletedPermission(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[order.markAsCompleted] Permission bootstrap failed: ${err.message}`
       );
     }
 
