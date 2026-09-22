@@ -159,10 +159,61 @@ function getLatestTrace(traces) {
 /**
  * Map DPD Webtrace StatusNumber / StatusDescription to orderStatus.
  * Codes observed from DPD FR Webtrace (e.g. 40=livré, 30=en livraison, 20=acheminement).
+ * Exception statuses (unsuccessful attempt, pickup, return, …) are checked before
+ * delivered — descriptions like "not delivered" also contain "delivered".
  */
 function mapTraceToOrderStatus(statusNumber, statusDescription = "") {
   const code = Number(statusNumber);
   const desc = String(statusDescription).toLowerCase();
+
+  // Exception statuses first (must run before delivered — "not delivered" contains "delivered")
+  if (
+    /retourn[ée]|return(ed)? to (sender|shipper|consignor)|retour (à l['']?exp[ée]diteur|exp[ée]diteur)|return parcel to the shipping|colis retourn/.test(
+      desc,
+    )
+  ) {
+    return "Returned to sender";
+  }
+
+  if (
+    /refus[ée]|refused by (recipient|consignee)|colis refus/.test(desc)
+  ) {
+    return "Returned to sender";
+  }
+
+  if (
+    /report[ée]|postponed|livraison reportée|absence (of )?the recipient|destinataire absent|delivery postponed|livraison est impossible/.test(
+      desc,
+    )
+  ) {
+    return "Delivery postponed";
+  }
+
+  if (
+    /point relais|pickup (point|parcelshop|shop)|à disposition.*pickup|available at pickup|disponible.*relais|disponible.*pickup/.test(
+      desc,
+    )
+  ) {
+    return "Available at Pickup";
+  }
+
+  if (
+    /en agence|available at (the )?dpd agency|parcels available at the dpd|colis en agence|disponible en agence/.test(
+      desc,
+    )
+  ) {
+    return "Available at DPD agency";
+  }
+
+  // Unsuccessful / failed delivery attempt
+  if (
+    [14, 18].includes(code) ||
+    /unsuccessful|delivery attempt|tentative.*(livraison|infruct)|avis de passage|non[\s_-]*livr|not[\s_-]*deliver|undeliver|échec.*(de )?livraison|livraison échou|delivery failure|deliveryfailure/.test(
+      desc,
+    )
+  ) {
+    return "Unsuccessful delivery attempt";
+  }
 
   if (
     [13, 23, 40].includes(code) ||

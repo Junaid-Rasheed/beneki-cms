@@ -69,6 +69,11 @@
         "Final parcel center",
         "Parcel out for delivery",
         "In delivery",
+        "Unsuccessful delivery attempt",
+        "Delivery postponed",
+        "Available at Pickup",
+        "Available at DPD agency",
+        "Returned to sender",
         "Not delivered",
         "delivered",
         "cancelled"

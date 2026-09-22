@@ -78,9 +78,14 @@ module.exports = {
         'In transit',
         'At delivery centre',
         'Parcel out for delivery',
+        'Unsuccessful delivery attempt',
+        'Delivery postponed',
+        'Available at Pickup',
+        'Available at DPD agency',
         'Preadvice',
         'Final parcel center',
-        'In delivery')
+        'In delivery',
+        'Not delivered')
       `;
 
       params = [userId, startDate, endDate]; // ✅ correct order
@@ -93,9 +98,14 @@ module.exports = {
         'In transit',
         'At delivery centre',
         'Parcel out for delivery',
+        'Unsuccessful delivery attempt',
+        'Delivery postponed',
+        'Available at Pickup',
+        'Available at DPD agency',
         'Preadvice',
         'Final parcel center',
-        'In delivery'
+        'In delivery',
+        'Not delivered'
         )
       `;
 

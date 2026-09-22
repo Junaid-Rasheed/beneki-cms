@@ -9,6 +9,10 @@ const DPD_TRACKED_ORDER_STATUSES = [
   "In transit",
   "At delivery centre",
   "Parcel out for delivery",
+  "Unsuccessful delivery attempt",
+  "Delivery postponed",
+  "Available at Pickup",
+  "Available at DPD agency",
 ];
 
 const GLS_TRACKED_ORDER_STATUSES = [
@@ -27,7 +31,12 @@ const DPD_STATUS_RANK = {
   "In transit": 2,
   "At delivery centre": 3,
   "Parcel out for delivery": 4,
-  delivered: 5,
+  "Unsuccessful delivery attempt": 4,
+  "Delivery postponed": 4,
+  "Available at Pickup": 5,
+  "Available at DPD agency": 5,
+  "Returned to sender": 5,
+  delivered: 6,
 };
 
 const GLS_STATUS_RANK = {
