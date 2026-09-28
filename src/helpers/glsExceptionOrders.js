@@ -56,13 +56,7 @@ function getBaseRangeForCountry(countryName) {
 }
 
 function getGlsHandledDate(order) {
-  return (
-    order?.dpdHandledDate ||
-    order?.attributes?.dpdHandledDate ||
-    order?.orderCreatedDate ||
-    order?.createdAt ||
-    null
-  );
+  return order?.dpdHandledDate || order?.attributes?.dpdHandledDate || null;
 }
 
 function unwrapAddress(order) {

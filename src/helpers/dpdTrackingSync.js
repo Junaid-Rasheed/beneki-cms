@@ -54,7 +54,8 @@ const GLS_STATUS_RANK = {
 const STATUS_RANK = DPD_STATUS_RANK;
 
 const HANDED_RANK = DPD_STATUS_RANK["Parcel handed to DPD"];
-const GLS_HANDED_RANK = GLS_STATUS_RANK.Preadvice;
+/** Preadvice = data received only; real handover starts at In transit (GLS PICKUP). */
+const GLS_HANDED_RANK = GLS_STATUS_RANK["In transit"];
 
 function isHandedToDpdOrBeyond(status) {
   const rank = DPD_STATUS_RANK[status];
