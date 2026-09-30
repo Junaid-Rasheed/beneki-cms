@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventories",
+  "info": {
+    "singularName": "inventory",
+    "pluralName": "inventories",
+    "displayName": "Inventory",
+    "description": "Shared stock for one product across multiple product-detail variants"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "productName": {
+      "type": "string",
+      "required": true
+    },
+    "sku": {
+      "type": "string"
+    },
+    "stock": {
+      "type": "integer",
+      "required": true,
+      "default": 0,
+      "min": 0
+    },
+    "lowStockThreshold": {
+      "type": "integer",
+      "default": 10,
+      "min": 0
+    },
+    "notes": {
+      "type": "text"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "product_details": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-detail.product-detail",
+      "mappedBy": "inventory"
+    }
+  }
+}

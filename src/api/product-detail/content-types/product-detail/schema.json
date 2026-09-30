@@ -35,6 +35,12 @@
     "isService": {
       "type": "boolean",
       "default": false
+    },
+    "inventory": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::inventory.inventory",
+      "inversedBy": "product_details"
     }
   }
 }

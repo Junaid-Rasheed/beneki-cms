@@ -29,6 +29,17 @@ const ORDER_MARK_COMPLETED_ACTION = 'api::order.order.markAsCompleted';
 
 const LOGISTIC_NOTIFY_ACTION = 'api::logistic.logistic.notify';
 
+const INVENTORY_ACTIONS = [
+  'api::inventory.inventory.find',
+  'api::inventory.inventory.findOne',
+  'api::inventory.inventory.create',
+  'api::inventory.inventory.update',
+  'api::inventory.inventory.delete',
+  'api::inventory.inventory.adjustStock',
+  'api::inventory.inventory.productDetailOptions',
+];
+
+
 async function ensurePermission(strapi, role, action, label, logTag) {
   if (!role) return;
   const existing = await strapi.db
@@ -198,6 +209,24 @@ async function ensureAdminOrderMarkCompletedPermission(strapi) {
   );
 }
 
+
+async function ensureAdminInventoryPermissions(strapi) {
+  const adminRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({ where: { name: 'Admin' } });
+
+  if (!adminRole) {
+    strapi.log.warn(
+      '[inventory] No users-permissions role named "Admin"; skip permission bootstrap'
+    );
+    return;
+  }
+
+  for (const action of INVENTORY_ACTIONS) {
+    await ensurePermission(strapi, adminRole, action, 'Admin', 'inventory');
+  }
+}
+
 async function ensureLogisticNotifyPermission(strapi) {
   const publicRole = await strapi.db
     .query('plugin::users-permissions.role')
@@ -305,6 +334,15 @@ module.exports = {
         `[order.markAsCompleted] Permission bootstrap failed: ${err.message}`
       );
     }
+
+    try {
+      await ensureAdminInventoryPermissions(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[inventory] Permission bootstrap failed: ${err.message}`
+      );
+    }
+
 
     try {
       await ensureLogisticNotifyPermission(strapi);
