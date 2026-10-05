@@ -1,5 +1,10 @@
 'use strict';
 
+const {
+  applyOrderInventoryDeduction,
+  restoreOrderInventory,
+} = require('../../../helpers/inventoryStock');
+
 /**
  * inventory controller — Admin stock management for the storefront account UI.
  */
@@ -453,5 +458,117 @@ module.exports = {
         },
       },
     };
+  },
+
+  /**
+   * POST /api/inventories/sync-order-stock
+   * Body: { orderId, action: 'deduct' | 'restore' }
+   *
+   * Explicit inventory sync for:
+   * - Admin bank-transfer paid/refund (order detail Save changes)
+   * - PayPal success page after capture
+   *
+   * Missing inventory for any line is skipped; never fails the payment/order flow.
+   */
+  async syncOrderStock(ctx) {
+    try {
+      const userId = ctx.state.user?.id;
+      if (!userId) {
+        return ctx.unauthorized();
+      }
+
+      const user = await strapi.db
+        .query('plugin::users-permissions.user')
+        .findOne({
+          where: { id: userId },
+          populate: ['role'],
+        });
+
+      const roleName = user?.role?.name || user?.role?.type;
+      const isAdmin = roleName === 'Admin';
+
+      const body = ctx.request.body || {};
+      const orderId = body.orderId || body.orderDocumentId || body.id;
+      const action = String(body.action || '').trim().toLowerCase();
+
+      if (!orderId) {
+        ctx.body = {
+          data: { ok: true, skipped: true, reason: 'missing_orderId' },
+        };
+        return;
+      }
+
+      if (action !== 'deduct' && action !== 'restore') {
+        ctx.body = {
+          data: { ok: true, skipped: true, reason: 'invalid_action' },
+        };
+        return;
+      }
+
+      // Resolve order by documentId or numeric id
+      let order = await strapi.db.query('api::order.order').findOne({
+        where: { documentId: String(orderId) },
+        populate: ['user'],
+      });
+      if (!order && /^\d+$/.test(String(orderId))) {
+        order = await strapi.db.query('api::order.order').findOne({
+          where: { id: Number(orderId) },
+          populate: ['user'],
+        });
+      }
+      if (!order && typeof orderId === 'string') {
+        order = await strapi.db.query('api::order.order').findOne({
+          where: { orderNumber: String(orderId) },
+          populate: ['user'],
+        });
+      }
+
+      if (!order) {
+        // Soft skip — do not break caller flow
+        ctx.body = {
+          data: { ok: true, skipped: true, reason: 'order_not_found' },
+        };
+        return;
+      }
+
+      // Authz: Admin can sync any order; non-admin may only deduct their own (PayPal).
+      const orderUserId = order.user?.id || order.user;
+      if (!isAdmin) {
+        if (action === 'restore') {
+          return ctx.forbidden('Admin role required to restore inventory');
+        }
+        if (Number(orderUserId) !== Number(userId)) {
+          return ctx.forbidden('Not allowed to sync inventory for this order');
+        }
+      }
+
+      let result;
+      if (action === 'deduct') {
+        result = await applyOrderInventoryDeduction(strapi, order);
+      } else {
+        result = await restoreOrderInventory(strapi, order);
+      }
+
+      ctx.body = {
+        data: {
+          ok: true,
+          action,
+          orderId: order.id,
+          documentId: order.documentId,
+          ...result,
+        },
+      };
+    } catch (err) {
+      // Never break payment / status-update flows
+      strapi.log.error(`[inventory.syncOrderStock] ${err.message}`);
+      ctx.body = {
+        data: {
+          ok: true,
+          skipped: true,
+          reason: 'error',
+          error: err.message,
+        },
+      };
+    }
   },
 };

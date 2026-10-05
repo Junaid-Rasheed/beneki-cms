@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * inventory routes — Admin inventory management (storefront Account → Inventory).
+ * inventory routes — Admin inventory management + explicit order stock sync.
  */
 
 module.exports = {
@@ -19,6 +19,15 @@ module.exports = {
       method: 'GET',
       path: '/inventories/product-details/options',
       handler: 'inventory.productDetailOptions',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/inventories/sync-order-stock',
+      handler: 'inventory.syncOrderStock',
       config: {
         policies: [],
         middlewares: [],

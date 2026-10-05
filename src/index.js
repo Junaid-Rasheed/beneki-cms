@@ -29,7 +29,7 @@ const ORDER_MARK_COMPLETED_ACTION = 'api::order.order.markAsCompleted';
 
 const LOGISTIC_NOTIFY_ACTION = 'api::logistic.logistic.notify';
 
-const INVENTORY_ACTIONS = [
+const INVENTORY_ADMIN_ACTIONS = [
   'api::inventory.inventory.find',
   'api::inventory.inventory.findOne',
   'api::inventory.inventory.create',
@@ -37,6 +37,12 @@ const INVENTORY_ACTIONS = [
   'api::inventory.inventory.delete',
   'api::inventory.inventory.adjustStock',
   'api::inventory.inventory.productDetailOptions',
+  'api::inventory.inventory.syncOrderStock',
+];
+
+const INVENTORY_AUTHENTICATED_ACTIONS = [
+  // PayPal success page explicitly deducts stock after capture
+  'api::inventory.inventory.syncOrderStock',
 ];
 
 
@@ -219,11 +225,35 @@ async function ensureAdminInventoryPermissions(strapi) {
     strapi.log.warn(
       '[inventory] No users-permissions role named "Admin"; skip permission bootstrap'
     );
+  } else {
+    for (const action of INVENTORY_ADMIN_ACTIONS) {
+      await ensurePermission(strapi, adminRole, action, 'Admin', 'inventory');
+    }
+  }
+
+  const authenticatedRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({
+      where: {
+        $or: [{ type: 'authenticated' }, { name: 'Authenticated' }],
+      },
+    });
+
+  if (!authenticatedRole) {
+    strapi.log.warn(
+      '[inventory] No Authenticated role; syncOrderStock permission skipped'
+    );
     return;
   }
 
-  for (const action of INVENTORY_ACTIONS) {
-    await ensurePermission(strapi, adminRole, action, 'Admin', 'inventory');
+  for (const action of INVENTORY_AUTHENTICATED_ACTIONS) {
+    await ensurePermission(
+      strapi,
+      authenticatedRole,
+      action,
+      'Authenticated',
+      'inventory'
+    );
   }
 }
 

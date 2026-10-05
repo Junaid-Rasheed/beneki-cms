@@ -11,6 +11,9 @@ const {
 const {
   generateMultiLabelByOrderId,
 } = require("../../../helpers/labelGenerator");
+const {
+  applyOrderInventoryDeduction,
+} = require("../../../helpers/inventoryStock");
 const UiUrl = process.env.FRONTEND_URL;
 const SUCCESS_STATUSES = ["OK", "SUCCESS", "AUTHORIZED", "APPROVED"];
 const FAILED_STATUSES = ["FAILED", "DECLINED", "ERROR", "CANCELLED", "TIMEOUT"];
@@ -252,8 +255,19 @@ module.exports = {
         where: { orderNumber: orderId },
         data: updateData,
       });
-      
+
       if (SUCCESS_STATUSES.includes(status)) {
+        try {
+          const stockResult = await applyOrderInventoryDeduction(strapi, order);
+          strapi.log.info(
+            `[bnpaxepta.notify] Inventory for ${orderId}: ${JSON.stringify(stockResult)}`,
+          );
+        } catch (stockErr) {
+          strapi.log.error(
+            `[bnpaxepta.notify] Inventory deduction failed for ${orderId}: ${stockErr.message}`,
+          );
+        }
+
         if (order.user?.autoprint !== false) {
           await generateMultiLabelByOrderId(order);
           strapi.log.info(`✅ Label generated for ${orderId}`);
