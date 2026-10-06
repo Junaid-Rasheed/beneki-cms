@@ -129,7 +129,7 @@ async function generateGlsShipment(payload) {
             ZIPCode: payload.receiver.zipCode,
             City: payload.receiver.city,
             Street: payload.receiver.street.substring(0, 40),
-            eMail: payload.receiver.email,
+            eMail: payload.receiver.email?.trim(),
             FixedLinePhonenumber: "",
             MobilePhoneNumber: payload.receiver.phoneNumber,
             ContactPerson: payload.receiver.name?.trim().slice(0, 40) || "",
