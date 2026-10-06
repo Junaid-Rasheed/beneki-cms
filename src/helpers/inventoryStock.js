@@ -76,7 +76,7 @@ async function buildInventoryDeltas(strapi, orderItems) {
   const deltas = new Map();
 
   for (const item of orderItems || []) {
-    const qty = parseQty(item.quantity);
+    const qty = parseQty(item.productQuantity);
     if (!qty) continue;
 
     const inventory = await findInventoryForOrderItem(strapi, item);
