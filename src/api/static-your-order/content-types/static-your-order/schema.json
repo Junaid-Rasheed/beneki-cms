@@ -256,6 +256,9 @@
     },
     "ActionGenerateLabelAgain": {
       "type": "string"
+    },
+    "tableInvoiceNo": {
+      "type": "string"
     }
   }
 }

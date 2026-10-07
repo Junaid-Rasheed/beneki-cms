@@ -1191,6 +1191,59 @@ export interface ApiHomePageTrustLogoHomePageTrustLogo
   };
 }
 
+export interface ApiInventoryInventory extends Struct.CollectionTypeSchema {
+  collectionName: 'inventories';
+  info: {
+    description: 'Shared stock for one product across multiple product-detail variants';
+    displayName: 'Inventory';
+    pluralName: 'inventories';
+    singularName: 'inventory';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::inventory.inventory'
+    > &
+      Schema.Attribute.Private;
+    lowStockThreshold: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<10>;
+    notes: Schema.Attribute.Text;
+    product_details: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::product-detail.product-detail'
+    >;
+    productName: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    sku: Schema.Attribute.String;
+    stock: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiLogisticLogistic extends Struct.CollectionTypeSchema {
   collectionName: 'logistics';
   info: {
@@ -1542,6 +1595,13 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         };
       }>;
     emailLocale: Schema.Attribute.String;
+    inventoryStockApplied: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: false;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<false>;
     invoiceId: Schema.Attribute.BigInteger;
     isDpdLabelPrinted: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
@@ -1772,6 +1832,10 @@ export interface ApiProductDetailProductDetail
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    inventory: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::inventory.inventory'
+    >;
     isFoodProduct: Schema.Attribute.Boolean;
     isOutOfStock: Schema.Attribute.Boolean;
     isService: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -5084,6 +5148,7 @@ export interface ApiStaticYourOrderStaticYourOrder
           localized: true;
         };
       }>;
+    tableInvoiceNo: Schema.Attribute.String;
     tableOrderNo: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -6002,6 +6067,7 @@ declare module '@strapi/strapi' {
       'api::home-page-partner-section.home-page-partner-section': ApiHomePagePartnerSectionHomePagePartnerSection;
       'api::home-page-product.home-page-product': ApiHomePageProductHomePageProduct;
       'api::home-page-trust-logo.home-page-trust-logo': ApiHomePageTrustLogoHomePageTrustLogo;
+      'api::inventory.inventory': ApiInventoryInventory;
       'api::logistic.logistic': ApiLogisticLogistic;
       'api::mentions-legale.mentions-legale': ApiMentionsLegaleMentionsLegale;
       'api::order-address.order-address': ApiOrderAddressOrderAddress;
