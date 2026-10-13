@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * inventory routes — Admin inventory management + explicit order stock sync.
+ * inventory routes — Admin and Logistic inventory management + explicit order stock sync.
  */
 
 module.exports = {

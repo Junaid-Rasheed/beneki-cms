@@ -216,18 +216,41 @@ async function ensureAdminOrderMarkCompletedPermission(strapi) {
 }
 
 
-async function ensureAdminInventoryPermissions(strapi) {
-  const adminRole = await strapi.db
+async function findRolesByName(strapi, names) {
+  const wanted = new Set(names.map((name) => String(name).toLowerCase()));
+  const roles = await strapi.db
     .query('plugin::users-permissions.role')
-    .findOne({ where: { name: 'Admin' } });
+    .findMany();
+  return roles.filter((role) =>
+    wanted.has(String(role.name || role.type || '').trim().toLowerCase())
+  );
+}
 
-  if (!adminRole) {
-    strapi.log.warn(
-      '[inventory] No users-permissions role named "Admin"; skip permission bootstrap'
-    );
-  } else {
-    for (const action of INVENTORY_ADMIN_ACTIONS) {
-      await ensurePermission(strapi, adminRole, action, 'Admin', 'inventory');
+async function ensureAdminInventoryPermissions(strapi) {
+  const staffRoleGroups = [
+    { names: ['Admin'], label: 'Admin' },
+    { names: ['Logistic', 'Logistics'], label: 'Logistic' },
+  ];
+
+  for (const group of staffRoleGroups) {
+    const roles = await findRolesByName(strapi, group.names);
+    if (!roles.length) {
+      strapi.log.warn(
+        `[inventory] No users-permissions role named "${group.label}"; skip permission bootstrap`
+      );
+      continue;
+    }
+
+    for (const role of roles) {
+      for (const action of INVENTORY_ADMIN_ACTIONS) {
+        await ensurePermission(
+          strapi,
+          role,
+          action,
+          role.name || group.label,
+          'inventory'
+        );
+      }
     }
   }
 

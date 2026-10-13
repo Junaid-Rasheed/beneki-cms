@@ -6,10 +6,17 @@ const {
 } = require('../../../helpers/inventoryStock');
 
 /**
- * inventory controller — Admin stock management for the storefront account UI.
+ * inventory controller — stock management for Admin and Logistic account users.
  */
 
-async function requireAdminUser(strapi, ctx) {
+const INVENTORY_STAFF_ROLES = new Set(['admin', 'logistic', 'logistics']);
+
+function isInventoryStaff(user) {
+  const roleName = user?.role?.name || user?.role?.type;
+  return INVENTORY_STAFF_ROLES.has(String(roleName || '').trim().toLowerCase());
+}
+
+async function requireInventoryStaff(strapi, ctx) {
   const userId = ctx.state.user?.id;
   if (!userId) {
     ctx.unauthorized();
@@ -23,9 +30,8 @@ async function requireAdminUser(strapi, ctx) {
       populate: ['role'],
     });
 
-  const roleName = user?.role?.name || user?.role?.type;
-  if (!user || roleName !== 'Admin') {
-    ctx.forbidden('Admin role required');
+  if (!user || !isInventoryStaff(user)) {
+    ctx.forbidden('Admin or Logistic role required');
     return null;
   }
 
@@ -68,7 +74,7 @@ module.exports = {
    * Query: page, pageSize, search, stockStatus, activeOnly
    */
   async find(ctx) {
-    const admin = await requireAdminUser(strapi, ctx);
+    const admin = await requireInventoryStaff(strapi, ctx);
     if (!admin) return;
 
     const {
@@ -137,7 +143,7 @@ module.exports = {
    * GET /api/inventories/:id
    */
   async findOne(ctx) {
-    const admin = await requireAdminUser(strapi, ctx);
+    const admin = await requireInventoryStaff(strapi, ctx);
     if (!admin) return;
 
     const { id } = ctx.params;
@@ -160,7 +166,7 @@ module.exports = {
    * Body: productName, sku, stock, lowStockThreshold, notes, isActive, productDetailIds
    */
   async create(ctx) {
-    const admin = await requireAdminUser(strapi, ctx);
+    const admin = await requireInventoryStaff(strapi, ctx);
     if (!admin) return;
 
     const body = ctx.request.body || {};
@@ -217,7 +223,7 @@ module.exports = {
    * PUT /api/inventories/:id
    */
   async update(ctx) {
-    const admin = await requireAdminUser(strapi, ctx);
+    const admin = await requireInventoryStaff(strapi, ctx);
     if (!admin) return;
 
     const { id } = ctx.params;
@@ -313,7 +319,7 @@ module.exports = {
    * DELETE /api/inventories/:id
    */
   async delete(ctx) {
-    const admin = await requireAdminUser(strapi, ctx);
+    const admin = await requireInventoryStaff(strapi, ctx);
     if (!admin) return;
 
     const { id } = ctx.params;
@@ -346,7 +352,7 @@ module.exports = {
    * Body: { delta?: number, stock?: number }
    */
   async adjustStock(ctx) {
-    const admin = await requireAdminUser(strapi, ctx);
+    const admin = await requireInventoryStaff(strapi, ctx);
     if (!admin) return;
 
     const { id } = ctx.params;
@@ -398,7 +404,7 @@ module.exports = {
    * Lists product details for linking (optionally unlinked only).
    */
   async productDetailOptions(ctx) {
-    const admin = await requireAdminUser(strapi, ctx);
+    const admin = await requireInventoryStaff(strapi, ctx);
     if (!admin) return;
 
     const {
@@ -484,8 +490,7 @@ module.exports = {
           populate: ['role'],
         });
 
-      const roleName = user?.role?.name || user?.role?.type;
-      const isAdmin = roleName === 'Admin';
+      const canManageAnyOrder = isInventoryStaff(user);
 
       const body = ctx.request.body || {};
       const orderId = body.orderId || body.orderDocumentId || body.id;
@@ -531,11 +536,11 @@ module.exports = {
         return;
       }
 
-      // Authz: Admin can sync any order; non-admin may only deduct their own (PayPal).
+      // Authz: Admin and Logistic can sync any order; others may only deduct their own (PayPal).
       const orderUserId = order.user?.id || order.user;
-      if (!isAdmin) {
+      if (!canManageAnyOrder) {
         if (action === 'restore') {
-          return ctx.forbidden('Admin role required to restore inventory');
+          return ctx.forbidden('Admin or Logistic role required to restore inventory');
         }
         if (Number(orderUserId) !== Number(userId)) {
           return ctx.forbidden('Not allowed to sync inventory for this order');
