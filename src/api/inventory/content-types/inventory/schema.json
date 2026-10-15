@@ -18,6 +18,10 @@
     "sku": {
       "type": "string"
     },
+    "purchasePrice": {
+      "type": "decimal",
+      "min": 0
+    },
     "stock": {
       "type": "integer",
       "required": true,

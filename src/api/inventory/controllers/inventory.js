@@ -4,6 +4,12 @@ const {
   applyOrderInventoryDeduction,
   restoreOrderInventory,
 } = require('../../../helpers/inventoryStock');
+const {
+  actorFromUser,
+  snapshotInventory,
+  diffSnapshots,
+  writeInventoryAuditLog,
+} = require('../../../helpers/inventoryAudit');
 
 /**
  * inventory controller — stock management for Admin and Logistic account users.
@@ -47,6 +53,67 @@ function parseNonNegativeInt(value, fallback) {
   if (value === undefined || value === null || value === '') return fallback;
   const n = parseInt(value, 10);
   return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+/**
+ * null = empty, number = valid price, undefined = invalid.
+ */
+function parsePurchasePrice(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const n = Number(String(value).replace(',', '.').trim());
+  if (!Number.isFinite(n) || n < 0) return undefined;
+  return Math.round(n * 100) / 100;
+}
+
+async function recordInventoryAudit(strapi, { action, actor, before, after }) {
+  const previousData = snapshotInventory(before);
+  const nextData = snapshotInventory(after);
+  const changes = diffSnapshots(previousData, nextData);
+  const source = after || before;
+
+  if (
+    (action === 'updated' || action === 'stock_adjusted') &&
+    Object.keys(changes).length === 0
+  ) {
+    return;
+  }
+
+  try {
+    await writeInventoryAuditLog(strapi, {
+      action,
+      inventoryId: source?.id,
+      inventoryDocumentId: source?.documentId,
+      productName: source?.productName,
+      sku: source?.sku,
+      updatedByName: actor?.updatedByName,
+      updatedByEmail: actor?.updatedByEmail,
+      changes,
+      previousData,
+      nextData,
+    });
+  } catch (err) {
+    strapi.log.error(
+      `[inventory] Failed to write ${action} audit log: ${err.message}`
+    );
+  }
+}
+
+function serializeAuditLog(entry) {
+  if (!entry) return null;
+  return {
+    id: entry.id,
+    inventoryId: entry.inventoryId || null,
+    inventoryDocumentId: entry.inventoryDocumentId || null,
+    productName: entry.productName || '',
+    sku: entry.sku || '',
+    action: entry.action || '',
+    changedAt: entry.changedAt,
+    updatedByName: entry.updatedByName || '',
+    updatedByEmail: entry.updatedByEmail || '',
+    changes: entry.changes || {},
+    previousData: entry.previousData || null,
+    nextData: entry.nextData || null,
+  };
 }
 
 function buildStockFilter(stockStatus) {
@@ -163,7 +230,7 @@ module.exports = {
 
   /**
    * POST /api/inventories
-   * Body: productName, sku, stock, lowStockThreshold, notes, isActive, productDetailIds
+   * Body: productName, sku, purchasePrice, stock, lowStockThreshold, notes, isActive, productDetailIds
    */
   async create(ctx) {
     const admin = await requireInventoryStaff(strapi, ctx);
@@ -173,6 +240,11 @@ module.exports = {
     const productName = String(body.productName || '').trim();
     if (!productName) {
       return ctx.badRequest('productName is required');
+    }
+
+    const purchasePrice = parsePurchasePrice(body.purchasePrice);
+    if (purchasePrice === undefined) {
+      return ctx.badRequest('purchasePrice must be a non-negative number');
     }
 
     const stock = parseNonNegativeInt(body.stock, 0);
@@ -185,6 +257,7 @@ module.exports = {
       data: {
         productName,
         sku: String(body.sku || '').trim() || null,
+        purchasePrice,
         stock,
         lowStockThreshold,
         notes: body.notes != null ? String(body.notes) : null,
@@ -212,6 +285,13 @@ module.exports = {
     const entry = await strapi.db.query('api::inventory.inventory').findOne({
       where: { id: created.id },
       populate: ['product_details'],
+    });
+
+    await recordInventoryAudit(strapi, {
+      action: 'created',
+      actor: actorFromUser(admin),
+      before: null,
+      after: entry,
     });
 
     ctx.body = {
@@ -246,6 +326,13 @@ module.exports = {
     }
     if (body.sku !== undefined) {
       data.sku = String(body.sku || '').trim() || null;
+    }
+    if (body.purchasePrice !== undefined) {
+      const purchasePrice = parsePurchasePrice(body.purchasePrice);
+      if (purchasePrice === undefined) {
+        return ctx.badRequest('purchasePrice must be a non-negative number');
+      }
+      data.purchasePrice = purchasePrice;
     }
     if (body.stock !== undefined) {
       data.stock = parseNonNegativeInt(body.stock, existing.stock);
@@ -310,6 +397,13 @@ module.exports = {
       populate: ['product_details'],
     });
 
+    await recordInventoryAudit(strapi, {
+      action: 'updated',
+      actor: actorFromUser(admin),
+      before: existing,
+      after: entry,
+    });
+
     ctx.body = {
       data: strapi.service('api::inventory.inventory').serialize(entry),
     };
@@ -344,6 +438,13 @@ module.exports = {
       where: { id },
     });
 
+    await recordInventoryAudit(strapi, {
+      action: 'deleted',
+      actor: actorFromUser(admin),
+      before: existing,
+      after: null,
+    });
+
     ctx.body = { data: { id: Number(id), deleted: true } };
   },
 
@@ -358,6 +459,7 @@ module.exports = {
     const { id } = ctx.params;
     const existing = await strapi.db.query('api::inventory.inventory').findOne({
       where: { id },
+      populate: ['product_details'],
     });
 
     if (!existing) {
@@ -394,8 +496,75 @@ module.exports = {
       populate: ['product_details'],
     });
 
+    await recordInventoryAudit(strapi, {
+      action: 'stock_adjusted',
+      actor: actorFromUser(admin),
+      before: existing,
+      after: entry,
+    });
+
     ctx.body = {
       data: strapi.service('api::inventory.inventory').serialize(entry),
+    };
+  },
+
+  /**
+   * GET /api/inventories/audit-logs
+   * GET /api/inventories/:id/audit-logs
+   * Query: page, pageSize, search, action, inventoryId
+   */
+  async findAuditLogs(ctx) {
+    const admin = await requireInventoryStaff(strapi, ctx);
+    if (!admin) return;
+
+    const {
+      page = '1',
+      pageSize = '25',
+      search = '',
+      action = '',
+      inventoryId: queryInventoryId = '',
+    } = ctx.query || {};
+
+    const pageNum = parsePositiveInt(page, 1);
+    const pageSizeNum = Math.min(parsePositiveInt(pageSize, 25), 100);
+    const searchTerm = String(search || '').trim();
+    const inventoryId = String(ctx.params.id || queryInventoryId || '').trim();
+    const actionFilter = String(action || '').trim().toLowerCase();
+    const where = {};
+
+    if (inventoryId) where.inventoryId = inventoryId;
+    if (actionFilter && actionFilter !== 'all') where.action = actionFilter;
+    if (searchTerm) {
+      where.$or = [
+        { productName: { $containsi: searchTerm } },
+        { sku: { $containsi: searchTerm } },
+        { updatedByName: { $containsi: searchTerm } },
+        { updatedByEmail: { $containsi: searchTerm } },
+      ];
+    }
+
+    const [rows, total] = await Promise.all([
+      strapi.db.query('api::inventory-audit-log.inventory-audit-log').findMany({
+        where,
+        orderBy: { changedAt: 'desc' },
+        offset: (pageNum - 1) * pageSizeNum,
+        limit: pageSizeNum,
+      }),
+      strapi.db.query('api::inventory-audit-log.inventory-audit-log').count({
+        where,
+      }),
+    ]);
+
+    ctx.body = {
+      data: rows.map(serializeAuditLog),
+      meta: {
+        pagination: {
+          page: pageNum,
+          pageSize: pageSizeNum,
+          pageCount: Math.max(1, Math.ceil(total / pageSizeNum)),
+          total,
+        },
+      },
     };
   },
 

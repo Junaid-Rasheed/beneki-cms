@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventory_audit_logs",
+  "info": {
+    "singularName": "inventory-audit-log",
+    "pluralName": "inventory-audit-logs",
+    "displayName": "Inventory Audit Log",
+    "description": "Audit trail for inventory create, update, stock adjustment, and delete"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "inventoryId": {
+      "type": "string"
+    },
+    "inventoryDocumentId": {
+      "type": "string"
+    },
+    "productName": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string",
+      "required": true
+    },
+    "changedAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "updatedByName": {
+      "type": "string"
+    },
+    "updatedByEmail": {
+      "type": "email"
+    },
+    "changes": {
+      "type": "json"
+    },
+    "previousData": {
+      "type": "json"
+    },
+    "nextData": {
+      "type": "json"
+    }
+  }
+}

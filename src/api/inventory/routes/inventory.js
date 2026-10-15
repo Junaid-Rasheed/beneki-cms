@@ -35,6 +35,24 @@ module.exports = {
     },
     {
       method: 'GET',
+      path: '/inventories/audit-logs',
+      handler: 'inventory.findAuditLogs',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/inventories/:id/audit-logs',
+      handler: 'inventory.findAuditLogs',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
       path: '/inventories/:id',
       handler: 'inventory.findOne',
       config: {

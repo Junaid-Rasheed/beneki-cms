@@ -38,6 +38,9 @@ module.exports = createCoreService('api::inventory.inventory', ({ strapi }) => (
     const stock = Number(entry.stock) || 0;
     const threshold =
       entry.lowStockThreshold == null ? 10 : Number(entry.lowStockThreshold);
+    const rawPrice = entry.purchasePrice;
+    const purchasePrice =
+      rawPrice == null || rawPrice === '' ? null : Number(rawPrice);
     const productDetails = Array.isArray(entry.product_details)
       ? entry.product_details
       : [];
@@ -47,6 +50,7 @@ module.exports = createCoreService('api::inventory.inventory', ({ strapi }) => (
       documentId: entry.documentId,
       productName: entry.productName || '',
       sku: entry.sku || '',
+      purchasePrice: Number.isFinite(purchasePrice) ? purchasePrice : null,
       stock,
       lowStockThreshold: threshold,
       notes: entry.notes || '',

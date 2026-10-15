@@ -38,6 +38,7 @@ const INVENTORY_ADMIN_ACTIONS = [
   'api::inventory.inventory.adjustStock',
   'api::inventory.inventory.productDetailOptions',
   'api::inventory.inventory.syncOrderStock',
+  'api::inventory.inventory.findAuditLogs',
 ];
 
 const INVENTORY_AUTHENTICATED_ACTIONS = [
