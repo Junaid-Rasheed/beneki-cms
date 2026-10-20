@@ -46,6 +46,8 @@ const INVENTORY_AUTHENTICATED_ACTIONS = [
   'api::inventory.inventory.syncOrderStock',
 ];
 
+const STATIC_INVENTORY_FIND = 'api::static-inventory.static-inventory.find';
+
 
 async function ensurePermission(strapi, role, action, label, logTag) {
   if (!role) return;
@@ -281,6 +283,32 @@ async function ensureAdminInventoryPermissions(strapi) {
   }
 }
 
+async function ensureStaticInventoryPermissions(strapi) {
+  const roles = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findMany();
+  const targets = roles.filter((role) => {
+    const name = String(role.name || role.type || '').trim().toLowerCase();
+    return (
+      name === 'public' ||
+      name === 'authenticated' ||
+      name === 'admin' ||
+      name === 'logistic' ||
+      name === 'logistics'
+    );
+  });
+
+  for (const role of targets) {
+    await ensurePermission(
+      strapi,
+      role,
+      STATIC_INVENTORY_FIND,
+      role.name || 'role',
+      'static-inventory'
+    );
+  }
+}
+
 async function ensureLogisticNotifyPermission(strapi) {
   const publicRole = await strapi.db
     .query('plugin::users-permissions.role')
@@ -397,6 +425,14 @@ module.exports = {
       );
     }
 
+
+    try {
+      await ensureStaticInventoryPermissions(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[static-inventory] Permission bootstrap failed: ${err.message}`
+      );
+    }
 
     try {
       await ensureLogisticNotifyPermission(strapi);
