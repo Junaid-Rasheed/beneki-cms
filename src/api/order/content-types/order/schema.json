@@ -186,6 +186,42 @@
         }
       }
     },
+    "totalBoxes": {
+      "type": "integer",
+      "default": 0,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "totalShippingCost": {
+      "type": "decimal",
+      "default": 0,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "costPerBox": {
+      "type": "decimal",
+      "default": 0,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "shippingVat": {
+      "type": "decimal",
+      "default": 0,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "coupon": {
       "type": "relation",
       "relation": "oneToOne",
