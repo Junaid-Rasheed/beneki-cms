@@ -358,12 +358,12 @@ module.exports = {
         return;
       }
 
-      if (
-        order.shippingAddress.country?.toLowerCase() === "france" &&
-        order.shippingAddress.postalCode?.toString().startsWith("20")
-      ) {
-        return;
-      }
+      // if (
+      //   order.shippingAddress.country?.toLowerCase() === "france" &&
+      //   order.shippingAddress.postalCode?.toString().startsWith("20")
+      // ) {
+      //   return;
+      // }
       const shippingAddress = order.shippingAddress;
       const billingAddress = order.billingAddress;
       if (!shippingAddress) {
