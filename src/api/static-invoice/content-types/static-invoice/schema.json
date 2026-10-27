@@ -99,6 +99,9 @@
     },
     "vatIntracomLabel": {
       "type": "string"
+    },
+    "shippingLineName": {
+      "type": "string"
     }
   }
 }
