@@ -74,6 +74,9 @@
     },
     "orderShippingLabel": {
       "type": "string"
+    },
+    "orderTotalExclVatLabel": {
+      "type": "string"
     }
   }
 }

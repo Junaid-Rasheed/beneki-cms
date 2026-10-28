@@ -246,6 +246,9 @@
     },
     "invalidVariationCheckoutRemovedMessage": {
       "type": "string"
+    },
+    "orderTotalExclVat": {
+      "type": "string"
     }
   }
 }

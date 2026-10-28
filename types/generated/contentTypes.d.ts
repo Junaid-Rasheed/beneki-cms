@@ -4062,6 +4062,7 @@ export interface ApiStaticCheckoutStaticCheckout
     orderSubtotal: Schema.Attribute.String;
     orderTitle: Schema.Attribute.String;
     orderTotal: Schema.Attribute.String;
+    orderTotalExclVat: Schema.Attribute.String;
     orderVat: Schema.Attribute.String;
     outOfStockCheckoutBlockedMessage: Schema.Attribute.String;
     payButton: Schema.Attribute.String;
@@ -5272,6 +5273,7 @@ export interface ApiStaticOrderSummaryStaticOrderSummary
           localized: true;
         };
       }>;
+    orderTotalExclVatLabel: Schema.Attribute.String;
     orderTotalLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
