@@ -6706,6 +6706,7 @@ export interface PluginUsersPermissionsUser
         'Portugal',
         'Slovakia',
         'Czech Republic',
+        'Malta',
       ]
     >;
     businessRegistrationNumber: Schema.Attribute.String;
