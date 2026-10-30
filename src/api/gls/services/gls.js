@@ -97,8 +97,6 @@ async function getAccessToken() {
     cachedToken = response.data.access_token;
     tokenExpiresAt = Date.now() + response.data.expires_in * 1000;
 
-    
-
     return cachedToken;
   } catch (err) {
     strapi.log.error("❌ GLS token error", err?.response?.data || err.message);
@@ -111,7 +109,6 @@ async function getAccessToken() {
  */
 async function generateGlsShipment(payload) {
   try {
-    
     const token = await getAccessToken();
 
     // 🔥 Build GLS body from YOUR payload
@@ -155,13 +152,19 @@ async function generateGlsShipment(payload) {
           Note2: payload.receiver.deliveryInstruction2,
         })),
 
-        Service: [
-          {
-            Service: {
-              ServiceName: "service_flexdelivery",
-            },
-          },
-        ],
+        ...(payload.receiver.countryPrefix?.toUpperCase() === "MT"
+          ? {
+              IncotermCode: "20",
+            }
+          : {
+              Service: [
+                {
+                  Service: {
+                    ServiceName: "service_flexdelivery",
+                  },
+                },
+              ],
+            }),
       },
 
       PrintingOptions: {
@@ -171,7 +174,7 @@ async function generateGlsShipment(payload) {
         },
       },
     };
-    
+
     const response = await axios.post(SHIPMENT_URL, glsBody, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -180,12 +183,12 @@ async function generateGlsShipment(payload) {
       },
     });
 
-      const order = await strapi.documents("api::order.order").findOne({
-          documentId: payload.orderId,
-          populate: {
-            orderItems: true,
-          },
-        });
+    const order = await strapi.documents("api::order.order").findOne({
+      documentId: payload.orderId,
+      populate: {
+        orderItems: true,
+      },
+    });
 
     const printData = response?.data?.CreatedShipment?.PrintData;
     const parcels = response?.data?.CreatedShipment?.ParcelData;
@@ -361,7 +364,10 @@ function normalizeGlsStatus(statusCode, description = "") {
  * Map GLS ShipIT API status to orderStatus.
  */
 function mapGlsStatusToOrderStatus(glsStatus) {
-  switch (normalizeGlsStatus(glsStatus) || String(glsStatus || "").toUpperCase()) {
+  switch (
+    normalizeGlsStatus(glsStatus) ||
+    String(glsStatus || "").toUpperCase()
+  ) {
     case "DATA_RECEIVED":
       return "Preadvice";
     case "PICKUP":
