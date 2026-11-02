@@ -11,7 +11,6 @@ const {
 const {
   sendAccountReviewDecisionEmail,
   sendRegistrationConfirmationEmail,
-  sendRegistrationAdminNotifyEmail,
   resolveLocaleFromContext,
 } = require('../../../utils/sendRegistrationConfirmationEmail');
 
@@ -533,17 +532,6 @@ module.exports = {
       await sendRegistrationConfirmationEmail(strapi, {
         email: user.email,
         locale,
-      });
-
-      await sendRegistrationAdminNotifyEmail(strapi, {
-        applicant: {
-          id: updated.id,
-          email: user.email,
-          username: updated.username || user.username,
-          accountStatus: ACCOUNT_STATUS.PENDING_REVIEW,
-          businessName: updated.businessName,
-        },
-        locale: 'en',
       });
       emailSent = true;
     } catch (err) {

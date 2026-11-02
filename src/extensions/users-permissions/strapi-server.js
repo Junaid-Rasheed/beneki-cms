@@ -8,7 +8,6 @@ const {
 } = require('../../utils/accountStatus');
 const {
   sendRegistrationConfirmationEmail,
-  sendRegistrationAdminNotifyEmail,
   resolveLocaleFromContext,
 } = require('../../utils/sendRegistrationConfirmationEmail');
 
@@ -101,23 +100,15 @@ module.exports = (plugin) => {
 
         if (user.email) {
           try {
+            // Applicant confirmation only. Admins are notified in the
+            // storefront Applications menu, not by email.
             await sendRegistrationConfirmationEmail(strapi, {
               email: user.email,
               locale,
             });
-
-            await sendRegistrationAdminNotifyEmail(strapi, {
-              applicant: {
-                id: user.id,
-                email: user.email,
-                username: user.username,
-                accountStatus: user.accountStatus || 'pending_review',
-              },
-              locale: 'en',
-            });
           } catch (err) {
             strapi.log.error(
-              `[registration-email] Failed registration emails for ${user.email}: ${err.message}`
+              `[registration-email] Failed registration email for ${user.email}: ${err.message}`
             );
           }
         }

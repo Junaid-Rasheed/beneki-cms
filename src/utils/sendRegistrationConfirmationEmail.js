@@ -138,6 +138,8 @@ async function findAdminUsers(strapi) {
 
 /**
  * Notify all Admin-role users that a registration is pending review.
+ * Not used: signup and re-apply no longer email admins. Pending applications
+ * are shown on the storefront Applications menu instead.
  * Template module: registrationadminnotify (EN fallback).
  *
  * Supported placeholders: {{email}}, {{userId}}, {{username}}, {{accountStatus}}
