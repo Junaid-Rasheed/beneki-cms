@@ -3,6 +3,7 @@
 const utils = require('@strapi/utils');
 const {
   getAccountStatus,
+  isAccountSuspended,
   isAccountBlockedFromAuth,
   canReapplyApplication,
 } = require('../../utils/accountStatus');
@@ -16,6 +17,7 @@ const { ApplicationError } = utils.errors;
 /** Fields end users must not set via Content API. */
 const PROTECTED_USER_FIELDS = [
   'accountStatus',
+  'isSuspended',
   'legacyAutoValidated',
   'legacyReapplyEligible',
   'legacyReapplyUsed',
@@ -52,10 +54,16 @@ module.exports = (plugin) => {
 
       if (freshUser && isAccountBlockedFromAuth(freshUser)) {
         ctx.body = undefined;
+        const suspended = isAccountSuspended(freshUser);
         throw new ApplicationError(
-          'Your account is not approved for access yet.',
+          suspended
+            ? 'Your account has been suspended due to no activity. You can apply again.'
+            : 'Your account is not approved for access yet.',
           {
-            accountStatus: getAccountStatus(freshUser),
+            accountStatus: suspended
+              ? 'suspended'
+              : getAccountStatus(freshUser),
+            isSuspended: suspended,
             canReapply: canReapplyApplication(freshUser),
           }
         );
@@ -73,6 +81,9 @@ module.exports = (plugin) => {
       // Never trust client accountStatus on register
       if (ctx.request.body?.accountStatus !== undefined) {
         delete ctx.request.body.accountStatus;
+      }
+      if (ctx.request.body?.isSuspended !== undefined) {
+        delete ctx.request.body.isSuspended;
       }
 
       await originalRegister(ctx);

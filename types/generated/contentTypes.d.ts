@@ -698,6 +698,7 @@ export interface ApiEmailTemplateEmailTemplate
         'accountapproved',
         'accountmoreinfo',
         'accountrefused',
+        'accountsuspended',
         'logistic',
       ]
     >;
@@ -6679,6 +6680,7 @@ export interface PluginUsersPermissionsUser
         'refused',
         'rejected_without_notification',
         'approved',
+        'suspended',
       ]
     >;
     accountType: Schema.Attribute.Enumeration<['Individual', 'Business']>;
@@ -6724,6 +6726,8 @@ export interface PluginUsersPermissionsUser
         minLength: 6;
       }>;
     firstName: Schema.Attribute.String;
+    isSuspended: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     isValidVatNumber: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     legacyAutoValidated: Schema.Attribute.Boolean &

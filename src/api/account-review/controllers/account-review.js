@@ -5,6 +5,8 @@ const {
   REVIEW_ACTIONS,
   ACTION_TO_STATUS,
   getAccountStatus,
+  isAccountApproved,
+  isAccountSuspended,
   isLegacyAutoValidated,
   canReapplyApplication,
 } = require('../../../utils/accountStatus');
@@ -33,6 +35,7 @@ const APPLICATION_FIELDS = [
   'airbnbProfileUrl',
   'reasonForPurchase',
   'accountStatus',
+  'isSuspended',
   'legacyAutoValidated',
   'legacyReapplyEligible',
   'legacyReapplyUsed',
@@ -54,7 +57,114 @@ const STATUS_FILTER_MAP = {
     ACCOUNT_STATUS.REJECTED_WITHOUT_NOTIFICATION,
   rejected_without_notification:
     ACCOUNT_STATUS.REJECTED_WITHOUT_NOTIFICATION,
+  suspended: ACCOUNT_STATUS.SUSPENDED,
 };
+
+const NO_PURCHASE_FILTERS = new Set([
+  'no-purchase',
+  'no_purchase',
+  'nopurchase',
+]);
+
+const INACTIVITY_MONTHS = 3;
+
+function inactivityCutoffDate() {
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - INACTIVITY_MONTHS);
+  return cutoff;
+}
+
+/** Paid orders with a total. Free samples (total 0) are not purchases. */
+function purchaseWhere(since) {
+  const where = {
+    paymentStatus: 'paid',
+    total: { $gt: 0 },
+    orderStatus: { $notIn: ['cancelled', 'refund'] },
+  };
+  if (since) where.createdAt = { $gte: since };
+  return where;
+}
+
+async function findRecentPurchaserIds(strapi, since) {
+  const ids = new Set();
+  const pageSize = 500;
+  let offset = 0;
+
+  for (;;) {
+    const orders = await strapi.db.query('api::order.order').findMany({
+      where: purchaseWhere(since),
+      populate: { user: true },
+      limit: pageSize,
+      offset,
+    });
+    if (!orders.length) break;
+
+    for (const order of orders) {
+      const userId = order.user?.id || order.user;
+      if (userId) ids.add(Number(userId));
+    }
+
+    if (orders.length < pageSize) break;
+    offset += pageSize;
+    if (offset > 50000) break;
+  }
+
+  return [...ids];
+}
+
+/**
+ * Approved (including legacy auto-validated) accounts old enough to have
+ * been inactive, excluding anyone with a paid order since `cutoff`.
+ */
+async function buildNoPurchaseWhere(strapi, cutoff) {
+  const recentBuyerIds = await findRecentPurchaserIds(strapi, cutoff);
+
+  const approvedClause = {
+    $or: [
+      { accountStatus: ACCOUNT_STATUS.APPROVED },
+      {
+        $and: [
+          { legacyAutoValidated: true },
+          { accountStatus: { $null: true } },
+        ],
+      },
+    ],
+  };
+
+  const oldEnough = {
+    $or: [
+      { accountReviewedAt: { $lte: cutoff } },
+      {
+        $and: [
+          { accountReviewedAt: { $null: true } },
+          { createdAt: { $lte: cutoff } },
+        ],
+      },
+    ],
+  };
+
+  const notSuspended = {
+    $or: [{ isSuspended: false }, { isSuspended: { $null: true } }],
+  };
+
+  const and = [approvedClause, oldEnough, notSuspended];
+  if (recentBuyerIds.length) {
+    and.push({ id: { $notIn: recentBuyerIds } });
+  }
+  return { $and: and };
+}
+
+async function latestPurchaseAt(strapi, userId) {
+  const rows = await strapi.db.query('api::order.order').findMany({
+    where: {
+      user: userId,
+      ...purchaseWhere(),
+    },
+    orderBy: { createdAt: 'desc' },
+    limit: 1,
+  });
+  return rows[0]?.createdAt || null;
+}
 
 function pickApplicationFields(user) {
   if (!user) return null;
@@ -113,6 +223,7 @@ module.exports = {
   /**
    * GET /api/account-reviews
    * Query: status, page, pageSize, search, legacyOnly
+   * status=no-purchase → approved accounts with no paid order in the last 3 months
    */
   async find(ctx) {
     const admin = await requireAdminUser(strapi, ctx);
@@ -131,7 +242,13 @@ module.exports = {
     const where = {};
 
     const normalizedStatus = String(status || 'all').trim().toLowerCase();
-    if (normalizedStatus !== 'all') {
+    const isNoPurchase = NO_PURCHASE_FILTERS.has(normalizedStatus);
+
+    if (isNoPurchase) {
+      const cutoff = inactivityCutoffDate();
+      const noPurchaseWhere = await buildNoPurchaseWhere(strapi, cutoff);
+      Object.assign(where, noPurchaseWhere);
+    } else if (normalizedStatus !== 'all') {
       const mapped = STATUS_FILTER_MAP[normalizedStatus];
       if (!mapped) {
         return ctx.badRequest(`Unknown status filter: ${status}`);
@@ -148,6 +265,7 @@ module.exports = {
               ACCOUNT_STATUS.REFUSED,
               ACCOUNT_STATUS.REJECTED_WITHOUT_NOTIFICATION,
               ACCOUNT_STATUS.APPROVED,
+              ACCOUNT_STATUS.SUSPENDED,
             ],
           },
         },
@@ -188,10 +306,18 @@ module.exports = {
       strapi.db.query('plugin::users-permissions.user').count({ where }),
     ]);
 
-    const data = users.map((user) => ({
-      ...pickApplicationFields(user),
-      submittedAt: user.createdAt,
-    }));
+    const data = await Promise.all(
+      users.map(async (user) => {
+        const row = {
+          ...pickApplicationFields(user),
+          submittedAt: user.createdAt,
+        };
+        if (isNoPurchase) {
+          row.lastPurchaseAt = await latestPurchaseAt(strapi, user.id);
+        }
+        return row;
+      })
+    );
 
     ctx.body = {
       data,
@@ -251,7 +377,7 @@ module.exports = {
   /**
    * POST /api/account-reviews/:id/action
    * Body: { action, note?, locale? }
-   * action: approve | request_more_info | refuse | reject_without_notification
+   * action: approve | request_more_info | refuse | reject_without_notification | suspend
    */
   async performAction(ctx) {
     const admin = await requireAdminUser(strapi, ctx);
@@ -289,6 +415,14 @@ module.exports = {
       return ctx.notFound('Application not found');
     }
 
+    if (action === REVIEW_ACTIONS.SUSPEND) {
+      if (isAccountSuspended(user) || !isAccountApproved(user)) {
+        return ctx.badRequest(
+          'Only approved accounts can be suspended for inactivity.'
+        );
+      }
+    }
+
     const previousStatus = getAccountStatus(user);
     const nextStatus = ACTION_TO_STATUS[action];
     const changedAt = new Date();
@@ -306,6 +440,7 @@ module.exports = {
       accountReviewedAt: changedAt,
       accountReviewedByName: reviewerName,
       accountReviewedByEmail: admin.email || null,
+      isSuspended: action === REVIEW_ACTIONS.SUSPEND,
     };
 
     // Old (legacy) users who are refused may re-apply once.
@@ -517,10 +652,13 @@ module.exports = {
           airbnbProfileUrl: airbnbProfileUrl || null,
           reasonForPurchase: reasonForPurchase || null,
           accountStatus: ACCOUNT_STATUS.PENDING_REVIEW,
+          isSuspended: false,
           legacyAutoValidated: false,
           legacyReapplyEligible: false,
-          // One-time re-apply for legacy users — cannot re-apply again.
-          legacyReapplyUsed: true,
+          // Suspension re-apply does not use up the one-time legacy re-apply.
+          legacyReapplyUsed: isAccountSuspended(user)
+            ? Boolean(user.legacyReapplyUsed)
+            : true,
           accountReviewedAt: null,
           accountReviewedByName: null,
           accountReviewedByEmail: null,

@@ -356,6 +356,68 @@ async function ensureLogisticEmailTemplate(strapi) {
   strapi.log.info('[logistic] Created default email-template (module=logistic, locale=en)');
 }
 
+const SUSPEND_EMAIL_TEMPLATES = [
+  {
+    locale: 'en',
+    subject: 'Your Beneki account has been suspended',
+    message:
+      '<p>Your Beneki account has been suspended due to no activity.</p><p>You can apply again whenever you would like to place an order.</p>',
+    closingText: 'The Beneki team',
+  },
+  {
+    locale: 'fr',
+    subject: 'Votre compte Beneki a été suspendu',
+    message:
+      '<p>Votre compte Beneki a été suspendu en raison d’une absence d’activité.</p><p>Vous pouvez déposer une nouvelle demande lorsque vous souhaiterez passer une commande.</p>',
+    closingText: 'L’équipe Beneki',
+  },
+  {
+    locale: 'it',
+    subject: 'Il tuo account Beneki è stato sospeso',
+    message:
+      '<p>Il tuo account Beneki è stato sospeso per mancanza di attività.</p><p>Puoi presentare una nuova domanda quando vorrai effettuare un ordine.</p>',
+    closingText: 'Il team Beneki',
+  },
+  {
+    locale: 'es',
+    subject: 'Tu cuenta de Beneki ha sido suspendida',
+    message:
+      '<p>Tu cuenta de Beneki ha sido suspendida por falta de actividad.</p><p>Puedes volver a solicitar el acceso cuando quieras realizar un pedido.</p>',
+    closingText: 'El equipo Beneki',
+  },
+];
+
+async function ensureAccountSuspendedEmailTemplates(strapi) {
+  for (const template of SUSPEND_EMAIL_TEMPLATES) {
+    const existing = await strapi.db
+      .query('api::email-template.email-template')
+      .findOne({
+        where: { module: 'accountsuspended', locale: template.locale },
+      });
+    if (existing) continue;
+
+    try {
+      await strapi.documents('api::email-template.email-template').create({
+        data: {
+          module: 'accountsuspended',
+          subject: template.subject,
+          message: template.message,
+          closingText: template.closingText,
+        },
+        locale: template.locale,
+        status: 'published',
+      });
+      strapi.log.info(
+        `[account-review] Created accountsuspended email template (${template.locale})`
+      );
+    } catch (err) {
+      strapi.log.warn(
+        `[account-review] Could not seed accountsuspended template for ${template.locale}: ${err.message}`
+      );
+    }
+  }
+}
+
 module.exports = {
   /**
    * An asynchronous register function that runs before
@@ -447,6 +509,14 @@ module.exports = {
     } catch (err) {
       strapi.log.error(
         `[logistic] Email template bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureAccountSuspendedEmailTemplates(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[account-review] Suspend email template bootstrap failed: ${err.message}`
       );
     }
   },

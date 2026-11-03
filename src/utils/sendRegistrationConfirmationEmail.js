@@ -204,8 +204,35 @@ async function sendRegistrationAdminNotifyEmail(
 }
 
 /**
+ * Used when the CMS has no accountsuspended template for the customer's locale.
+ * Locale follows the applicant's business registration country (en fallback).
+ */
+const SUSPEND_EMAIL_COPY = {
+  en: {
+    subject: 'Your Beneki account has been suspended',
+    html: '<p>Your Beneki account has been suspended due to no activity.</p><p>You can apply again whenever you would like to place an order.</p>',
+    closing: 'The Beneki team',
+  },
+  fr: {
+    subject: 'Votre compte Beneki a été suspendu',
+    html: '<p>Votre compte Beneki a été suspendu en raison d’une absence d’activité.</p><p>Vous pouvez déposer une nouvelle demande lorsque vous souhaiterez passer une commande.</p>',
+    closing: 'L’équipe Beneki',
+  },
+  it: {
+    subject: 'Il tuo account Beneki è stato sospeso',
+    html: '<p>Il tuo account Beneki è stato sospeso per mancanza di attività.</p><p>Puoi presentare una nuova domanda quando vorrai effettuare un ordine.</p>',
+    closing: 'Il team Beneki',
+  },
+  es: {
+    subject: 'Tu cuenta de Beneki ha sido suspendida',
+    html: '<p>Tu cuenta de Beneki ha sido suspendida por falta de actividad.</p><p>Puedes volver a solicitar el acceso cuando quieras realizar un pedido.</p>',
+    closing: 'El equipo Beneki',
+  },
+};
+
+/**
  * Account review decision emails.
- * Modules: accountapproved | accountmoreinfo | accountrefused
+ * Modules: accountapproved | accountmoreinfo | accountrefused | accountsuspended
  * Placeholders: {{email}}, {{userId}}, {{username}}, {{businessName}},
  *   {{accountStatus}}, {{note}}, {{requestedInfo}}
  *
@@ -221,6 +248,7 @@ async function sendAccountReviewDecisionEmail(
     approve: 'accountapproved',
     request_more_info: 'accountmoreinfo',
     refuse: 'accountrefused',
+    suspend: 'accountsuspended',
   };
 
   const module = moduleByAction[action];
@@ -242,7 +270,10 @@ async function sendAccountReviewDecisionEmail(
     accountapproved: 'Your Beneki account has been approved',
     accountmoreinfo: 'More information needed for your Beneki account',
     accountrefused: 'Your Beneki registration was not approved',
+    accountsuspended: 'Your Beneki account has been suspended',
   };
+
+  const normalizedLocale = String(locale || 'en').split('-')[0] || 'en';
 
   // If no CMS template exists for more-info, still send the admin message.
   if (module === 'accountmoreinfo' && requestedInfo) {
@@ -281,6 +312,17 @@ async function sendAccountReviewDecisionEmail(
     locale,
     vars,
     fallbackSubject: fallbackSubjects[module],
+  }).then(async (sent) => {
+    if (sent || module !== 'accountsuspended') return sent;
+
+    const copy =
+      SUSPEND_EMAIL_COPY[normalizedLocale] || SUSPEND_EMAIL_COPY.en;
+    await strapi.plugin('email').service('email').send({
+      to: user.email,
+      subject: copy.subject,
+      html: `${copy.html}<p style="margin-top:30px;">${copy.closing}</p>`,
+    });
+    return true;
   });
 }
 

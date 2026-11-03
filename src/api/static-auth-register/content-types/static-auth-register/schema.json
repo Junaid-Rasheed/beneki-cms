@@ -324,6 +324,22 @@
         }
       }
     },
+    "accountStatusSuspendedTitle": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "accountStatusSuspendedBody": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "accountStatusBackToLogin": {
       "type": "string",
       "pluginOptions": {

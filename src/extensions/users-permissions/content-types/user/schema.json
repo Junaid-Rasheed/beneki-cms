@@ -155,8 +155,13 @@
         "more_info_requested",
         "refused",
         "rejected_without_notification",
-        "approved"
+        "approved",
+        "suspended"
       ]
+    },
+    "isSuspended": {
+      "type": "boolean",
+      "default": false
     },
     "legacyAutoValidated": {
       "type": "boolean",
