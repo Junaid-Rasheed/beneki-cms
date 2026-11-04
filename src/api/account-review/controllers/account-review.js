@@ -74,12 +74,15 @@ function inactivityCutoffDate() {
   return cutoff;
 }
 
-/** Paid orders with a total. Free samples (total 0) are not purchases. */
+/**
+ * A purchase is an order that has shipped or been delivered.
+ * Payment status is ignored: many customers pay at year end, so an
+ * unpaid-but-shipped order still counts. Free samples (total 0) do not.
+ */
 function purchaseWhere(since) {
   const where = {
-    paymentStatus: 'paid',
     total: { $gt: 0 },
-    orderStatus: { $notIn: ['cancelled', 'refund'] },
+    orderStatus: { $in: ['shipped', 'delivered'] },
   };
   if (since) where.createdAt = { $gte: since };
   return where;
@@ -114,7 +117,7 @@ async function findRecentPurchaserIds(strapi, since) {
 
 /**
  * Approved (including legacy auto-validated) accounts old enough to have
- * been inactive, excluding anyone with a paid order since `cutoff`.
+ * been inactive, excluding anyone with a shipped or delivered order since `cutoff`.
  */
 async function buildNoPurchaseWhere(strapi, cutoff) {
   const recentBuyerIds = await findRecentPurchaserIds(strapi, cutoff);
@@ -223,7 +226,7 @@ module.exports = {
   /**
    * GET /api/account-reviews
    * Query: status, page, pageSize, search, legacyOnly
-   * status=no-purchase → approved accounts with no paid order in the last 3 months
+   * status=no-purchase → approved accounts with no shipped or delivered order in the last 3 months
    */
   async find(ctx) {
     const admin = await requireAdminUser(strapi, ctx);
