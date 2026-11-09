@@ -27,7 +27,7 @@ module.exports = {
       }
     },
     options: {
-      rule: "0 */5 6-20 * * 1-5",
+      rule: "0 */5 6-20 * * 1-6",
       tz: "Europe/Paris",
     },
   },
