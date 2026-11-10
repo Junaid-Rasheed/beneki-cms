@@ -331,6 +331,113 @@ function formatNum(value) {
   const rounded = Math.round(value * 1000) / 1000;
   return String(rounded);
 }
+function matchItemsByReference(orderItems, referenceNumber) {
+  const items = Array.isArray(orderItems) ? orderItems : [];
+  const tokens = String(referenceNumber || "")
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter(Boolean);
+  if (!items.length || !tokens.length) return [];
+
+  const sorted = [...items].sort(
+    (a, b) =>
+      String(b.productId || "").length - String(a.productId || "").length,
+  );
+  const matched = new Map();
+  for (const token of tokens) {
+    const upper = String(token).toUpperCase();
+    for (const item of sorted) {
+      const pid = String(item.productId || "").toUpperCase();
+      if (!pid || !upper.endsWith(pid)) continue;
+      const prefix = upper.slice(0, upper.length - pid.length);
+      if (prefix !== "" && !/^\d+(?:\.\d+)?$/.test(prefix)) continue;
+      const key = item.documentId || item.id;
+      if (key != null) matched.set(key, item);
+      break;
+    }
+  }
+  return [...matched.values()];
+}
+
+function trackingDocumentIds(item) {
+  const raw = item?.shipment_trackings?.data ?? item?.shipment_trackings ?? [];
+  const list = Array.isArray(raw) ? raw : [];
+  return list
+    .map((entry) => entry?.documentId || entry?.attributes?.documentId)
+    .filter(Boolean)
+    .map(String);
+}
+
+async function buildSlaveRequestsForOrder(order) {
+  const orderTotal = Number(order?.total);
+  if (orderTotal === 0) {
+    return [{ weight: "1", referencenumber: "sample" }];
+  }
+
+  const products = await strapi
+    .documents("api::sidebar-item.sidebar-item")
+    .findMany({
+      locale: "*",
+      populate: {
+        product_detail: true,
+        children: {
+          populate: {
+            product_detail: true,
+          },
+        },
+      },
+    });
+
+  const allPieces = [];
+  (order?.orderItems || []).forEach((item, index) => {
+    const foundProduct = findProductByIdInTree(products, item.productId);
+    if (isServiceProduct(foundProduct)) return;
+    allPieces.push(...buildPiecesForOrderLine(item, foundProduct, index));
+  });
+
+  return packPiecesIntoSlaves(allPieces);
+}
+
+function pickSlaveForTracking(order, trackingDocumentId, slaveRequests) {
+  const slaves = Array.isArray(slaveRequests) ? slaveRequests : [];
+  if (!slaves.length) return null;
+  if (slaves.length === 1) return slaves[0];
+
+  const id = String(trackingDocumentId || "");
+  const items = Array.isArray(order?.orderItems) ? order.orderItems : [];
+  const sameWeight = (list) => {
+    const weights = new Set(list.map((slave) => String(slave.weight)));
+    return weights.size === 1 ? list[0] : null;
+  };
+
+  const ownedByTracking = slaves.filter((slave) => {
+    const matched = matchItemsByReference(items, slave.referencenumber);
+    if (!matched.length) return false;
+    return matched.every((item) => trackingDocumentIds(item).includes(id));
+  });
+  if (ownedByTracking.length === 1) return ownedByTracking[0];
+  const sharedWeight = sameWeight(ownedByTracking);
+  if (sharedWeight) return sharedWeight;
+
+  const itemsForTracking = items.filter((item) =>
+    trackingDocumentIds(item).includes(id),
+  );
+  if (itemsForTracking.length === 1) {
+    const itemKey = String(
+      itemsForTracking[0].documentId || itemsForTracking[0].id || "",
+    );
+    const itemSlaves = slaves.filter((slave) =>
+      matchItemsByReference(items, slave.referencenumber).some(
+        (item) => String(item.documentId || item.id) === itemKey,
+      ),
+    );
+    if (itemSlaves.length === 1) return itemSlaves[0];
+    return sameWeight(itemSlaves);
+  }
+
+  return null;
+}
+
 async function resolveAutoPrint(order) {
   if (typeof order.user?.autoprint === "boolean") {
     return order.user.autoprint !== false;
@@ -383,55 +490,13 @@ module.exports = {
       const receiverName =
         receiverFullName || shippingAddress.companyName || "Customer";
 
-      const orderTotal = Number(order.total);
-      const isSampleOrder = orderTotal === 0;
+      const slaveRequests = await buildSlaveRequestsForOrder(order);
 
-      let slaveRequests = [];
-
-      if (isSampleOrder) {
-        slaveRequests = [
-          {
-            weight: "1",
-            referencenumber: "sample",
-          },
-        ];
-      } else {
-        const products = await strapi
-          .documents("api::sidebar-item.sidebar-item")
-          .findMany({
-            locale: "*",
-            populate: {
-              product_detail: true,
-              children: {
-                populate: {
-                  product_detail: true,
-                },
-              },
-            },
-          });
-
-        const allPieces = [];
-
-        order.orderItems.forEach((item, index) => {
-          const foundProduct = findProductByIdInTree(products, item.productId);
-
-          if (isServiceProduct(foundProduct)) {
-            return;
-          }
-
-          const pieces = buildPiecesForOrderLine(item, foundProduct, index);
-
-          allPieces.push(...pieces);
-        });
-
-        slaveRequests = packPiecesIntoSlaves(allPieces);
-
-        if (!slaveRequests.length) {
-          strapi.log.info(
-            `Skipping label generation for ${order.orderNumber} (no shippable items; service-only order)`,
-          );
-          return;
-        }
+      if (!slaveRequests.length) {
+        strapi.log.info(
+          `Skipping label generation for ${order.orderNumber} (no shippable items; service-only order)`,
+        );
+        return;
       }
       //--------------------------------------------------------
       // Delivery Instructions
@@ -523,4 +588,7 @@ module.exports = {
     }
   },
   findProductByIdInTree,
+  getCountryPrefix,
+  buildSlaveRequestsForOrder,
+  pickSlaveForTracking,
 };

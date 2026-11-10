@@ -11,5 +11,10 @@ module.exports = {
       path: "/shipment-trackings/:documentId/reprint",
       handler: "shipment-tracking.reprint",
     },
+    {
+      method: "POST",
+      path: "/shipment-trackings/:documentId/regenerate",
+      handler: "shipment-tracking.regenerate",
+    },
   ],
 };

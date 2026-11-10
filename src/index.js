@@ -27,6 +27,9 @@ const MISSING_GLS_ORDER_ACTIONS = [
 
 const ORDER_MARK_COMPLETED_ACTION = 'api::order.order.markAsCompleted';
 
+const SHIPMENT_REGENERATE_ACTION =
+  'api::shipment-tracking.shipment-tracking.regenerate';
+
 const LOGISTIC_NOTIFY_ACTION = 'api::logistic.logistic.notify';
 
 const INVENTORY_ADMIN_ACTIONS = [
@@ -215,6 +218,27 @@ async function ensureAdminOrderMarkCompletedPermission(strapi) {
     ORDER_MARK_COMPLETED_ACTION,
     'Admin',
     'order.markAsCompleted'
+  );
+}
+
+async function ensureAdminRegenerateLabelPermission(strapi) {
+  const adminRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({ where: { name: 'Admin' } });
+
+  if (!adminRole) {
+    strapi.log.warn(
+      '[shipment-tracking.regenerate] No users-permissions role named "Admin"; skip permission bootstrap'
+    );
+    return;
+  }
+
+  await ensurePermission(
+    strapi,
+    adminRole,
+    SHIPMENT_REGENERATE_ACTION,
+    'Admin',
+    'shipment-tracking.regenerate'
   );
 }
 
@@ -476,6 +500,14 @@ module.exports = {
     } catch (err) {
       strapi.log.error(
         `[order.markAsCompleted] Permission bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureAdminRegenerateLabelPermission(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[shipment-tracking.regenerate] Permission bootstrap failed: ${err.message}`
       );
     }
 

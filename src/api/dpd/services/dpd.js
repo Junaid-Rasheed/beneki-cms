@@ -857,4 +857,219 @@ module.exports = {
     // return zipBuffer;
     return true;
   },
+
+  /**
+   * Create a new DPD shipment for one existing box and replace that
+   * shipment-tracking record (barcode + ZPL). The previous DPD shipment
+   * is cancelled when DPD still allows it.
+   */
+  async regenerateShipmentLabel({ tracking, receiver, orderNumber }) {
+    const previousBarCodeId = tracking?.barCodeId;
+    if (!previousBarCodeId) {
+      throw new Error("Shipment tracking has no DPD barcode");
+    }
+    if (!receiver?.street || !receiver?.zipCode || !receiver?.city) {
+      throw new Error("Shipping address is incomplete");
+    }
+
+    const client = await soap.createClientAsync(WSDL_PATH, {
+      disableCache: true,
+    });
+    client.addSoapHeader({
+      UserCredentials: {
+        userid: process.env.DPD_USER,
+        password: process.env.DPD_PASSWORD,
+        attributes: {
+          xmlns: "http://www.cargonet.software",
+        },
+      },
+    });
+
+    const fetchLabels = async (barcodeId) => {
+      const labelResponse = await client.GetLabelBcAsync({
+        request: {
+          customer: getDpdCustomer(),
+          shipmentNumber: barcodeId,
+          labelType: { type: "ZPL_A6" },
+        },
+      });
+      const result = labelResponse?.[0]?.GetLabelBcResult;
+      if (!result?.labels) return [];
+
+      let shipmentLabels = [];
+      if (result.labels.Label) {
+        shipmentLabels = Array.isArray(result.labels.Label)
+          ? result.labels.Label
+          : [result.labels.Label];
+      } else if (Array.isArray(result.labels)) {
+        shipmentLabels = result.labels;
+      }
+
+      return shipmentLabels
+        .map((label) => {
+          const labelData = label.label || label.Label;
+          if (!labelData) return null;
+          return { buffer: Buffer.from(labelData, "utf-8") };
+        })
+        .filter(Boolean);
+    };
+
+    const terminateShipment = async (barcodeId, barcodeSource) => {
+      const request = {
+        customer: getDpdCustomer(),
+        BarcodeId: String(barcodeId),
+        Reason: "Label regenerated",
+      };
+      if (barcodeSource != null && barcodeSource !== "") {
+        request.BarcodeSource = Number(barcodeSource);
+      }
+      await client.TerminateShipmentAsync({ request });
+    };
+
+    const existingResponse = await client.GetShipmentBcAsync({
+      request: {
+        customer: getDpdCustomer(),
+        BarcodeId: String(previousBarCodeId),
+        ...(tracking.barCodeSource != null && tracking.barCodeSource !== ""
+          ? { BarcodeSource: Number(tracking.barCodeSource) }
+          : {}),
+        GetServices: false,
+      },
+    });
+
+    const existing = existingResponse?.[0]?.GetShipmentBcResult;
+    const rawWeight = existing?.weight ?? existing?.Weight;
+    if (rawWeight == null || String(rawWeight).trim() === "") {
+      throw new Error(
+        "DPD did not return the existing shipment, so the label cannot be regenerated",
+      );
+    }
+
+    const weight = String(rawWeight).trim().replace(",", ".");
+    const referencenumber = String(
+      existing?.referencenumber ?? existing?.Referencenumber ?? "",
+    );
+
+    const request = {
+      customer_countrycode: Number(process.env.DPD_COUNTRY_CODE),
+      customer_centernumber: Number(process.env.DPD_CENTER_NUMBER),
+      customer_number: Number(process.env.DPD_CUSTOMER_NUMBER),
+      shipperaddress: {
+        name: "BENEKI",
+        countryPrefix: "FR",
+        zipCode: "59500",
+        city: "Douai",
+        street: "691 rue maurice caullery",
+        phoneNumber: "0672799030",
+      },
+      receiveraddress: {
+        name: receiver.companyName || receiver.name,
+        countryPrefix: receiver.countryPrefix || "FR",
+        zipCode: receiver.zipCode,
+        city: receiver.city,
+        street: receiver.street,
+        phoneNumber: receiver.phoneNumber || "",
+      },
+      receiverinfo: {
+        contact: receiver.name || "",
+        vinfo1: receiver.deliveryInstruction || "",
+        vinfo2: receiver.deliveryInstruction2 || "",
+      },
+      shippingdate: getDpdShippingDate(),
+      ...(receiver.email
+        ? {
+            services: {
+              contact: {
+                email: receiver.email,
+                type: "AutomaticMail",
+              },
+            },
+          }
+        : {}),
+      weight,
+      referencenumber,
+    };
+
+    const response = await client.CreateShipmentBcAsync({ request });
+    const created = response?.[0]?.CreateShipmentBcResult?.ShipmentBc?.[0];
+    const newBarcodeId = created?.Shipment?.BarcodeId;
+
+    if (!newBarcodeId) {
+      throw new Error("No barcode returned from DPD");
+    }
+
+    let labels = [];
+    try {
+      labels = await fetchLabels(newBarcodeId);
+      if (!labels.length) {
+        throw new Error("DPD did not return a label for the new shipment");
+      }
+
+      await strapi
+        .documents("api::shipment-tracking.shipment-tracking")
+        .update({
+          documentId: tracking.documentId,
+          data: {
+            barCodeId: created.Shipment.BarcodeId,
+            barCode: created.Shipment.BarCode,
+            barCodeSource: created.Shipment.BarcodeSource,
+            labelData: labelDataFromFetchedLabels(labels),
+            status: "preparing",
+          },
+        });
+    } catch (error) {
+      try {
+        await terminateShipment(newBarcodeId, created.Shipment?.BarcodeSource);
+      } catch (terminateError) {
+        strapi.log.warn(
+          `Failed to cancel new DPD shipment ${newBarcodeId} after regenerate error: ${terminateError.message}`,
+        );
+      }
+      throw error;
+    }
+
+    let previousShipmentTerminated = false;
+    try {
+      await terminateShipment(previousBarCodeId, tracking.barCodeSource);
+      previousShipmentTerminated = true;
+    } catch (terminateError) {
+      strapi.log.warn(
+        `New label ${newBarcodeId} replaced ${previousBarCodeId}, but the old DPD shipment could not be cancelled: ${terminateError.message}`,
+      );
+    }
+
+    const printOrderNumber = orderNumber
+      ? `${orderNumber}-${newBarcodeId}-${Date.now()}`
+      : `regen-${newBarcodeId}-${Date.now()}`;
+
+    let printJobId = null;
+    try {
+      const printJob = await strapi
+        .documents("api::print-labels-job.print-labels-job")
+        .create({
+          data: {
+            orderNumber: printOrderNumber,
+            zpl: labels.map((label) => label.buffer.toString("utf-8")),
+            labelStatus: "Pending",
+            attempts: 0,
+          },
+        });
+      printJobId = printJob.documentId;
+    } catch (printError) {
+      strapi.log.error(
+        `Label ${newBarcodeId} was saved, but the print job failed: ${printError.message}`,
+      );
+    }
+
+    return {
+      documentId: tracking.documentId,
+      barCodeId: created.Shipment.BarcodeId,
+      barCode: created.Shipment.BarCode,
+      barCodeSource: created.Shipment.BarcodeSource,
+      previousBarCodeId,
+      previousShipmentTerminated,
+      status: "preparing",
+      printJobId,
+    };
+  },
 };

@@ -567,9 +567,245 @@ async function getParcelTrace(trackId) {
   };
 }
 
+function glsErrorMessage(error) {
+  const data = error?.response?.data;
+  if (typeof data === "string" && data.trim()) return data;
+  if (data && typeof data === "object") {
+    return (
+      data.Message ||
+      data.message ||
+      data.error ||
+      JSON.stringify(data)
+    );
+  }
+  return error?.message || "GLS request failed";
+}
+
+function parcelMetaFromDetails(data) {
+  const detail = data?.UnitDetail || data?.unitDetail;
+  if (!detail || typeof detail !== "object") return {};
+
+  const weight = detail.Weight ?? detail.weight ?? detail.ParcelWeight;
+  let reference =
+    detail.ShipmentUnitReference ??
+    detail.ShipmentReference ??
+    detail.Reference ??
+    detail.reference;
+  if (Array.isArray(reference)) {
+    reference = reference.filter(Boolean).join(" ");
+  }
+
+  return {
+    weight: weight == null ? "" : String(weight).trim(),
+    reference: reference == null ? "" : String(reference).trim(),
+  };
+}
+
+async function cancelGlsShipment(trackId) {
+  const token = await getAccessToken();
+  await axios.post(
+    `${SHIPMENT_URL}/cancel/${encodeURIComponent(String(trackId))}`,
+    {},
+    { headers: trackingHeaders(token) },
+  );
+}
+
+/**
+ * Create a new GLS shipment for one existing box and replace that
+ * shipment-tracking record. The previous parcel is cancelled when GLS allows it.
+ */
+async function regenerateGlsShipmentLabel({
+  tracking,
+  receiver,
+  orderNumber,
+  orderId,
+  fallbackWeight,
+  fallbackReference,
+}) {
+  const previousBarCodeId = tracking?.barCodeId;
+  if (!previousBarCodeId) {
+    throw new Error("Shipment tracking has no GLS barcode");
+  }
+  if (!receiver?.street || !receiver?.zipCode || !receiver?.city) {
+    throw new Error("Shipping address is incomplete");
+  }
+
+  const token = await getAccessToken();
+  let weight = "";
+  let referencenumber = "";
+
+  try {
+    const detailsResponse = await axios.post(
+      TRACKING_DETAILS_URL,
+      { TrackID: String(previousBarCodeId) },
+      { headers: trackingHeaders(token) },
+    );
+    const meta = parcelMetaFromDetails(detailsResponse.data);
+    weight = meta.weight || "";
+    referencenumber = meta.reference || "";
+  } catch (error) {
+    strapi.log.warn(
+      `GLS parcel details unavailable for ${previousBarCodeId}: ${glsErrorMessage(error)}`,
+    );
+  }
+
+  if (!weight) weight = String(fallbackWeight || "").trim();
+  if (!referencenumber) {
+    referencenumber = String(fallbackReference || "").trim();
+  }
+  if (!weight) {
+    throw new Error(
+      "Could not determine the parcel weight, so the GLS label cannot be regenerated",
+    );
+  }
+
+  const numericWeight = Number(String(weight).replace(",", "."));
+  const countryPrefix = String(receiver.countryPrefix || "").toUpperCase();
+  const glsBody = {
+    Shipment: {
+      Middleware: "IT Supplier",
+      Product: "PARCEL",
+      Consignee: {
+        ConsigneeID: orderId?.toString() || "N/A",
+        Address: {
+          Name1: receiver.companyName || receiver.name,
+          CountryCode: countryPrefix,
+          ZIPCode: receiver.zipCode,
+          City: receiver.city,
+          Street: String(receiver.street).substring(0, 40),
+          eMail: receiver.email?.trim(),
+          FixedLinePhonenumber: "",
+          MobilePhoneNumber: receiver.phoneNumber || "",
+          ContactPerson: receiver.name?.trim().slice(0, 40) || "",
+        },
+      },
+      Shipper: {
+        ContactID: CONTACT_ID,
+        AlternativeShipperAddress: {
+          Name1: "BENEKI",
+          CountryCode: "FR",
+          ZIPCode: "59500",
+          City: "Douai",
+          Street: "691 rue maurice caullery",
+        },
+      },
+      ShipmentUnit: [
+        {
+          Weight: Number.isFinite(numericWeight) ? numericWeight : weight,
+          ShipmentUnitReference: [referencenumber || "regen"],
+          Note1: receiver.deliveryInstruction || "",
+          Note2: receiver.deliveryInstruction2 || "",
+        },
+      ],
+      ...(countryPrefix === "MT"
+        ? { IncotermCode: "20" }
+        : {
+            Service: [
+              {
+                Service: {
+                  ServiceName: "service_flexdelivery",
+                },
+              },
+            ],
+          }),
+    },
+    PrintingOptions: {
+      ReturnLabels: {
+        TemplateSet: "ZPL_200",
+        LabelFormat: "ZEBRA",
+      },
+    },
+  };
+
+  let response;
+  try {
+    response = await axios.post(SHIPMENT_URL, glsBody, {
+      headers: trackingHeaders(token),
+    });
+  } catch (error) {
+    throw new Error(glsErrorMessage(error));
+  }
+
+  const parcel = response?.data?.CreatedShipment?.ParcelData?.[0];
+  const parcelLabel = response?.data?.CreatedShipment?.PrintData?.[0]?.Data;
+  const newBarcodeId = parcel?.TrackID;
+
+  if (!newBarcodeId || !parcelLabel) {
+    throw new Error("GLS did not return a label for the new shipment");
+  }
+
+  try {
+    await strapi.documents("api::shipment-tracking.shipment-tracking").update({
+      documentId: tracking.documentId,
+      data: {
+        barCodeId: parcel.TrackID,
+        barCode: parcel.ParcelNumber,
+        barCodeSource: 0,
+        labelData: [parcelLabel],
+        status: "preparing",
+      },
+    });
+  } catch (error) {
+    try {
+      await cancelGlsShipment(newBarcodeId);
+    } catch (cancelError) {
+      strapi.log.warn(
+        `Failed to cancel new GLS shipment ${newBarcodeId} after regenerate error: ${glsErrorMessage(cancelError)}`,
+      );
+    }
+    throw error;
+  }
+
+  let previousShipmentTerminated = false;
+  try {
+    await cancelGlsShipment(previousBarCodeId);
+    previousShipmentTerminated = true;
+  } catch (cancelError) {
+    strapi.log.warn(
+      `New label ${newBarcodeId} replaced ${previousBarCodeId}, but the old GLS shipment could not be cancelled: ${glsErrorMessage(cancelError)}`,
+    );
+  }
+
+  const printOrderNumber = orderNumber
+    ? `${orderNumber}-${newBarcodeId}-${Date.now()}`
+    : `regen-${newBarcodeId}-${Date.now()}`;
+
+  let printJobId = null;
+  try {
+    const printJob = await strapi
+      .documents("api::print-labels-job.print-labels-job")
+      .create({
+        data: {
+          orderNumber: printOrderNumber,
+          zpl: [parcelLabel],
+          labelStatus: "Pending",
+          attempts: 0,
+        },
+      });
+    printJobId = printJob.documentId;
+  } catch (printError) {
+    strapi.log.error(
+      `Label ${newBarcodeId} was saved, but the print job failed: ${printError.message}`,
+    );
+  }
+
+  return {
+    documentId: tracking.documentId,
+    barCodeId: parcel.TrackID,
+    barCode: parcel.ParcelNumber,
+    barCodeSource: 0,
+    previousBarCodeId,
+    previousShipmentTerminated,
+    status: "preparing",
+    printJobId,
+    carrier: "GLS",
+  };
+}
+
 module.exports = {
   getAccessToken,
   generateGlsShipment,
+  regenerateGlsShipmentLabel,
   mapGlsStatusToOrderStatus,
   normalizeGlsStatus,
   getParcelTrace,
