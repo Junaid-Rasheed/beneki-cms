@@ -2711,6 +2711,36 @@ export interface ApiStaticAuthLoginStaticAuthLogin
       'oneToMany',
       'api::static-auth-login.static-auth-login'
     >;
+    authPanelDescription: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    authPanelPoint1: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    authPanelPoint2: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    authPanelPoint3: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    authPanelTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     loginDefaultError: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -2724,6 +2754,12 @@ export interface ApiStaticAuthLoginStaticAuthLogin
         };
       }>;
     loginEmailRequired: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    loginHidePassword: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -2771,13 +2807,31 @@ export interface ApiStaticAuthLoginStaticAuthLogin
           localized: true;
         };
       }>;
+    loginShowPassword: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     loginSubmitButton: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
+    loginSubtitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     loginTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    loginWelcomeTitle: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -3022,6 +3076,12 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
           localized: true;
         };
       }>;
+    registerBackButton: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     registerBusinessNameLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3041,6 +3101,12 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
         };
       }>;
     registerBusinessNumberRequired: Schema.Attribute.String;
+    registerContinueButton: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     registerCountryLabel: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3060,12 +3126,24 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
           localized: true;
         };
       }>;
+    registerEmailRequired: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     registerErrorBusinessNumberRequired: Schema.Attribute.String;
     registerErrorCountryRequired: Schema.Attribute.String;
     registerErrorEmailTaken: Schema.Attribute.String;
     registerErrorGeneric: Schema.Attribute.String;
     registerErrorIndividualFranceOnly: Schema.Attribute.String;
     registerErrorVatRequired: Schema.Attribute.String;
+    registerHidePassword: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     registerIndividualFranceMessage: Schema.Attribute.String;
     registerIndividualFranceOnly: Schema.Attribute.String;
     registerListingsInvalid: Schema.Attribute.String &
@@ -3104,6 +3182,12 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
           localized: true;
         };
       }>;
+    registerPasswordRequired: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     registerPrivacyLinkText: Schema.Attribute.String;
     registerPrivacyText: Schema.Attribute.String;
     registerReasonLabel: Schema.Attribute.String &
@@ -3113,6 +3197,54 @@ export interface ApiStaticAuthRegisterStaticAuthRegister
         };
       }>;
     registerReasonPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerShowPassword: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerStep1Subtitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerStep1Title: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerStep2Subtitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerStep2Title: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerStep3Subtitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerStep3Title: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    registerStepCounter: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;

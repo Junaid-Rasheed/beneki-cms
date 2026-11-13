@@ -1,5 +1,7 @@
 'use strict';
 
+const { ensureAuthPageStatic } = require('./bootstrap/auth-page-static');
+
 const ACCOUNT_REVIEW_ACTIONS = [
   'api::account-review.account-review.find',
   'api::account-review.account-review.findOne',
@@ -549,6 +551,14 @@ module.exports = {
     } catch (err) {
       strapi.log.error(
         `[account-review] Suspend email template bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureAuthPageStatic(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[auth-page-static] Bootstrap failed: ${err.message}`
       );
     }
   },
