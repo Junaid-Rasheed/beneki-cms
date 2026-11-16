@@ -48,6 +48,17 @@ const HOME_COPY = {
     homeProCtaButton: 'Crear una cuenta pro',
     headerAccountLabel: 'Mi cuenta',
   },
+  pt: {
+    homeProductsTitle: 'Os nossos produtos',
+    homeProductsEmptyMessage: 'Nenhum produto de momento.',
+    trustSectionSubtitle:
+      'Concierges e gestores de arrendamentos de curta duração.',
+    homeProCtaTitle: 'Gere arrendamentos de curta duração?',
+    homeProCtaDescription:
+      'Crie a sua conta pro e encomende em poucos cliques. Verificamos a sua empresa antes da ativação.',
+    homeProCtaButton: 'Criar uma conta pro',
+    headerAccountLabel: 'A minha conta',
+  },
 };
 
 const FOOTER_COPY = {
@@ -62,6 +73,9 @@ const FOOTER_COPY = {
   },
   es: {
     footerPrivacyPolicyLink: 'Política de privacidad',
+  },
+  pt: {
+    footerPrivacyPolicyLink: 'Política de privacidade',
   },
 };
 
