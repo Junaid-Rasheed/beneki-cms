@@ -26,6 +26,28 @@ const HOME_COPY = {
     homeProCtaButton: 'Create a pro account',
     headerAccountLabel: 'My account',
   },
+  it: {
+    homeProductsTitle: 'I nostri prodotti',
+    homeProductsEmptyMessage: 'Nessun prodotto al momento.',
+    trustSectionSubtitle:
+      'Concierge e gestori di affitti brevi.',
+    homeProCtaTitle: 'Gestisci affitti brevi?',
+    homeProCtaDescription:
+      "Crea il tuo account pro e ordina in pochi clic. Verifichiamo la tua azienda prima dell'attivazione.",
+    homeProCtaButton: 'Crea un account pro',
+    headerAccountLabel: 'Il mio account',
+  },
+  es: {
+    homeProductsTitle: 'Nuestros productos',
+    homeProductsEmptyMessage: 'Ningún producto por el momento.',
+    trustSectionSubtitle:
+      'Conserjerías y gestores de alquileres de corta duración.',
+    homeProCtaTitle: '¿Gestionas alquileres de corta duración?',
+    homeProCtaDescription:
+      'Crea tu cuenta pro y pide en unos clics. Verificamos tu empresa antes de la activación.',
+    homeProCtaButton: 'Crear una cuenta pro',
+    headerAccountLabel: 'Mi cuenta',
+  },
 };
 
 const FOOTER_COPY = {
@@ -34,6 +56,12 @@ const FOOTER_COPY = {
   },
   en: {
     footerPrivacyPolicyLink: 'Privacy policy',
+  },
+  it: {
+    footerPrivacyPolicyLink: 'Informativa sulla privacy',
+  },
+  es: {
+    footerPrivacyPolicyLink: 'Política de privacidad',
   },
 };
 
