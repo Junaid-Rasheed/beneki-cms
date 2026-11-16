@@ -104,6 +104,14 @@
         }
       }
     },
+    "footerPrivacyPolicyLink": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "footerRightsReserved": {
       "type": "string",
       "pluginOptions": {

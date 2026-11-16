@@ -1,6 +1,7 @@
 'use strict';
 
 const { ensureAuthPageStatic } = require('./bootstrap/auth-page-static');
+const { ensureHomePageStatic } = require('./bootstrap/home-page-static');
 
 const ACCOUNT_REVIEW_ACTIONS = [
   'api::account-review.account-review.find',
@@ -559,6 +560,14 @@ module.exports = {
     } catch (err) {
       strapi.log.error(
         `[auth-page-static] Bootstrap failed: ${err.message}`
+      );
+    }
+
+    try {
+      await ensureHomePageStatic(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[home-page-static] Bootstrap failed: ${err.message}`
       );
     }
   },
