@@ -90,23 +90,49 @@ module.exports = (plugin) => {
 
       const user = ctx.body?.user;
       if (user?.id) {
-        // Ensure pending_review even if a client somehow bypassed create hooks
-        if (user.accountStatus !== 'pending_review') {
-          try {
+        // Web-app signups must be the Authenticated role. Strapi's default
+        // role setting is not trusted here. Admin-created users use another API.
+        try {
+          const authenticatedRole = await strapi.db
+            .query('plugin::users-permissions.role')
+            .findOne({
+              where: {
+                $or: [{ type: 'authenticated' }, { name: 'Authenticated' }],
+              },
+            });
+
+          const patch = {};
+          if (user.accountStatus !== 'pending_review') {
+            patch.accountStatus = 'pending_review';
+          }
+          if (authenticatedRole) {
+            patch.role = authenticatedRole.id;
+          } else {
+            strapi.log.warn(
+              `[register] No Authenticated role found; user ${user.id} kept the default role`
+            );
+          }
+
+          if (Object.keys(patch).length > 0) {
             const updated = await strapi.db
               .query('plugin::users-permissions.user')
               .update({
                 where: { id: user.id },
-                data: { accountStatus: 'pending_review' },
+                data: patch,
               });
             if (ctx.body.user) {
-              ctx.body.user.accountStatus = updated.accountStatus;
+              if (updated.accountStatus) {
+                ctx.body.user.accountStatus = updated.accountStatus;
+              }
+              if (authenticatedRole) {
+                ctx.body.user.role = authenticatedRole.id;
+              }
             }
-          } catch (err) {
-            strapi.log.error(
-              `[register] Failed to force pending_review for user ${user.id}: ${err.message}`
-            );
           }
+        } catch (err) {
+          strapi.log.error(
+            `[register] Failed to set Authenticated role for user ${user.id}: ${err.message}`
+          );
         }
 
         if (user.email) {
