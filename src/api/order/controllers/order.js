@@ -125,6 +125,36 @@ function assertData(body) {
   }
 }
 
+/**
+ * Relations a shopper sets while placing an order. Validating them requires
+ * find permission on the target collection, which would expose every row.
+ * They are applied after validation instead.
+ */
+const CUSTOMER_ORDER_RELATIONS = [
+  'coupon',
+  'orderItems',
+  'billingAddress',
+  'shippingAddress',
+  'shipment_trackings',
+];
+
+function liftRelationFields(data, keys) {
+  const lifted = {};
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      lifted[key] = data[key];
+      delete data[key];
+    }
+  }
+  return lifted;
+}
+
+function relationValueIsEmpty(value) {
+  if (value == null || value === '') return true;
+  if (Array.isArray(value) && value.length === 0) return true;
+  return false;
+}
+
 function scopeFiltersToUser(sanitizedQuery, userId) {
   const filters = { ...(sanitizedQuery.filters || {}) };
   delete filters.user;
@@ -240,15 +270,21 @@ module.exports = createCoreController(UID, ({ strapi }) => ({
     const { body = {} } = ctx.request;
     assertData(body);
 
-    if (user && isCustomerRole(user)) {
-      delete body.data.user;
-    }
+    const customer = user && isCustomerRole(user);
+    const lifted = customer
+      ? liftRelationFields(body.data, ['user', ...CUSTOMER_ORDER_RELATIONS])
+      : {};
 
     await this.validateInput(body.data, ctx);
     const data = await this.sanitizeInput(body.data, ctx);
 
-    if (user && isCustomerRole(user)) {
+    if (customer) {
       data.user = user.documentId || user.id;
+      for (const key of CUSTOMER_ORDER_RELATIONS) {
+        if (!relationValueIsEmpty(lifted[key])) {
+          data[key] = lifted[key];
+        }
+      }
     }
 
     const entity = await strapi.service(UID).create({
@@ -278,14 +314,18 @@ module.exports = createCoreController(UID, ({ strapi }) => ({
     const sanitizedQuery = await this.sanitizeQuery(ctx);
     const { body = {} } = ctx.request;
     assertData(body);
-    if (customer) {
-      delete body.data.user;
-    }
+    const lifted = customer
+      ? liftRelationFields(body.data, ['user', ...CUSTOMER_ORDER_RELATIONS])
+      : {};
 
     await this.validateInput(body.data, ctx);
     const data = await this.sanitizeInput(body.data, ctx);
     if (customer) {
-      delete data.user;
+      for (const key of CUSTOMER_ORDER_RELATIONS) {
+        if (!relationValueIsEmpty(lifted[key])) {
+          data[key] = lifted[key];
+        }
+      }
     }
 
     const entity = await strapi.service(UID).update(ctx.params.id, {
