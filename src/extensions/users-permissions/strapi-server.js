@@ -208,6 +208,20 @@ module.exports = (plugin) => {
     return originalAuth;
   };
 
+  // /users/me?populate=role is stripped unless the role can list every role.
+  // Shoppers only need their own role name, so attach that after sanitization.
+  const originalMe = plugin.controllers.user.me;
+  plugin.controllers.user.me = async (ctx) => {
+    await originalMe(ctx);
+    const role = ctx.state.user?.role;
+    if (!ctx.body || !role || typeof role !== 'object') return;
+    ctx.body.role = {
+      id: role.id,
+      name: role.name,
+      type: role.type,
+    };
+  };
+
   // --- User controller: strip protected fields on Content API update ---
   const originalUserUpdate = plugin.controllers.user.update;
   plugin.controllers.user.update = async (ctx) => {
