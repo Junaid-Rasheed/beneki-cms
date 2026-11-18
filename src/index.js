@@ -74,6 +74,156 @@ async function ensurePermission(strapi, role, action, label, logTag) {
   );
 }
 
+async function revokePermission(strapi, role, action, label, logTag) {
+  if (!role) return;
+  const existing = await strapi.db
+    .query('plugin::users-permissions.permission')
+    .findMany({
+      where: {
+        action,
+        role: role.id,
+      },
+    });
+  if (!existing.length) return;
+  for (const permission of existing) {
+    await strapi.db.query('plugin::users-permissions.permission').delete({
+      where: { id: permission.id },
+    });
+  }
+  strapi.log.info(
+    `[${logTag || 'permissions'}] Removed permission ${action} from ${label}`
+  );
+}
+
+const USER_ORDER_READ_ACTIONS = [
+  'api::order.order.userOrders',
+  'api::order.order.userOrder',
+];
+
+const USER_ORDER_SEQUENCE_ACTIONS = [
+  'api::order.order.nextOrderNumber',
+  'api::order.order.nextInvoiceId',
+];
+
+const AUTHENTICATED_REVOKED_ACTIONS = [
+  // Listing /api/orders returns every order. Shoppers use /api/userorder.
+  'api::order.order.find',
+  // Required only to connect a user relation. Address and order creates
+  // now stamp the owner from the JWT, so this list-all-users permission goes.
+  'plugin::users-permissions.user.find',
+  // Nested on the shopper's own order by /api/userorder. Find/findOne here
+  // would let them list or open every row in these collections.
+  'api::order-item.order-item.find',
+  'api::order-item.order-item.findOne',
+  'api::order-address.order-address.find',
+  'api::order-address.order-address.findOne',
+  'api::shipment-tracking.shipment-tracking.find',
+  'api::shipment-tracking.shipment-tracking.findOne',
+  'api::coupon.coupon.find',
+];
+
+async function ensureCustomerAccessPermissions(strapi) {
+  const authenticatedRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({
+      where: {
+        $or: [{ type: 'authenticated' }, { name: 'Authenticated' }],
+      },
+    });
+
+  const publicRole = await strapi.db
+    .query('plugin::users-permissions.role')
+    .findOne({
+      where: {
+        $or: [{ type: 'public' }, { name: 'Public' }],
+      },
+    });
+
+  if (authenticatedRole) {
+    for (const action of AUTHENTICATED_REVOKED_ACTIONS) {
+      await revokePermission(
+        strapi,
+        authenticatedRole,
+        action,
+        'Authenticated',
+        'customer-access'
+      );
+    }
+    for (const action of [
+      ...USER_ORDER_READ_ACTIONS,
+      ...USER_ORDER_SEQUENCE_ACTIONS,
+    ]) {
+      await ensurePermission(
+        strapi,
+        authenticatedRole,
+        action,
+        'Authenticated',
+        'customer-access'
+      );
+    }
+    // Profile save (signup follow-up, account details) stays on update,
+    // which the controller limits to the caller's own record.
+    await ensurePermission(
+      strapi,
+      authenticatedRole,
+      'plugin::users-permissions.user.update',
+      'Authenticated',
+      'customer-access'
+    );
+  } else {
+    strapi.log.warn(
+      '[customer-access] No Authenticated role; shopper order permissions skipped'
+    );
+  }
+
+  if (publicRole) {
+    for (const action of USER_ORDER_SEQUENCE_ACTIONS) {
+      await ensurePermission(
+        strapi,
+        publicRole,
+        action,
+        'Public',
+        'customer-access'
+      );
+    }
+    // Signup JWT is Public and still PUTs /api/users/:id with the application.
+    // The user controller only allows that update on the caller's own id.
+    await ensurePermission(
+      strapi,
+      publicRole,
+      'plugin::users-permissions.user.update',
+      'Public',
+      'customer-access'
+    );
+  } else {
+    strapi.log.warn(
+      '[customer-access] No Public role; signup update permission skipped'
+    );
+  }
+
+  const shopperReadRoles = await findRolesByName(strapi, [
+    'Admin',
+    'Affiliate',
+    'Logistic',
+    'Logistics',
+    'Production',
+  ]);
+  for (const role of shopperReadRoles) {
+    for (const action of [
+      ...USER_ORDER_READ_ACTIONS,
+      ...USER_ORDER_SEQUENCE_ACTIONS,
+    ]) {
+      await ensurePermission(
+        strapi,
+        role,
+        action,
+        role.name || 'role',
+        'customer-access'
+      );
+    }
+  }
+}
+
 /**
  * Ensure Admin role can call account-review Content API routes.
  * Safe to re-run: skips actions that already exist.
@@ -473,6 +623,14 @@ module.exports = {
         }
       },
     });
+
+    try {
+      await ensureCustomerAccessPermissions(strapi);
+    } catch (err) {
+      strapi.log.error(
+        `[customer-access] Permission bootstrap failed: ${err.message}`
+      );
+    }
 
     try {
       await ensureAccountReviewPermissions(strapi);

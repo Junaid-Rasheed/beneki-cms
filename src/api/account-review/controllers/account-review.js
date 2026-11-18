@@ -15,6 +15,7 @@ const {
   sendRegistrationConfirmationEmail,
   resolveLocaleFromContext,
 } = require('../../../utils/sendRegistrationConfirmationEmail');
+const { findUsersRole, roleToken } = require('../../../utils/customerRole');
 
 const APPLICATION_FIELDS = [
   'id',
@@ -412,7 +413,7 @@ module.exports = {
 
     const user = await strapi.db
       .query('plugin::users-permissions.user')
-      .findOne({ where: { id } });
+      .findOne({ where: { id }, populate: ['role'] });
 
     if (!user) {
       return ctx.notFound('Application not found');
@@ -436,6 +437,9 @@ module.exports = {
       admin.email;
 
     const wasLegacy = isLegacyAutoValidated(user);
+    const currentRole = roleToken(user);
+    const canAssignCustomerRole =
+      !currentRole || currentRole === 'public' || currentRole === 'authenticated';
     const updateData = {
       accountStatus: nextStatus,
       // Human review → no longer treated as 2026 auto-validated.
@@ -451,6 +455,18 @@ module.exports = {
       updateData.legacyReapplyEligible = true;
     } else if (action !== REVIEW_ACTIONS.REFUSE) {
       updateData.legacyReapplyEligible = false;
+    }
+
+    // Approval is what grants shop access. Leave Admin/Affiliate/Logistic roles alone.
+    if (canAssignCustomerRole && action === REVIEW_ACTIONS.APPROVE) {
+      const authenticatedRole = await findUsersRole(strapi, 'authenticated');
+      if (authenticatedRole) {
+        updateData.role = authenticatedRole.id;
+      } else {
+        strapi.log.warn(
+          `[account-review] Authenticated role not found; user ${user.id} was approved without a role change`
+        );
+      }
     }
 
     const updated = await strapi.db
