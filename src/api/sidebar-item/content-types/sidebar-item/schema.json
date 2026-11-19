@@ -88,14 +88,6 @@
         }
       }
     },
-    "PD_PriceRange": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
     "PD_Gallery": {
       "type": "media",
       "multiple": true,
@@ -106,14 +98,6 @@
         "videos",
         "audios"
       ],
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "quantity": {
-      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -164,9 +148,6 @@
         }
       }
     },
-    "productId": {
-      "type": "string"
-    },
     "productTitle": {
       "type": "text"
     },
@@ -208,18 +189,6 @@
       "type": "string"
     },
     "isAdminProduct": {
-      "type": "boolean"
-    },
-    "maximumVariation": {
-      "type": "integer"
-    },
-    "maximumWeight": {
-      "type": "integer"
-    },
-    "isFoodProduct": {
-      "type": "boolean"
-    },
-    "isOutOfStock": {
       "type": "boolean"
     },
     "product_detail": {

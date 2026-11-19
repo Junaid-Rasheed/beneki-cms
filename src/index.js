@@ -111,6 +111,8 @@ const AUTHENTICATED_REVOKED_ACTIONS = [
   // Required only to connect a user relation. Address and order creates
   // now stamp the owner from the JWT, so this list-all-users permission goes.
   'plugin::users-permissions.user.find',
+  // GET /api/users/:id reads any account. Shoppers use GET /api/users/me.
+  'plugin::users-permissions.user.findOne',
   // Nested on the shopper's own order by /api/userorder. Find/findOne here
   // would let them list or open every row in these collections.
   'api::order-item.order-item.find',
