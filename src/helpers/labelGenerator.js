@@ -1,5 +1,6 @@
 const { generateShipment } = require("../api/dpd/services/dpd");
 const { generateGlsShipment } = require("../api/gls/services/gls");
+const { isSampleOrder } = require("./sampleOrder");
 const orderItem = require("../api/order-item/controllers/order-item");
 
 const STREET_MIN_LETTERS_OR_DIGITS = 5;
@@ -369,8 +370,7 @@ function trackingDocumentIds(item) {
 }
 
 async function buildSlaveRequestsForOrder(order) {
-  const orderTotal = Number(order?.total);
-  if (orderTotal === 0) {
+  if (isSampleOrder(order)) {
     return [{ weight: "1", referencenumber: "sample" }];
   }
 

@@ -245,6 +245,15 @@
     "isOssVatOrder": {
       "type": "boolean"
     },
+    "isSampleOrder": {
+      "type": "boolean",
+      "default": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      }
+    },
     "shipment_trackings": {
       "type": "relation",
       "relation": "oneToMany",

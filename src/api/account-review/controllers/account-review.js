@@ -78,14 +78,29 @@ function inactivityCutoffDate() {
 /**
  * A purchase is an order that has shipped or been delivered.
  * Payment status is ignored: many customers pay at year end, so an
- * unpaid-but-shipped order still counts. Free samples (total 0) do not.
+ * unpaid-but-shipped order still counts. Sample orders (SMP product /
+ * isSampleOrder, including older "Free sample request" orders) do not.
+ * A fully discounted order still counts.
  */
 function purchaseWhere(since) {
   const where = {
-    total: { $gt: 0 },
-    orderStatus: { $in: ['shipped', 'delivered'] },
+    $and: [
+      {
+        $or: [
+          { isSampleOrder: { $null: true } },
+          { isSampleOrder: false },
+        ],
+      },
+      {
+        $or: [
+          { notes: { $null: true } },
+          { notes: { $ne: 'Free sample request' } },
+        ],
+      },
+      { orderStatus: { $in: ['shipped', 'delivered'] } },
+    ],
   };
-  if (since) where.createdAt = { $gte: since };
+  if (since) where.$and.push({ createdAt: { $gte: since } });
   return where;
 }
 

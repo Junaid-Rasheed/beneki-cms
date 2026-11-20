@@ -3,6 +3,7 @@
 const { createCoreController } = require('@strapi/strapi').factories;
 const { errors } = require('@strapi/utils');
 const { markOrderAsCompleted } = require('../../../helpers/markOrderCompleted');
+const { syncSampleOrderFlag } = require('../../../helpers/sampleOrder');
 const {
   isCustomerRole,
   loadAuthUser,
@@ -287,10 +288,11 @@ module.exports = createCoreController(UID, ({ strapi }) => ({
       }
     }
 
-    const entity = await strapi.service(UID).create({
+    const created = await strapi.service(UID).create({
       ...sanitizedQuery,
       data,
     });
+    const entity = await syncSampleOrderFlag(strapi, created);
     const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
     ctx.status = 201;
     return this.transformResponse(sanitizedEntity);
@@ -328,10 +330,11 @@ module.exports = createCoreController(UID, ({ strapi }) => ({
       }
     }
 
-    const entity = await strapi.service(UID).update(ctx.params.id, {
+    const updated = await strapi.service(UID).update(ctx.params.id, {
       ...sanitizedQuery,
       data,
     });
+    const entity = await syncSampleOrderFlag(strapi, updated);
     const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
     return this.transformResponse(sanitizedEntity);
   },
